@@ -190,3 +190,40 @@ No arm beat the baseline. The full skill came last.
 - **Restraint rule:** at ≤ 32 px every added colour and detail must pass the noise gate. Prefer fewer, larger clusters. The colour budget is ≤ the reference's count.
 - **Scale comes from the game,** not the reference: the target figure height is set by the scene the sprite stands in.
 - **Variance:** run the baseline twice (P0b) to see run-to-run spread before crediting any method.
+
+## Round 2: rewritten skill (gates + independent critic), with a baseline rerun for variance
+
+| Arm | What it was | Fig h | Colours | Isolated px | Audit |
+|---|---|---|---|---|---|
+| P0 | baseline, run 1 | 43 | 28 | 7.7% | height fail |
+| P0b | baseline, run 2 | 31 | 33 | 11.3% | FAIL (colours, noise) |
+| P6pre | rewritten skill, before the critic | 32 | 20 | 3.6% | PASS |
+| P6 | rewritten skill, after 1 independent-critic round | 32 | 21 | 6.9% | PASS |
+
+**Baseline variance is large.** The same prompt produced a 43 px slim barmaid and a 31 px chibi. Round 1's "P0 wins" was partly the luck of one sample.
+
+**The critic step (P6pre → P6):** one fresh critic gave 5 specific, pixel-located flaws, led by "head as wide as body, reads as a toddler or jar". The artist fixed them in one pass and the sprite still passed the gates.
+
+### Blind judge, round 2 (opus; key: W=P0, X=P6, Y=P0b, Z=P6pre)
+
+| Rank | Arm | Fidelity | Craft | Readability | Character | Ship | **Total** |
+|---|---|---|---|---|---|---|---|
+| 1 | **P6** (skill + critic) | 7 | 6 | 7 | 8 | 6 | **34** |
+| 2 | P0b (baseline) | 6 | 5 | 6 | 7 | 5 | 29 |
+| 3 | P6pre (skill, no critic) | 6 | 6 | 7 | 5 | 4 | 28 |
+| 4 | P0 (baseline) | 3 | 7 | 6 | 4 | 3 | 23 |
+
+### Verdict: the rewritten skill PASSES, and the critic is the main lever
+- **The skill with the critic won.** It was the only sprite judged on-model (it matches the HUD portrait), at scene scale and unmistakably heavy-set.
+- **The gates alone were not enough.** They make a sprite *clean* (P6pre had the best clusters) but not *good*: the judge called P6pre "a peg doll or toy with no appeal". The critic round added +6 points, almost all of it character, fidelity and ship-readiness.
+- **The baseline still has the most raw polish when it hits:** P0 scored 7 on craft. Its failures are scale and brief, the things the skill's game-scale spec fixes.
+- **Remaining flaw of the winner:** the torso is a green sack; the left arm and sleeve merge into the body; the mug arm is a stiff horizontal bar.
+
+The next lever is a **second critic round**. Within the skill, use it on every hero asset.
+
+### What goes into the pipeline (for A12, the sprite animator, and the later asset pipeline)
+1. A spec from the game: target height and the palette taken from existing on-model art (the HUD portrait).
+2. Silhouette variants in solid black.
+3. Objective gates after every render.
+4. **2 independent-critic rounds**, run by the orchestrator, each critic a fresh agent.
+5. A final blind check against the scene.
