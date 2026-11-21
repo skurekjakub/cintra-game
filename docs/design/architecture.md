@@ -510,6 +510,7 @@ cintra-game/
 **Typing (enforced by project settings, `debug/gdscript/warnings/*`):**
 - `untyped_declaration` = Error.
 - `unsafe_property_access`, `unsafe_method_access`, `unsafe_cast`, `unsafe_call_argument` = Warn. These are treated as review blockers.
+- Lint gate: under `res://src` the `unsafe_*` warnings are errors, together with the rest of the policy in `tools/lint_override.cfg` (`unused_*`, `shadowed_*`, and so on), enforced by `tools/lint.ps1` / `tools/lint.sh`, which `tools/test.*` run before any test.
 - `inferred_declaration` = Ignore. `:=` is allowed when the type is obvious on the right-hand side.
 - Every variable, parameter and return is typed. Use typed arrays and dictionaries (`Array[StringName]`, `Dictionary[StringName, int]`). Use `StringName` for ids.
 

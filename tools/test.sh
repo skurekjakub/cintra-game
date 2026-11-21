@@ -15,6 +15,9 @@
 # JUnit XML goes to reports/junit.xml. The exit code is Godot's (0 = all passed).
 set -u
 
+# First of all: a hard-killed lint run may have left the strict policy (game/override.cfg) behind.
+rm -f "$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)/game/override.cfg"
+
 DEFAULT_GODOT="${LOCALAPPDATA:-}\\Microsoft\\WinGet\\Packages\\GodotEngine.GodotEngine_Microsoft.Winget.Source_8wekyb3d8bbwe\\Godot_v4.7.2-stable_windows_arm64_console.exe"
 GODOT_BIN="${GODOT:-$DEFAULT_GODOT}"
 if command -v cygpath >/dev/null 2>&1; then GODOT_BIN="$(cygpath -u "$GODOT_BIN")"; fi
@@ -67,7 +70,7 @@ fi
 # Strict lint gate: unsafe or untyped code under res://src fails the run (tools/lint.sh).
 # It runs after the import above, so its class cache is fresh, and before any test.
 if [ "$run_lint" -eq 1 ]; then
-  "$(dirname "${BASH_SOURCE[0]}")/lint.sh"
+  bash "$(dirname "${BASH_SOURCE[0]}")/lint.sh"
   lint_code=$?
   if [ "$lint_code" -ne 0 ]; then
     echo "[test] FAILED: lint gate failed (exit $lint_code). Fix the errors above, or use -L while iterating."

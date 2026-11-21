@@ -11,6 +11,11 @@ const OK_MARKER: String = "[lint] OK:"
 
 
 func _init() -> void:
+	var problem: String = _policy_problem()
+	if not problem.is_empty():
+		print("[lint] FAIL: %s" % problem)
+		quit(1)
+		return
 	var paths: Array[String] = []
 	_collect(ROOT, paths)
 	paths.sort()
@@ -30,6 +35,18 @@ func _init() -> void:
 		return
 	print("[lint] FAILED: %d of %d scripts" % [failed.size(), paths.size()])
 	quit(1)
+
+
+## Why the strict policy is not in force, or "" when it is. Without it every script compiles
+## and the gate would pass vacuously, so a missing override must fail the run, never skip it.
+func _policy_problem() -> String:
+	var unsafe_cast: int = ProjectSettings.get_setting("debug/gdscript/warnings/unsafe_cast", 0)
+	if unsafe_cast != 2:
+		return "unsafe_cast is %d, not 2 (error): game/override.cfg is not applied. Run tools/lint.ps1 or tools/lint.sh, not this script by hand." % unsafe_cast
+	var rules: Dictionary = ProjectSettings.get_setting("debug/gdscript/warnings/directory_rules", {})
+	if rules.get("res://src") != 1:
+		return "directory_rules does not include res://src (it is %s): game/override.cfg is not applied." % str(rules)
+	return ""
 
 
 func _collect(dir: String, out: Array[String]) -> void:

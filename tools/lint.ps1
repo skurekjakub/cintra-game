@@ -8,6 +8,7 @@
   warning promoted to an error, only res://src included), runs tools/lint_runner.gd, which
   loads every script under res://src, and always deletes override.cfg again. A script that
   carries such a warning does not compile, so the run fails with Godot's own "Parse Error" line.
+  The runner also refuses to run when the policy is not in force, so the gate cannot pass vacuously.
 
 .EXAMPLE
   tools/lint.ps1             # lint src; exit 0 = clean
@@ -24,15 +25,18 @@ param(
 
 $ErrorActionPreference = 'Stop'
 
+$RepoRoot = Split-Path -Parent $PSScriptRoot
+$GameDir = Join-Path $RepoRoot 'game'
+$Override = Join-Path $GameDir 'override.cfg'
+# First of all: a hard-killed earlier run may have left the strict policy behind.
+Remove-Item -Path $Override -Force -ErrorAction SilentlyContinue
+
 $DefaultGodot = Join-Path $env:LOCALAPPDATA 'Microsoft\WinGet\Packages\GodotEngine.GodotEngine_Microsoft.Winget.Source_8wekyb3d8bbwe\Godot_v4.7.2-stable_windows_arm64_console.exe'
 $Godot = if ($env:GODOT) { $env:GODOT } else { $DefaultGodot }
 if (-not (Test-Path $Godot)) { throw "Godot 4.7.2 console binary not found: $Godot (set `$env:GODOT)" }
 
-$RepoRoot = Split-Path -Parent $PSScriptRoot
-$GameDir = Join-Path $RepoRoot 'game'
 $Template = Join-Path $PSScriptRoot 'lint_override.cfg'
 $Runner = (Join-Path $PSScriptRoot 'lint_runner.gd') -replace '\\', '/'
-$Override = Join-Path $GameDir 'override.cfg'
 
 # The runner resolves class_name globals through the class cache, which only --import builds.
 # Same staleness rule as tools/test.ps1 (they share the stamp). Import before the override is
@@ -53,12 +57,12 @@ if ($needImport) {
     Set-Content -Path $Stamp -Value (Get-Date -Format o)
 }
 
-# Godot can exit 0 even when the runner never ran (for example if it failed to parse), so
-# success needs the runner's OK marker and no error lines, not just exit code 0.
+# Success is positive: Godot exit code exactly 0, the runner's OK marker seen, and no error
+# lines. Anything else (a null exit code, a runner that never ran, stray errors) fails.
 $Problems = @('Parse Error', 'Failed to load script', 'SCRIPT ERROR')
 $problemLines = [System.Collections.Generic.List[string]]::new()
 $sawOk = [System.Collections.Generic.List[string]]::new()
-$code = 1
+$code = $null
 try {
     Copy-Item -Path $Template -Destination $Override -Force
     $ErrorActionPreference = 'Continue'
@@ -73,12 +77,12 @@ try {
     Remove-Item -Path $Override -Force -ErrorAction SilentlyContinue
 }
 
-if ($code -eq 0 -and $problemLines.Count -gt 0) {
-    Write-Host "[lint] FAILED: $($problemLines.Count) error line(s), first: $($problemLines[0])"
-    $code = 1
-} elseif ($code -eq 0 -and $sawOk.Count -eq 0) {
-    Write-Host '[lint] FAILED: the runner did not report OK (it may not have run)'
-    $code = 1
+$passed = ($null -ne $code) -and ($code -eq 0) -and ($sawOk.Count -gt 0) -and ($problemLines.Count -eq 0)
+if (-not $passed) {
+    $why = "Godot exit code '$code', OK marker seen: $($sawOk.Count -gt 0), error lines: $($problemLines.Count)"
+    Write-Host "[lint] FAILED: $why"
+    Write-Host '[lint] exit code 1'
+    exit 1
 }
-Write-Host "[lint] exit code $code"
-exit $code
+Write-Host '[lint] exit code 0'
+exit 0

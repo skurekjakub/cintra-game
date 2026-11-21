@@ -29,7 +29,7 @@ Git Bash: `tools/test.sh [-s suite] [-t path] [-n name] [-i] [-L]` (`-L` = no li
 - Exit code 0 means everything passed. JUnit XML goes to `reports/junit.xml` (git-ignored).
 - The scripts re-import automatically when a `.gd` file under `src/` or `tests/` changed, because new `class_name`s need the class cache.
 - A script that fails to parse fails the run. GUT alone would skip it and exit 0.
-- **Lint gate:** every run first compiles all of `src/` with the `unsafe_*`, `untyped_declaration`, `unused_*`, `shadowed_*` and the other default-on GDScript warnings promoted to errors (headless Godot never prints warnings, so this is the only enforcement). Violations print Godot's `Parse Error` line and fail the run before any test. Fix them with typed locals; a justified exception takes `@warning_ignore("name")` on that line. The policy is `tools/lint_override.cfg`, copied temporarily to `game/override.cfg` (git-ignored), and only `res://src` is linted, not `tests/` or `addons/`.
+- **Lint gate:** every run first compiles all of `src/` with the `unsafe_*`, `untyped_declaration`, `unused_*` (variables, parameters), `shadowed_*` and the other default-on GDScript warnings promoted to errors (headless Godot never prints warnings, so this is the only enforcement). Violations print Godot's `Parse Error` line and fail the run before any test. Fix them with typed locals; a justified exception takes `@warning_ignore("name")` on that line. The policy is `tools/lint_override.cfg`, copied temporarily to `game/override.cfg` (git-ignored), and only `res://src` is linted, not `tests/` or `addons/`.
 
 ## TDD (binding)
 

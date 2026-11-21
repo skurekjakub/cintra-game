@@ -29,6 +29,9 @@ param(
 
 $ErrorActionPreference = 'Stop'
 
+# First of all: a hard-killed lint run may have left the strict policy (game/override.cfg) behind.
+Remove-Item -Path (Join-Path (Split-Path -Parent $PSScriptRoot) 'game/override.cfg') -Force -ErrorAction SilentlyContinue
+
 $DefaultGodot = Join-Path $env:LOCALAPPDATA 'Microsoft\WinGet\Packages\GodotEngine.GodotEngine_Microsoft.Winget.Source_8wekyb3d8bbwe\Godot_v4.7.2-stable_windows_arm64_console.exe'
 $Godot = if ($env:GODOT) { $env:GODOT } else { $DefaultGodot }
 if (-not (Test-Path $Godot)) { throw "Godot 4.7.2 console binary not found: $Godot (set `$env:GODOT)" }

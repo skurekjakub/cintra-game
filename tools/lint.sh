@@ -7,12 +7,20 @@
 # warning promoted to an error, only res://src included), runs tools/lint_runner.gd, which
 # loads every script under res://src, and always deletes override.cfg again. A script that
 # carries such a warning does not compile, so the run fails with Godot's own "Parse Error" line.
+# The runner also refuses to run when the policy is not in force, so the gate cannot pass vacuously.
 #
 #   tools/lint.sh        # lint src; exit 0 = clean
 #   tools/lint.sh -i     # force a class-cache re-import first
 #
 # tools/test.sh runs this first unless it gets -L. Same Godot 4.7.2 resolution as tools/test.sh.
 set -u
+
+tools_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+repo_root="$(cd "$tools_dir/.." && pwd)"
+game_dir="$repo_root/game"
+override="$game_dir/override.cfg"
+# First of all: a hard-killed earlier run may have left the strict policy behind.
+rm -f "$override"
 
 DEFAULT_GODOT="${LOCALAPPDATA:-}\\Microsoft\\WinGet\\Packages\\GodotEngine.GodotEngine_Microsoft.Winget.Source_8wekyb3d8bbwe\\Godot_v4.7.2-stable_windows_arm64_console.exe"
 GODOT_BIN="${GODOT:-$DEFAULT_GODOT}"
@@ -27,11 +35,7 @@ while getopts "i" opt; do
   esac
 done
 
-tools_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-repo_root="$(cd "$tools_dir/.." && pwd)"
-game_dir="$repo_root/game"
 template="$tools_dir/lint_override.cfg"
-override="$game_dir/override.cfg"
 if command -v cygpath >/dev/null 2>&1; then
   game_arg="$(cygpath -m "$game_dir")"; runner="$(cygpath -m "$tools_dir/lint_runner.gd")"
 else
@@ -56,23 +60,22 @@ if [ "$need_import" -eq 1 ]; then
 fi
 
 # Always remove the override, however this script ends.
-log="$(mktemp)"
+log="$(mktemp)" || exit 1
 cleanup() { rm -f "$override" "$log"; }
 trap cleanup EXIT
 trap 'exit 130' INT TERM
 
-cp "$template" "$override"
+# No override means no policy: a failed copy must stop the run, never fall through to a pass.
+cp "$template" "$override" || { echo "[lint] FAILED: could not write $override"; exit 1; }
 "$GODOT_BIN" --headless --path "$game_arg" -s "$runner" 2>&1 | tee "$log"
-code=${PIPESTATUS[0]}
+code=${PIPESTATUS[0]:-}
 
-# Godot can exit 0 even when the runner never ran (for example if it failed to parse), so
-# success needs the runner's OK marker and no error lines, not just exit code 0.
-if [ "$code" -eq 0 ] && grep -qE 'Parse Error|Failed to load script|SCRIPT ERROR' "$log"; then
-  echo "[lint] FAILED: Godot reported script errors (see lines above)"
-  code=1
-elif [ "$code" -eq 0 ] && ! grep -q '^\[lint\] OK:' "$log"; then
-  echo "[lint] FAILED: the runner did not report OK (it may not have run)"
-  code=1
+# Success is positive: Godot exit code exactly 0, the runner's OK marker seen, and no error
+# lines. Anything else (an empty exit code, a runner that never ran, stray errors) fails.
+if [ "$code" = "0" ] && grep -q '^\[lint\] OK:' "$log" && ! grep -qE 'Parse Error|Failed to load script|SCRIPT ERROR' "$log"; then
+  echo "[lint] exit code 0"
+  exit 0
 fi
-echo "[lint] exit code $code"
-exit "$code"
+echo "[lint] FAILED: Godot exit code '${code}', or no [lint] OK marker, or error lines above"
+echo "[lint] exit code 1"
+exit 1

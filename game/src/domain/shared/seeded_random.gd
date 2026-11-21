@@ -25,5 +25,7 @@ func get_state() -> Dictionary:
 
 func set_state(data: Dictionary) -> void:
 	assert(data.has("seed") and data.has("state"), "SeededRandom state needs seed and state")
-	_rng.seed = str(data["seed"]).to_int()
-	_rng.state = str(data["state"]).to_int()
+	var seed_text: String = data["seed"]
+	var state_text: String = data["state"]
+	_rng.seed = seed_text.to_int()
+	_rng.state = state_text.to_int()
