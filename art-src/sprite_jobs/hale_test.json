@@ -1,0 +1,15 @@
+{
+  "model": "C:/Users/skure/repositories/cintra-game/game/spikes/hd2d/kaykit/adventurers/Barbarian.glb",
+  "texture": "C:/Users/skure/repositories/cintra-game/game/spikes/hd2d/kaykit/recolor/hale.png",
+  "attach": [{"from": "C:/Users/skure/repositories/cintra-game/game/spikes/hd2d/kaykit/adventurers/Knight.glb", "object": "1H_Sword"}],
+  "keep": ["Barbarian_Hat", "Barbarian_Cape", "1H_Sword"],
+  "anims": {"Idle": {"frames": 1, "at": 0.2}},
+  "dirs": [0, 1, 7],
+  "size": [64, 64],
+  "ortho_scale": 3.6,
+  "pitch": 30,
+  "target_h": 1.5,
+  "key_dir": [0.55, -0.6, 0.65],
+  "rim_dir": [-0.6, 0.7, 0.45],
+  "out": "C:/Users/skure/AppData/Local/Temp/claude/f82cef077b1ec211/fe7622d7-f626-4cfc-b340-9272070adc79/scratchpad/sprites/hale_test"
+}

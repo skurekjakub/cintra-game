@@ -1,0 +1,36 @@
+{
+ "hale_idle_s": {
+  "size": [
+   34,
+   34
+  ],
+  "feet_row": 33
+ },
+ "thug_s": {
+  "size": [
+   34,
+   34
+  ],
+  "feet_row": 33
+ },
+ "bertha_s": {
+  "size": [
+   34,
+   34
+  ],
+  "feet_row": 33
+ },
+ "courier_lying": {
+  "size": [
+   34,
+   34
+  ]
+ },
+ "courier_s": {
+  "size": [
+   34,
+   34
+  ],
+  "feet_row": 33
+ }
+}
