@@ -57,6 +57,13 @@ Update after every decision, dispatch, and report.
 Common planner brief: agents/_planner-common.md. Plans → docs/superpowers/plans/2026-11-21-*.md. Execution: subagent-driven-development, ONE task at a time (D5): implementer → reviewer → orchestrator commits → next task.
 | A09-art-spike | HD-2D Godot render spike (Drowned Rat + Karak Ostrel shots, 3+ iterations) + art-bible.md | dispatched | agents/A09-art-spike/brief.md | (final msg → save) |
 
+## Implementation runs
+| Plan | Worktree / branch | Ledger | Status |
+|---|---|---|---|
+| core-state-domains (P1, 21 tasks) | `.worktrees/core-state` / `feat/core-state` (base e141bef) | `.worktrees/core-state/.superpowers/sdd/2026-11-21-core-state-domains/progress.md` | pre-flight scan running |
+
+Note: the harness moved the orchestrator's working directory into the worktree. Main-checkout commits (content, art, plans) use `git -C C:\Users\skure\repositories\cintra-game ...`.
+
 ## Roadmap
 - M1 Foundations: P1 → P2 → P3 plans executed (P3 waves gated on P1/P2 classes). Content reconciliation (A08) in parallel.
 - M2 Vertical slice: (needs art pick) art bible + asset pipeline, combat domain + presentation, the Drowned Rat playable end to end.
