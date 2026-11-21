@@ -7,7 +7,10 @@
 #   tools/test.sh -t tests/unit/shared              # one directory (recursive)
 #   tools/test.sh -t tests/unit/shared/test_result.gd [-n err_keeps_code]
 #   tools/test.sh -i                                # force a re-import first
+#   tools/test.sh -L                                # skip the strict lint gate (faster iteration)
 #
+# Unless -L is given, tools/lint.sh runs first and a lint failure fails the run before any test
+# starts (unsafe or untyped code under res://src, see CLAUDE.md).
 # -t accepts res:// paths or paths relative to game/ or to the repo root.
 # JUnit XML goes to reports/junit.xml. The exit code is Godot's (0 = all passed).
 set -u
@@ -17,14 +20,15 @@ GODOT_BIN="${GODOT:-$DEFAULT_GODOT}"
 if command -v cygpath >/dev/null 2>&1; then GODOT_BIN="$(cygpath -u "$GODOT_BIN")"; fi
 [ -f "$GODOT_BIN" ] || { echo "Godot 4.7.2 console binary not found: $GODOT_BIN (set \$GODOT)" >&2; exit 2; }
 
-suite="all"; test_path=""; test_name=""; force_import=0
-while getopts "s:t:n:i" opt; do
+suite="all"; test_path=""; test_name=""; force_import=0; run_lint=1
+while getopts "s:t:n:iL" opt; do
   case "$opt" in
     s) suite="$OPTARG" ;;
     t) test_path="$OPTARG" ;;
     n) test_name="$OPTARG" ;;
     i) force_import=1 ;;
-    *) echo "usage: $0 [-s suite] [-t path] [-n test_name] [-i]" >&2; exit 2 ;;
+    L) run_lint=0 ;;
+    *) echo "usage: $0 [-s suite] [-t path] [-n test_name] [-i] [-L]" >&2; exit 2 ;;
   esac
 done
 
@@ -58,6 +62,17 @@ if [ "$need_import" -eq 1 ]; then
   echo "[test] Importing project (refreshing the class cache)..."
   "$GODOT_BIN" --headless --path "$game_arg" --import >/dev/null 2>&1
   date -u +%FT%TZ > "$stamp"
+fi
+
+# Strict lint gate: unsafe or untyped code under res://src fails the run (tools/lint.sh).
+# It runs after the import above, so its class cache is fresh, and before any test.
+if [ "$run_lint" -eq 1 ]; then
+  "$(dirname "${BASH_SOURCE[0]}")/lint.sh"
+  lint_code=$?
+  if [ "$lint_code" -ne 0 ]; then
+    echo "[test] FAILED: lint gate failed (exit $lint_code). Fix the errors above, or use -L while iterating."
+    exit 1
+  fi
 fi
 
 args=(--headless --path "$game_arg" -s res://addons/gut/gut_cmdln.gd -gconfig=res://.gutconfig.json "-gjunit_xml_file=$junit" -gexit)

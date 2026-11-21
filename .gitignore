@@ -37,3 +37,6 @@ Thumbs.db
 # command contains machine paths, so never commit a .mcp.json.
 .claude/settings.local.json
 .mcp.json
+
+# Lint gate: tools/lint.* write this temporarily (tools/lint_override.cfg) and always delete it
+/game/override.cfg

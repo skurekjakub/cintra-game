@@ -9,8 +9,11 @@
   tools/test.ps1 -Test tests/unit/shared/test_result.gd
   tools/test.ps1 -Test tests/unit/shared/test_result.gd -Name err_keeps_code
   tools/test.ps1 -Import                           # force a re-import first
+  tools/test.ps1 -NoLint                           # skip the strict lint gate (faster iteration)
 
 .NOTES
+  Unless -NoLint is given, tools/lint.ps1 runs first and a lint failure fails the run before
+  any test starts (unsafe or untyped code under res://src, see CLAUDE.md).
   -Test accepts res:// paths or paths relative to game/ or to the repo root.
   JUnit XML goes to reports/junit.xml. The exit code is Godot's (0 = all passed).
 #>
@@ -20,7 +23,8 @@ param(
     [string]$Suite = 'all',
     [string]$Test = '',
     [string]$Name = '',
-    [switch]$Import
+    [switch]$Import,
+    [switch]$NoLint
 )
 
 $ErrorActionPreference = 'Stop'
@@ -60,6 +64,16 @@ if ($needImport) {
     Write-Host '[test] Importing project (refreshing the class cache)...'
     & $Godot --headless --path $GameDir --import 2>&1 | Out-Null
     Set-Content -Path $Stamp -Value (Get-Date -Format o)
+}
+
+# Strict lint gate: unsafe or untyped code under res://src fails the run (tools/lint.ps1).
+# It runs after the import above, so its class cache is fresh, and before any test.
+if (-not $NoLint) {
+    & (Join-Path $PSScriptRoot 'lint.ps1')
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host "[test] FAILED: lint gate failed (exit $LASTEXITCODE). Fix the errors above, or use -NoLint while iterating."
+        exit 1
+    }
 }
 
 $GutArgs = @('--headless', '--path', $GameDir, '-s', 'res://addons/gut/gut_cmdln.gd',
