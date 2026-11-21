@@ -42,3 +42,6 @@ Thumbs.db
 
 # Raw Poly Haven downloads (re-fetch with art-src/env/fetch_polyhaven.py)
 /game/spikes/hd2d/models/ph_src/
+
+# Lint gate: tools/lint.* write this temporarily (tools/lint_override.cfg) and always delete it
+/game/override.cfg

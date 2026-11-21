@@ -21,12 +21,15 @@ tools/test.ps1 -Test tests/unit/shared                 # one directory, recursiv
 tools/test.ps1 -Test tests/unit/shared/test_result.gd  # one file
 tools/test.ps1 -Test tests/unit/shared/test_result.gd -Name err_keeps   # tests whose name contains the text
 tools/test.ps1 -Import                                 # force a re-import first
+tools/test.ps1 -NoLint                                 # skip the lint gate while iterating
+tools/lint.ps1                                         # the lint gate alone
 ```
 
-Git Bash: `tools/test.sh [-s suite] [-t path] [-n name] [-i]`.
+Git Bash: `tools/test.sh [-s suite] [-t path] [-n name] [-i] [-L]` (`-L` = no lint) and `tools/lint.sh`.
 - Exit code 0 means everything passed. JUnit XML goes to `reports/junit.xml` (git-ignored).
 - The scripts re-import automatically when a `.gd` file under `src/` or `tests/` changed, because new `class_name`s need the class cache.
 - A script that fails to parse fails the run. GUT alone would skip it and exit 0.
+- **Lint gate:** every run first compiles all of `src/` with the `unsafe_*`, `untyped_declaration`, `unused_*` (variables, parameters), `shadowed_*` and the other default-on GDScript warnings promoted to errors (headless Godot never prints warnings, so this is the only enforcement). Violations print Godot's `Parse Error` line and fail the run before any test. Fix them with typed locals; a justified exception takes `@warning_ignore("name")` on that line. The policy is `tools/lint_override.cfg`, copied temporarily to `game/override.cfg` (git-ignored), and only `res://src` is linted, not `tests/` or `addons/`.
 
 ## TDD (binding)
 
@@ -81,5 +84,6 @@ presentation ──► application ──► domain
 
 - State, decisions and the agent table: `docs/orchestration/STATE.md`.
 - Briefs and reports: `docs/orchestration/agents/<id>/brief.md` and `report.md`.
-- **Subagents do not commit.** Agents share the working tree, so the orchestrator verifies each report and commits only that agent's paths.
+- **Commits:** on `main`, subagents do not commit (several agents share that tree); the orchestrator verifies each report and commits only that agent's paths. In an implementation worktree (`.worktrees/<plan>`, branch `feat/<plan>`), exactly one implementer runs at a time and commits its own task; the orchestrator pushes and merges.
+- Plan execution ledgers: `.superpowers/sdd/<plan>/progress.md` inside the worktree (git-ignored); milestones are mirrored in `docs/orchestration/STATE.md`.
 - Only touch the paths your brief owns. `docs/content/` and `docs/art-direction/` belong to their own agents.

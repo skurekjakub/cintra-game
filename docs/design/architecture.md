@@ -88,20 +88,22 @@ Content uses one condition language and one effect list everywhere (dialogue, qu
 Conventions for every domain:
 - The public classes sit at the domain root. Helpers sit in `_internal/` and may only be referenced inside the same domain.
 - Definitions (`*Definition`) are immutable parsed content types owned by the domain. Infrastructure builds them, and the domain uses them.
-- Aggregates that hold saved state implement `Snapshotable` (`to_snapshot() -> Dictionary`, `restore(data: Dictionary) -> void`).
+- Aggregates that hold saved state implement `Snapshotable` (`to_snapshot() -> Dictionary`, `restore(data: Dictionary) -> Result`).
+- `restore()` is all or nothing: it validates every key, JSON type, range and id first and mutates only after. On any problem it returns `Result.err(&"save_invalid", "<section>.<key>: <reason>")` and the aggregate is exactly unchanged; on success it returns `Result.ok()`. Problems are a missing key, a wrong type (JSON numbers arrive as floats, so an integral float is accepted for an int and `2.5` is not), an out-of-range value, and an unknown id where the aggregate holds definitions (an item, a faction, an equipment slot). The policy is **reject**: never clamp, repair or drop. `restore()` emits no events and never touches the outbox (the load use case discards pending events). `SnapshotReader` (`shared`) does the typed reads and keeps the first problem with its path. Extra top-level keys in a section are ignored.
+- Queries are lenient, commands assert: a query on an unknown id returns a neutral value (`0`, `&""`, `false`, the tier of 0), while a command given an unknown id or a bad argument fails an `assert()` (or returns its documented `Result.err`).
 - "Consumes" lists what the application reacts to on the domain's behalf. Domains never subscribe to anything themselves.
 
 ### 4.1 `shared` (shared kernel)
 
 - **Responsibility:** primitives used by all domains.
-- **API:** `DomainEvent` (abstract), `Result` (`ok(value)`, `err(code: StringName, detail := "")`, `is_ok()`, `value`, `error_code`), `RandomSource` (abstract: `randi_range(a, b) -> int`, `randf() -> float`, `get_state() -> Dictionary`, `set_state(d)`), `SeededRandom extends RandomSource` (wraps `RandomNumberGenerator`), `IdRules` (`static func kind_of(id: StringName) -> StringName`, `static func is_valid(id, kind) -> bool`), `Snapshotable` (abstract).
+- **API:** `DomainEvent` (abstract), `Result` (`ok(value)`, `err(code: StringName, detail := "")`, `is_ok()`, `value`, `error_code`), `RandomSource` (abstract: `randi_range(a, b) -> int`, `randf() -> float`, `get_state() -> Dictionary`, `set_state(d)`), `SeededRandom extends RandomSource` (wraps `RandomNumberGenerator`), `IdRules` (`static func kind_of(id: StringName) -> StringName`, `static func is_valid(id, kind) -> bool`), `Snapshotable` (abstract), `SnapshotReader` (typed, range-checked reads of a saved section for `restore()`; `read_int/read_bool/read_string/read_dict/read_array/read_ids`, `fail(key, reason)`, `failed()`, `result()`).
 - **Emits / consumes:** none.
 - **Must not know:** any specific game concept.
 
 ### 4.2 `rules` (conditions and effect specs)
 
 - **Responsibility:** parse and evaluate the condition language, and parse effect specs. It does not apply effects.
-- **API:** `ConditionParser.parse(text: String) -> Result` (holds a `Condition`), `Condition` (abstract: `evaluate(facts: FactProvider) -> bool`, `referenced_ids() -> Array[StringName]`), with AST nodes `AndCondition`, `OrCondition`, `NotCondition`, `CompareCondition`, `CallCondition` in `_internal/`. `FactProvider` is abstract, read-only: `has_flag`, `get_var`, `has_milestone`, `item_count`, `has_clue`, `has_deduction`, `quest_status`, `quest_stage`, `attribute`, `check_total(skill)`, `reputation`, `rep_tier`, `escalation_stage`, `act`, `in_party`, `has_perk`, `crowns`, `level`, `finale_value(key)`. Also `EffectParser.parse(text: String) -> Result` (holds an `EffectSpec` with `op: StringName`, `args: Array`, `referenced_ids()`), and `EffectSignatures` (the table of valid ops and argument types, used by the parser and by content tests).
+- **API:** `ConditionParser.parse(text: String) -> Result` (holds a `Condition`), `Condition` (abstract: `evaluate(facts: FactProvider) -> bool`, `referenced_ids() -> Array[StringName]`), with AST nodes `AndCondition`, `OrCondition`, `NotCondition`, `CompareCondition`, `CallCondition` in `_internal/`. `FactProvider` is abstract, read-only, with 27 methods, each id parameter a `StringName`: `has_flag`, `get_var`, `has_milestone`, `item_count`, `has_clue`, `has_deduction`, `quest_status`, `quest_stage`, `attribute`, `check_total(skill)`, `reputation`, `rep_tier`, `escalation_stage`, `act`, `in_party`, `has_perk`, `crowns`, `level`, `finale_value(key)`, `visited(zone_id)`, `rumor_heard(rumor_id)`, `queen_condition`, `is_equipped(item_id)`, `is_disguised`, `heard_from(rumor_id, npc_id)`, `map_unlocked(map_id)`, `map_pinned(map_id)`. Also `ItemModifier` (an immutable `{mod, value, vs_faction}` value, `create(mod, value, vs_faction := &"") -> Result`, errors `unknown_mod` and `bad_arg`; it lives here because `inventory` and `actors` both read it and may not reference each other), `EffectParser.parse(text: String) -> Result` (holds an `EffectSpec` with `op: StringName`, `args: Array`, `referenced_ids()`), and `EffectSignatures` (the table of valid ops and argument types, used by the parser and by content tests).
 - **Emits / consumes:** none.
 - **Must not know:** how facts are stored, or what any effect does.
 
@@ -179,21 +181,21 @@ Conventions for every domain:
 ### 4.11 `actors` (stats)
 
 - **Responsibility:** the player's attributes, derived stats, current HP and stamina outside combat, and check totals for dialogue.
-- **API:** `Attributes` (a value with 5 ints, `with_point(attr) -> Attributes`), `ActorSheet` (`_init(attrs, level_provider: Callable)`, `max_hp()`, `max_stamina()`, `melee_mod()`, `ranged_mod()`, `resist(type)`, `current_hp()`, `heal(n)`, `damage(n)`, `full_restore()`, `spend_attribute_point(attr) -> Result`, `unspent_attribute_points()`), `CheckTotals.compute(skill, sheet, perks: Array[StringName], items: Array[StringName]) -> int`. Implements `Snapshotable`.
+- **API:** `Attributes` (a value with 5 ints, `with_point(attr) -> Attributes`), `ActorSheet` (`_init(attrs, level_provider: Callable)`, `max_hp()`, `max_stamina()`, `melee_mod()`, `ranged_mod()`, `resist(type)`, `current_hp()`, `heal(n)`, `damage(n)`, `full_restore()`, `spend_attribute_point(attr) -> Result`, `unspent_attribute_points()`), `CheckTotals.compute(skill, sheet, perks: Array[StringName], mods: Array[ItemModifier]) -> int` (the attribute, the perk bonus, and the `check_all` / `check_<skill>` mods that have no `vs_faction`; mods with a `vs_faction` are left to the application's `CheckResolver`). Implements `Snapshotable`.
 - **Emits:** `AttributeIncreased`, `ActorHealed`, `ActorDamaged` (outside combat, from hazards).
 - **Must not know:** combat state machines, XP, the UI.
 
 ### 4.12 `inventory`
 
 - **Responsibility:** item stacks, equipment slots, quick slots, crowns, shop transactions.
-- **API:** `ItemDefinition` (id, category, stack_max, price, equip_slot, weapon or armor or consumable payload, tags such as `key`/`document`), `Inventory` (`add(id, n := 1) -> Result`, `remove(id, n := 1) -> Result`, `count(id) -> int`, `has(id) -> bool`, `items_in(category)`), `Equipment` (`equip(slot, id) -> Result`, `unequip(slot)`, `equipped(slot) -> StringName`), `QuickSlots`, `Wallet` (`add(n)`, `spend(n) -> Result`, `balance()`), `Shop` (`buy(item_id, price_mod: float) -> Result`, `sell(item_id) -> Result`). Key and document items refuse `remove` unless `force := true` is passed (used only by scripted effects). All implement `Snapshotable`.
+- **API:** `ItemDefinition` (id, category, stack_max, price, equip_slot, weapon or armor or consumable payload, `mods: Array[ItemModifier]` (§J.6, flat for trinkets and armor), tags such as `key`/`document`; a consumable payload carries `quick_slot`, default true), `Inventory` (`add(id, n := 1) -> Result`, `remove(id, n := 1) -> Result`, `count(id) -> int`, `has(id) -> bool`, `items_in(category)`), `Equipment` (`equip(slot, id) -> Result`, `unequip(slot)`, `equipped(slot) -> StringName`, `equipped_mods() -> Array[ItemModifier]`, `armor_total()` including `armor` mods without a `vs_faction`), `QuickSlots` (`assign` refuses a consumable with `quick_slot: false` with `not_quick_slottable`), `Wallet` (`add(n)`, `spend(n) -> Result`, `balance()`), `Shop` (`buy(item_id, price_mod: float) -> Result`, `sell(item_id) -> Result`). Key and document items refuse `remove` unless `force := true` is passed (used only by scripted effects). All implement `Snapshotable`.
 - **Emits:** `ItemAdded`, `ItemRemoved`, `ItemEquipped`, `ItemUnequipped`, `CrownsChanged`.
 - **Must not know:** quests, dialogue, combat formulas (it exposes weapon profiles as data only).
 
 ### 4.13 `progression`
 
 - **Responsibility:** XP, levels, the skill tree and perks.
-- **API:** `LevelTable` (`xp_for(level) -> int`, `level_for(xp) -> int`, cap 12), `ExperienceTrack` (`grant(amount, source: StringName) -> void`, `xp()`, `level()`, `unspent_skill_points()`, `unspent_attribute_points()`), `SkillTreeDefinition`, `SkillTree` (`can_unlock(perk_id) -> Result`, `unlock(perk_id) -> Result`, `has(perk_id)`, `points_in(branch)`). Implements `Snapshotable`.
+- **API:** `LevelTable` (`xp_for(level) -> int`, `level_for(xp) -> int`, cap 12), `ExperienceTrack` (`grant(amount, source: StringName) -> void`, `xp()`, `level()`, `unspent_skill_points()`, `attribute_points_earned()`), `SkillTreeDefinition`, `SkillTree` (`can_unlock(perk_id) -> Result`, `unlock(perk_id) -> Result`, `has(perk_id)`, `points_in(branch)`). Implements `Snapshotable`.
 - **Emits:** `XpGained(amount, source)`, `LevelGained(new_level)`, `PerkUnlocked(id)`.
 - **Consumes (via `XpPolicy`):** `QuestCompleted`, `ObjectiveCompleted`, `ClueDiscovered`, `DeductionUnlocked`, `CheckResolved(passed)`, `CombatantDefeated`, `EnemyYielded`, `ZoneFirstVisited`.
 - **Must not know:** what perks do. Effects of perks are read by other code through `FactProvider.has_perk` or by the application mappers.
@@ -510,6 +512,7 @@ cintra-game/
 **Typing (enforced by project settings, `debug/gdscript/warnings/*`):**
 - `untyped_declaration` = Error.
 - `unsafe_property_access`, `unsafe_method_access`, `unsafe_cast`, `unsafe_call_argument` = Warn. These are treated as review blockers.
+- Lint gate: under `res://src` the `unsafe_*` warnings are errors, together with the rest of the policy in `tools/lint_override.cfg` (`unused_*`, `shadowed_*`, and so on), enforced by `tools/lint.ps1` / `tools/lint.sh`, which `tools/test.*` run before any test.
 - `inferred_declaration` = Ignore. `:=` is allowed when the type is obvious on the right-hand side.
 - Every variable, parameter and return is typed. Use typed arrays and dictionaries (`Array[StringName]`, `Dictionary[StringName, int]`). Use `StringName` for ids.
 

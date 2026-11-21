@@ -49,8 +49,9 @@ func _drain() -> void:
 	while next < _queue.size():
 		var event := _queue[next]
 		next += 1
+		var event_type: Script = event.get_script()
 		# Snapshot first: subscriptions added during delivery start with the next event.
-		for sub: BusSubscription in _active_subscriptions(event.get_script() as Script):
+		for sub: BusSubscription in _active_subscriptions(event_type):
 			if deliveries >= DELIVERY_CAP:
 				_reset_queue()
 				assert(false, "EventBus delivery cap (%d) reached: an event cycle?" % DELIVERY_CAP)

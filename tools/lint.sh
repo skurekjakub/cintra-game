@@ -1,0 +1,81 @@
+#!/usr/bin/env bash
+# Strict lint gate for res://src: unsafe or untyped GDScript fails the run (CLAUDE.md "Running tests").
+# Git Bash twin of tools/lint.ps1.
+#
+# Godot only prints warnings in the editor, so a headless test run never shows an UNSAFE_*
+# warning. This script instead writes game/override.cfg from tools/lint_override.cfg (every
+# warning promoted to an error, only res://src included), runs tools/lint_runner.gd, which
+# loads every script under res://src, and always deletes override.cfg again. A script that
+# carries such a warning does not compile, so the run fails with Godot's own "Parse Error" line.
+# The runner also refuses to run when the policy is not in force, so the gate cannot pass vacuously.
+#
+#   tools/lint.sh        # lint src; exit 0 = clean
+#   tools/lint.sh -i     # force a class-cache re-import first
+#
+# tools/test.sh runs this first unless it gets -L. Same Godot 4.7.2 resolution as tools/test.sh.
+set -u
+
+tools_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+repo_root="$(cd "$tools_dir/.." && pwd)"
+game_dir="$repo_root/game"
+override="$game_dir/override.cfg"
+# First of all: a hard-killed earlier run may have left the strict policy behind.
+rm -f "$override"
+
+DEFAULT_GODOT="${LOCALAPPDATA:-}\\Microsoft\\WinGet\\Packages\\GodotEngine.GodotEngine_Microsoft.Winget.Source_8wekyb3d8bbwe\\Godot_v4.7.2-stable_windows_arm64_console.exe"
+GODOT_BIN="${GODOT:-$DEFAULT_GODOT}"
+if command -v cygpath >/dev/null 2>&1; then GODOT_BIN="$(cygpath -u "$GODOT_BIN")"; fi
+[ -f "$GODOT_BIN" ] || { echo "Godot 4.7.2 console binary not found: $GODOT_BIN (set \$GODOT)" >&2; exit 2; }
+
+force_import=0
+while getopts "i" opt; do
+  case "$opt" in
+    i) force_import=1 ;;
+    *) echo "usage: $0 [-i]" >&2; exit 2 ;;
+  esac
+done
+
+template="$tools_dir/lint_override.cfg"
+if command -v cygpath >/dev/null 2>&1; then
+  game_arg="$(cygpath -m "$game_dir")"; runner="$(cygpath -m "$tools_dir/lint_runner.gd")"
+else
+  game_arg="$game_dir"; runner="$tools_dir/lint_runner.gd"
+fi
+
+# The runner resolves class_name globals through the class cache, which only --import builds.
+# Same staleness rule as tools/test.sh (they share the stamp). Import before the override is
+# written so the import never sees it.
+cache="$game_dir/.godot/global_script_class_cache.cfg"
+stamp="$game_dir/.godot/test_import.stamp"
+need_import=$force_import
+if [ ! -f "$cache" ] || [ ! -f "$stamp" ]; then
+  need_import=1
+elif [ -n "$(find "$game_dir/src" "$game_dir/tests" \( -name '*.gd' -o -type d \) -newer "$stamp" -print -quit)" ]; then
+  need_import=1
+fi
+if [ "$need_import" -eq 1 ]; then
+  echo "[lint] Importing project (refreshing the class cache)..."
+  "$GODOT_BIN" --headless --path "$game_arg" --import >/dev/null 2>&1
+  date -u +%FT%TZ > "$stamp"
+fi
+
+# Always remove the override, however this script ends.
+log="$(mktemp)" || exit 1
+cleanup() { rm -f "$override" "$log"; }
+trap cleanup EXIT
+trap 'exit 130' INT TERM
+
+# No override means no policy: a failed copy must stop the run, never fall through to a pass.
+cp "$template" "$override" || { echo "[lint] FAILED: could not write $override"; exit 1; }
+"$GODOT_BIN" --headless --path "$game_arg" -s "$runner" 2>&1 | tee "$log"
+code=${PIPESTATUS[0]:-}
+
+# Success is positive: Godot exit code exactly 0, the runner's OK marker seen, and no error
+# lines. Anything else (an empty exit code, a runner that never ran, stray errors) fails.
+if [ "$code" = "0" ] && grep -q '^\[lint\] OK:' "$log" && ! grep -qE 'Parse Error|Failed to load script|SCRIPT ERROR' "$log"; then
+  echo "[lint] exit code 0"
+  exit 0
+fi
+echo "[lint] FAILED: Godot exit code '${code}', or no [lint] OK marker, or error lines above"
+echo "[lint] exit code 1"
+exit 1
