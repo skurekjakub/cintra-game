@@ -47,7 +47,7 @@ Update after every decision, dispatch, and report.
 | A03-project-setup | Godot project in game/, GUT, tools/test.ps1, shared kernel + event bus (TDD), architecture test, Godot AI plugin, CLAUDE.md, README | DONE 8f426ef (53 tests green, re-verified). godot-ai moved to LOCAL scope by orch (no .mcp.json in public repo) | agents/A03-project-setup/brief.md | agents/A03-project-setup/report.md |
 | A04-content-act1 | Act I sections (01-drowned-rat = vertical slice) | DONE 708d63f (issues list in report → A08) | agents/A04-content-act1/brief.md | agents/A04-content-act1/report.md |
 | A05-content-act2 | Act II sandbox sections + twist | dispatched | agents/A05-content-act2/brief.md | agents/A05-content-act2/report.md |
-| A06-content-act3 | Act III + finale + endings | dispatched | agents/A06-content-act3/brief.md | agents/A06-content-act3/report.md |
+| A06-content-act3 | Act III + finale + endings | DONE 82ef406 (issues + reconciliation list in report → A08) | agents/A06-content-act3/brief.md | agents/A06-content-act3/report.md |
 | A07-content-side | 12 side quests, travel events, rumors | DONE f246017 (format issues listed in report → A08) | agents/A07-content-side/brief.md | agents/A07-content-side/report.md |
 
 | P1-plan-core-state | Plan: rules, world_state, escalation, actors, inventory, progression, factions, rumors (+FactsChanged, ScriptedRandom) | DONE c68afe8 | agents/P1-plan-core-state/brief.md | agents/P1-plan-core-state/report.md |
