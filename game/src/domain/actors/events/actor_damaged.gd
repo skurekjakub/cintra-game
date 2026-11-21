@@ -1,4 +1,4 @@
-## Recorded when hit points are really lost (architecture.md §4.4; gdd.md §6.6).
+## Recorded when hit points are really lost (architecture.md §4.11; gdd.md §6.6).
 ## `amount` is the HP actually lost, after the floor at 0.
 class_name ActorDamaged
 extends DomainEvent

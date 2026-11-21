@@ -1,5 +1,5 @@
 ## The Queen's condition, a derived value rather than a timer (gdd.md §6.2;
-## architecture.md §4.9). While the antidote is not administered it is
+## architecture.md §4.4). While the antidote is not administered it is
 ## clamp(min(stage, 3) - mitigations, 0, 3). Once administered it freezes and
 ## improves by one step per later milestone, down to 0 (Weak). Surviving the
 ## Act II twist is exactly "the antidote was administered".

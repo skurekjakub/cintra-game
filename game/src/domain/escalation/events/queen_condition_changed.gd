@@ -1,5 +1,5 @@
 ## Recorded when the Queen's condition (0–3) really changes (architecture.md
-## §4.9; gdd.md §6.2).
+## §4.4; gdd.md §6.2).
 class_name QueenConditionChanged
 extends DomainEvent
 

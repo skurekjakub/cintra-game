@@ -4,7 +4,8 @@
 ##     literals never change);
 ##   - a bare word next to a tier becomes a tier literal and must be a reputation tier;
 ##   - both sides end up with the same value type;
-##   - a bare word next to a call with a closed word set (ConditionCalls.words) is one of those words.
+##   - a bare word next to a call with a closed word set (ConditionCalls.words) is one of those words;
+##   - two WORD calls compare only if both are open (no closed set) or both share the same closed set.
 ## Every failure is err(&"bad_compare") whose detail is the reason; the reader adds the compare's span.
 ## `left_text` and `right_text` are the first token of each side: the call name of a call, the word of a bare word.
 class_name CompareChecker
@@ -39,11 +40,38 @@ static func _bare_word_as_tier(value: ConditionValue, text: String, other: Condi
 	return Result.ok(LiteralValue.new(word, ConditionValue.VALUE_TIER))
 
 
-## The reason a bare word beside a closed-word call is not allowed, or "" when the pair is fine.
+## The reason a bare word beside a closed-word call, or two calls with different word sets, is not
+## allowed, or "" when the pair is fine.
 static func _outside_closed_set(left: ConditionValue, left_text: String,
 		right: ConditionValue, right_text: String) -> String:
+	if left is CallValue and right is CallValue:
+		return _word_calls_reason(left_text, right_text)
 	var reason := _word_reason(left, left_text, right, right_text)
 	return reason if not reason.is_empty() else _word_reason(right, right_text, left, left_text)
+
+
+## The reason two calls cannot be compared, or "" when both are open or share one closed set.
+## Only WORD calls have a closed set, and both sides already have the same value type.
+static func _word_calls_reason(left_text: String, right_text: String) -> String:
+	var left_words := ConditionCalls.words(StringName(left_text))
+	var right_words := ConditionCalls.words(StringName(right_text))
+	if _same_words(left_words, right_words):
+		return ""
+	return "%s() and %s() do not share one word set (%s vs %s)" % [left_text, right_text,
+			_words_text(left_words), _words_text(right_words)]
+
+
+static func _same_words(a: Array[StringName], b: Array[StringName]) -> bool:
+	if a.size() != b.size():
+		return false
+	for word: StringName in a:
+		if not b.has(word):
+			return false
+	return true
+
+
+static func _words_text(words: Array[StringName]) -> String:
+	return "any word" if words.is_empty() else " | ".join(words)
 
 
 static func _word_reason(call_side: ConditionValue, call_text: String,

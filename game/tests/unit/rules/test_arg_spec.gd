@@ -159,3 +159,47 @@ func test_ids_in_skips_non_id_values() -> void:
 	var r := ArgSpec.bind(specs, PackedStringArray(["quest.main_a1", "door_kicked"]))
 	var vals: Array = r.value
 	assert_eq(ArgSpec.ids_in(specs, vals), [&"quest.main_a1"] as Array[StringName])
+
+
+func test_empty_default_makes_the_arg_optional_with_null() -> void:
+	var s := ArgSpec.parse("id:npc=")
+	assert_true(s.optional)
+	assert_null(s.default_value)
+	assert_true(s.is_id())
+	var w := ArgSpec.parse("word:player_first|enemy_first|normal=")
+	assert_true(w.optional)
+	assert_null(w.default_value)
+
+
+func test_bind_optional_id_without_default_binds_null() -> void:
+	var specs: Array[ArgSpec] = [ArgSpec.parse("id:npc=")]
+	var r := ArgSpec.bind(specs, PackedStringArray([]))
+	assert_true(r.is_ok(), "%s %s" % [r.error_code, r.detail])
+	var vals: Array = r.value
+	assert_eq(vals, [null])
+	assert_eq(ArgSpec.ids_in(specs, vals), [] as Array[StringName])
+	var given := ArgSpec.bind(specs, PackedStringArray(["npc.bertha"]))
+	var given_vals: Array = given.value
+	assert_eq(given_vals, [&"npc.bertha"])
+	assert_eq(ArgSpec.ids_in(specs, given_vals), [&"npc.bertha"] as Array[StringName])
+	assert_eq(ArgSpec.bind(specs, PackedStringArray(["flag.x"])).error_code, &"bad_arg")
+
+
+func test_bind_optional_word_without_default_binds_null() -> void:
+	var specs: Array[ArgSpec] = [ArgSpec.parse("word:player_first|enemy_first|normal=")]
+	var none := ArgSpec.bind(specs, PackedStringArray([]))
+	assert_true(none.is_ok(), "%s %s" % [none.error_code, none.detail])
+	var none_vals: Array = none.value
+	assert_eq(none_vals, [null])
+	var given := ArgSpec.bind(specs, PackedStringArray(["enemy_first"]))
+	var given_vals: Array = given.value
+	assert_eq(given_vals, [&"enemy_first"])
+	assert_eq(ArgSpec.bind(specs, PackedStringArray(["sideways"])).error_code, &"bad_arg")
+
+
+func test_ids_in_skips_a_null_optional_id_among_other_ids() -> void:
+	var specs: Array[ArgSpec] = [ArgSpec.parse("id:quest"), ArgSpec.parse("id:npc=")]
+	var r := ArgSpec.bind(specs, PackedStringArray(["quest.main_a1"]))
+	var vals: Array = r.value
+	assert_eq(vals, [&"quest.main_a1", null])
+	assert_eq(ArgSpec.ids_in(specs, vals), [&"quest.main_a1"] as Array[StringName])

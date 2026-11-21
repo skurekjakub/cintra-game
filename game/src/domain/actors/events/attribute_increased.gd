@@ -1,4 +1,4 @@
-## Recorded when an attribute point is spent (architecture.md §4.4; gdd.md §6.6, §6.8).
+## Recorded when an attribute point is spent (architecture.md §4.11; gdd.md §6.6, §6.8).
 class_name AttributeIncreased
 extends DomainEvent
 

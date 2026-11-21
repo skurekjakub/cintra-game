@@ -1,5 +1,5 @@
 ## One faction: its name, starting reputation and the lower bound of each tier
-## (gdd.md §6.12; architecture.md §4.5). Immutable by convention: only parsers and
+## (gdd.md §6.12; architecture.md §4.14). Immutable by convention: only parsers and
 ## tests assign `thresholds`, right after construction.
 class_name FactionDefinition
 extends RefCounted

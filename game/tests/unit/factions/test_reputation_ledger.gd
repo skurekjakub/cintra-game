@@ -180,3 +180,28 @@ func test_restore_ignores_a_faction_the_ledger_does_not_define() -> void:
 	var l := _ledger()
 	l.restore({"values": {"faction.crown": 7.0, "faction.gone": 90.0}})
 	assert_eq(l.to_snapshot(), {"values": {"faction.crown": 7, "faction.strept": -10}})
+
+
+func test_queries_on_an_unknown_faction_are_lenient() -> void:
+	var l := _ledger()
+	assert_eq(l.value(&"faction.nobody"), 0)
+	assert_eq(l.tier(&"faction.nobody"), &"neutral")
+	assert_eq(l.rep_mod(&"faction.nobody"), 0)
+	assert_eq(l.rep_mod(&"faction.nobody"), RepTiers.rep_mod(l.tier(&"faction.nobody")))
+
+
+func test_unknown_faction_queries_change_nothing() -> void:
+	var l := _ledger()
+	var before := l.to_snapshot()
+	l.value(&"faction.nobody")
+	l.tier(&"faction.nobody")
+	l.rep_mod(&"faction.nobody")
+	assert_eq(l.to_snapshot(), before)
+	assert_eq(l.drain_events().size(), 0)
+
+
+func test_rep_mod_matches_the_shared_table_for_every_tier() -> void:
+	var l := _ledger()
+	for score: int in [-100, -20, 0, 20, 100]:
+		l.add(&"faction.crown", score - l.value(&"faction.crown"))
+		assert_eq(l.rep_mod(&"faction.crown"), RepTiers.rep_mod(l.tier(&"faction.crown")), str(score))

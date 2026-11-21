@@ -1,4 +1,4 @@
-## Recorded when hit points are really restored (architecture.md §4.4; gdd.md §6.6).
+## Recorded when hit points are really restored (architecture.md §4.11; gdd.md §6.6).
 ## `amount` is the HP actually gained, after the cap at max HP.
 class_name ActorHealed
 extends DomainEvent

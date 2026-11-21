@@ -1,14 +1,11 @@
 ## Every faction's reputation, -100 to 100, its tier and the rep_mod a tier adds
 ## to social checks (gdd.md §6.12 reputation and tiers, §6.10 rep_mod;
-## architecture.md §4.5). Records an event only when state really changes.
+## architecture.md §4.14). Records an event only when state really changes.
 class_name ReputationLedger
 extends Snapshotable
 
 const MIN_REP := -100
 const MAX_REP := 100
-const REP_MODS: Dictionary[StringName, int] = {
-	&"hostile": -2, &"wary": -1, &"neutral": 0, &"friendly": 1, &"allied": 2,
-}
 
 var _defs: Dictionary[StringName, FactionDefinition] = {}
 var _values: Dictionary[StringName, int] = {}
@@ -40,19 +37,22 @@ func add(faction_id: StringName, delta: int) -> void:
 		_outbox.record(ReputationTierChanged.new(faction_id, old_tier, new_tier))
 
 
+## Queries are lenient: an unknown faction reads as a score of 0 (and tier and rep_mod follow from it).
 func value(faction_id: StringName) -> int:
-	assert(_values.has(faction_id), "unknown faction")
-	return _values[faction_id]
+	return _values.get(faction_id, 0)
 
 
+## The tier of the faction's score; an unknown faction gets the tier of 0 under the default thresholds.
 func tier(faction_id: StringName) -> StringName:
-	assert(_defs.has(faction_id), "unknown faction")
-	return _defs[faction_id].tier_for(value(faction_id))
+	var def: FactionDefinition = _defs.get(faction_id, null)
+	if def == null:
+		def = FactionDefinition.new(faction_id, "")
+	return def.tier_for(value(faction_id))
 
 
-## Friendly +1, Allied +2, Wary -1, Hostile -2, Neutral 0 (gdd.md §6.10).
+## Friendly +1, Allied +2, Wary -1, Hostile -2, Neutral 0 (gdd.md §6.10); see RepTiers.rep_mod.
 func rep_mod(faction_id: StringName) -> int:
-	return REP_MODS[tier(faction_id)]
+	return RepTiers.rep_mod(tier(faction_id))
 
 
 func drain_events() -> Array[DomainEvent]:

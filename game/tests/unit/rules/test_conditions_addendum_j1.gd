@@ -179,10 +179,29 @@ func test_quest_stage_words_stay_open() -> void:
 	assert_true(_eval("quest_stage(quest.x) != somewhere_else", f))
 
 
-func test_two_word_calls_compare_without_a_closed_check() -> void:
+func test_two_word_calls_with_different_word_sets_are_bad_compare() -> void:
+	assert_eq(_code("finale_oath() == finale_anselm()"), &"bad_compare")
+	assert_eq(_code("finale_anselm() != finale_oath()"), &"bad_compare")
+	assert_eq(_code("quest_stage(quest.a) == finale_oath()"), &"bad_compare")
+	assert_eq(_code("finale_oath() == quest_stage(quest.a)"), &"bad_compare")
+	var r := ConditionParser.parse("finale_oath() == finale_anselm()")
+	assert_string_contains(r.detail, "finale_oath")
+	assert_string_contains(r.detail, "finale_anselm")
+
+
+func test_two_open_word_calls_compare() -> void:
 	var f := FakeFactProvider.new()
-	f.quest_stages[&"quest.x"] = &"none"
-	assert_true(_eval("quest_stage(quest.x) == finale_oath()", f))
+	f.quest_stages[&"quest.a"] = &"audience"
+	f.quest_stages[&"quest.b"] = &"audience"
+	assert_true(_eval("quest_stage(quest.a) == quest_stage(quest.b)", f))
+	f.quest_stages[&"quest.b"] = &"epilogue"
+	assert_true(_eval("quest_stage(quest.a) != quest_stage(quest.b)", f))
+
+
+func test_two_word_calls_with_the_same_closed_set_compare() -> void:
+	var f := FakeFactProvider.new()
+	f.finale[FactProvider.FINALE_OATH] = &"true"
+	assert_true(_eval("finale_oath() == finale_oath()", f))
 
 
 func test_content_probe_real_conditions_parse() -> void:

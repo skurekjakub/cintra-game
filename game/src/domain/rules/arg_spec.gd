@@ -6,6 +6,7 @@
 ##   local                   a local id (^[a-z][a-z0-9_]*$), as a StringName
 ##   int|word:<a>|<b>...     an int if the token is numeric, else one of the words
 ## A suffix "=<default>" makes the param optional (default converted by the spec itself).
+## A suffix "=" with nothing after it also makes it optional, and the default is null ("no value").
 ## A trailing "+" makes it variadic (one or more; it must be the last param).
 class_name ArgSpec
 extends RefCounted
@@ -86,7 +87,8 @@ static func bind(specs: Array[ArgSpec], tokens: PackedStringArray) -> Result:
 	return Result.ok(values)
 
 
-## The values (from `bind`) that belong to id specs, variadic ones included.
+## The values (from `bind`) that belong to id specs, variadic ones included. An optional id that
+## was not given (null) is skipped.
 static func ids_in(specs: Array[ArgSpec], values: Array) -> Array[StringName]:
 	var ids: Array[StringName] = []
 	for i: int in mini(specs.size(), values.size()):
@@ -95,8 +97,10 @@ static func ids_in(specs: Array[ArgSpec], values: Array) -> Array[StringName]:
 			continue
 		var stop := values.size() if spec.variadic else i + 1
 		for v: int in range(i, stop):
-			var id: StringName = values[v]
-			ids.append(id)
+			var value: Variant = values[v]
+			if value != null:
+				var id: StringName = value
+				ids.append(id)
 	return ids
 
 
@@ -190,6 +194,9 @@ func _parse_body(body: String) -> void:
 
 
 func _set_default(default_text: String) -> void:
+	if default_text.is_empty():
+		default_value = null
+		return
 	var r := self.convert(default_text)  # bare convert() is the global builtin
 	assert(r.is_ok(), "ArgSpec '%s': default '%s' does not satisfy the spec" % [spec_text, default_text])
 	default_value = r.value

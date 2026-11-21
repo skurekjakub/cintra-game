@@ -101,7 +101,7 @@ Conventions for every domain:
 ### 4.2 `rules` (conditions and effect specs)
 
 - **Responsibility:** parse and evaluate the condition language, and parse effect specs. It does not apply effects.
-- **API:** `ConditionParser.parse(text: String) -> Result` (holds a `Condition`), `Condition` (abstract: `evaluate(facts: FactProvider) -> bool`, `referenced_ids() -> Array[StringName]`), with AST nodes `AndCondition`, `OrCondition`, `NotCondition`, `CompareCondition`, `CallCondition` in `_internal/`. `FactProvider` is abstract, read-only: `has_flag`, `get_var`, `has_milestone`, `item_count`, `has_clue`, `has_deduction`, `quest_status`, `quest_stage`, `attribute`, `check_total(skill)`, `reputation`, `rep_tier`, `escalation_stage`, `act`, `in_party`, `has_perk`, `crowns`, `level`, `finale_value(key)`. Also `EffectParser.parse(text: String) -> Result` (holds an `EffectSpec` with `op: StringName`, `args: Array`, `referenced_ids()`), and `EffectSignatures` (the table of valid ops and argument types, used by the parser and by content tests).
+- **API:** `ConditionParser.parse(text: String) -> Result` (holds a `Condition`), `Condition` (abstract: `evaluate(facts: FactProvider) -> bool`, `referenced_ids() -> Array[StringName]`), with AST nodes `AndCondition`, `OrCondition`, `NotCondition`, `CompareCondition`, `CallCondition` in `_internal/`. `FactProvider` is abstract, read-only, with 27 methods, each id parameter a `StringName`: `has_flag`, `get_var`, `has_milestone`, `item_count`, `has_clue`, `has_deduction`, `quest_status`, `quest_stage`, `attribute`, `check_total(skill)`, `reputation`, `rep_tier`, `escalation_stage`, `act`, `in_party`, `has_perk`, `crowns`, `level`, `finale_value(key)`, `visited(zone_id)`, `rumor_heard(rumor_id)`, `queen_condition`, `is_equipped(item_id)`, `is_disguised`, `heard_from(rumor_id, npc_id)`, `map_unlocked(map_id)`, `map_pinned(map_id)`. Also `EffectParser.parse(text: String) -> Result` (holds an `EffectSpec` with `op: StringName`, `args: Array`, `referenced_ids()`), and `EffectSignatures` (the table of valid ops and argument types, used by the parser and by content tests).
 - **Emits / consumes:** none.
 - **Must not know:** how facts are stored, or what any effect does.
 
@@ -193,7 +193,7 @@ Conventions for every domain:
 ### 4.13 `progression`
 
 - **Responsibility:** XP, levels, the skill tree and perks.
-- **API:** `LevelTable` (`xp_for(level) -> int`, `level_for(xp) -> int`, cap 12), `ExperienceTrack` (`grant(amount, source: StringName) -> void`, `xp()`, `level()`, `unspent_skill_points()`, `unspent_attribute_points()`), `SkillTreeDefinition`, `SkillTree` (`can_unlock(perk_id) -> Result`, `unlock(perk_id) -> Result`, `has(perk_id)`, `points_in(branch)`). Implements `Snapshotable`.
+- **API:** `LevelTable` (`xp_for(level) -> int`, `level_for(xp) -> int`, cap 12), `ExperienceTrack` (`grant(amount, source: StringName) -> void`, `xp()`, `level()`, `unspent_skill_points()`, `attribute_points_earned()`), `SkillTreeDefinition`, `SkillTree` (`can_unlock(perk_id) -> Result`, `unlock(perk_id) -> Result`, `has(perk_id)`, `points_in(branch)`). Implements `Snapshotable`.
 - **Emits:** `XpGained(amount, source)`, `LevelGained(new_level)`, `PerkUnlocked(id)`.
 - **Consumes (via `XpPolicy`):** `QuestCompleted`, `ObjectiveCompleted`, `ClueDiscovered`, `DeductionUnlocked`, `CheckResolved(passed)`, `CombatantDefeated`, `EnemyYielded`, `ZoneFirstVisited`.
 - **Must not know:** what perks do. Effects of perks are read by other code through `FactProvider.has_perk` or by the application mappers.

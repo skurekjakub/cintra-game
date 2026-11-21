@@ -1,6 +1,6 @@
 ## The player's attributes, derived stats and hit points outside combat, plus
 ## the attribute points earned by level (gdd.md §6.6 derived stats, §6.8
-## attribute points; architecture.md §4.4). The level comes from a provider, so
+## attribute points; architecture.md §4.11). The level comes from a provider, so
 ## the sheet never knows how experience works. Records an event only when state
 ## really changes.
 class_name ActorSheet

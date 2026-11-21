@@ -1,6 +1,6 @@
 ## The five attributes as an immutable value: Might, Agility, Grit, Wits and
 ## Presence. Each starts at 3; character creation adds 4 points with none above 6,
-## and the absolute maximum is 10 (gdd.md §6.6; architecture.md §4.4).
+## and the absolute maximum is 10 (gdd.md §6.6; architecture.md §4.11).
 class_name Attributes
 extends RefCounted
 

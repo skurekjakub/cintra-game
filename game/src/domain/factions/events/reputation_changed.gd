@@ -1,5 +1,5 @@
 ## Recorded when a faction's reputation really changes value, after clamping
-## to -100..100 (architecture.md §4.5; gdd.md §6.12).
+## to -100..100 (architecture.md §4.14; gdd.md §6.12).
 class_name ReputationChanged
 extends DomainEvent
 

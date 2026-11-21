@@ -1,5 +1,5 @@
 ## Recorded when the crowns balance really changes (never for an amount of 0)
-## (architecture.md §4.7; gdd.md §6.9).
+## (architecture.md §4.12; gdd.md §6.9).
 class_name CrownsChanged
 extends DomainEvent
 

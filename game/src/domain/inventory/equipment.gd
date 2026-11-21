@@ -4,6 +4,8 @@
 ## out of the inventory. A failed equip changes nothing and records nothing.
 ## Whoever removes the last copy of an equipped item (selling, take_item) must
 ## unequip it first.
+## To move an item between slots (e.g. `trinket_1` → `trinket_2`), the use case unequips it first.
+## `QuickSlots.assign`, by contrast, moves.
 class_name Equipment
 extends Snapshotable
 

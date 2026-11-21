@@ -1,4 +1,4 @@
-## The player's crowns (gdd.md §6.9 currency; architecture.md §4.7). A failed
+## The player's crowns (gdd.md §6.9 currency; architecture.md §4.12). A failed
 ## spend changes nothing and records nothing; an amount of 0 is not a change.
 ## The add_crowns(N) handler calls spend(-N) when N < 0, so a price the player
 ## cannot pay fails (content-format.md §E).

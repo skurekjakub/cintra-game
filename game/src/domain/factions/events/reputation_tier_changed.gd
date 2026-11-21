@@ -1,5 +1,5 @@
 ## Recorded when a reputation change moves a faction into a different tier
-## (architecture.md §4.5; gdd.md §6.12). Follows the ReputationChanged it belongs to.
+## (architecture.md §4.14; gdd.md §6.12). Follows the ReputationChanged it belongs to.
 class_name ReputationTierChanged
 extends DomainEvent
 
