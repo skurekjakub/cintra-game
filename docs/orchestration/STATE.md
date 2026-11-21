@@ -45,13 +45,13 @@ Update after every decision, dispatch, and report.
 | A01-art-options | Build 5 art-direction mockup artifact | DONE, committed 8812c02. Awaiting user pick | agents/A01-art-options/brief.md | agents/A01-art-options/report.md |
 | A02-design-architecture | GDD + architecture + content template | DONE (report saved by orchestrator; agent's write was blocked) | agents/A02-design-architecture/brief.md | agents/A02-design-architecture/report.md |
 | A03-project-setup | Godot project in game/, GUT, tools/test.ps1, shared kernel + event bus (TDD), architecture test, Godot AI plugin, CLAUDE.md, README | DONE 8f426ef (53 tests green, re-verified). godot-ai moved to LOCAL scope by orch (no .mcp.json in public repo) | agents/A03-project-setup/brief.md | agents/A03-project-setup/report.md |
-| A04-content-act1 | Act I sections (01-drowned-rat = vertical slice) | dispatched | agents/A04-content-act1/brief.md | agents/A04-content-act1/report.md |
+| A04-content-act1 | Act I sections (01-drowned-rat = vertical slice) | DONE 708d63f (issues list in report → A08) | agents/A04-content-act1/brief.md | agents/A04-content-act1/report.md |
 | A05-content-act2 | Act II sandbox sections + twist | dispatched | agents/A05-content-act2/brief.md | agents/A05-content-act2/report.md |
 | A06-content-act3 | Act III + finale + endings | dispatched | agents/A06-content-act3/brief.md | agents/A06-content-act3/report.md |
 | A07-content-side | 12 side quests, travel events, rumors | DONE f246017 (format issues listed in report → A08) | agents/A07-content-side/brief.md | agents/A07-content-side/report.md |
 
-| P1-plan-core-state | Plan: rules, world_state, escalation, actors, inventory, progression, factions, rumors (+FactsChanged, ScriptedRandom) | dispatched | agents/P1-plan-core-state/brief.md | (in final msg → save) |
-| P2-plan-narrative | Plan: quests, investigation, dialogue, companions, travel, finale, endings | dispatched | agents/P2-plan-narrative/brief.md | (in final msg → save) |
+| P1-plan-core-state | Plan: rules, world_state, escalation, actors, inventory, progression, factions, rumors (+FactsChanged, ScriptedRandom) | DONE c68afe8 | agents/P1-plan-core-state/brief.md | agents/P1-plan-core-state/report.md |
+| P2-plan-narrative | Plan: quests, investigation, dialogue, companions, travel, finale, endings | DONE 0a40369 (gated on P1 tasks 1,2,5,6,13,14) | agents/P2-plan-narrative/brief.md | agents/P2-plan-narrative/report.md |
 | P3-plan-app-infra | Plan: save, application layer, infra, composer/Services/Main.tscn, md→JSON converter, content validation tests | dispatched | agents/P3-plan-app-infra/brief.md | (in final msg → save) |
 
 Common planner brief: agents/_planner-common.md. Plans → docs/superpowers/plans/2026-11-21-*.md. Execution: subagent-driven-development, ONE task at a time (D5): implementer → reviewer → orchestrator commits → next task.
