@@ -122,3 +122,23 @@ Output: 29×27 px, 29 colours. 4 variants, then 4 critique rounds.
 1. **M1** splits the spec into *style to copy* (scale, proportions, palette mood, light direction, face language) and *craft floor to beat* (outline treatment, ramps, anti-aliasing, rim). The craft floor never drops below M2, even when the reference does.
 2. **M3 stop rule:** stop only after a round where you cannot name a gap visible **at 1× game scale against the target backdrop**. Wins at 8× only don't count. You must also render on the real backdrop: a warm wood floor and a cold blue pool.
 3. **M4:** the variants must differ in silhouette and proportion (judged in solid black), not in palette or arm pose alone.
+
+## D1: full skill incl. M7 (opus, 67 tool calls, 51 min, about 6× D0's time)
+Output: an upright barrel. 18 jittered staves, 4 hoops with riveted laps, 3-board heads, a tarnished brass spigot. A **baked** GLB: 19.2k tris, 1 material, 4.6 MB. The final render comes from the *re-imported* GLB.
+
+**Effect of M7:** every process step now happened:
+- **Plan first:** real dimensions in metres, and a game camera defined (ortho, 40° down, about 66 px tall).
+- **4 stages**, each rendered as a hero view next to the in-game view at 1× and 6×.
+- **Specific critiques:** the grain went from "flame" to "camouflage" to long streaks; the rust from "tortoiseshell" to granular; it debug-rendered a spill mask that was 1 cm wide.
+- **Engine budget:** the bake took the mesh from 38.7k to 19.2k tris and the file from 24.7 MB to 4.6 MB. It parsed the GLB JSON and re-imported it to check.
+
+**Orchestrator's view:**
+- A real, engine-ready game asset, where D0 was a scene file with a studio render.
+- Lit for the tavern (warm key, cold moon rim). It reads at 66 px.
+- Visually it is stylized-clean rather than "weathered": the wood is a little smooth and uniform up close.
+- As a *pipeline* result it is far ahead of D0; as a hero image it is comparable.
+
+**Lessons for the later 3D pipeline (D7):**
+- The in-game-scale check is the decisive habit.
+- Baking plus GLB re-import verification belongs in every asset's definition of done.
+- Weathering needs its own explicit pass: edge wear, grime, stains, all scaled to be visible at game size.
