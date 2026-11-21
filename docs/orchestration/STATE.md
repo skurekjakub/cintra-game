@@ -15,14 +15,16 @@ The orchestrator works from the main checkout `C:/Users/skure/repositories/cintr
   - The critic round is the main lever.
 
 **In flight:**
-- **A12, sprite animator** (opus, agent ace272b03a114be06, brief `docs/orchestration/agents/A12-sprite-animator/brief.md`): Bertha rev2 gets an idle cycle and a front walk cycle, with normal maps, placed in the Drowned Rat. Lit close-up clips are the main deliverable, plus a scene clip.
-  - The user said: "critic 2 is going decently, but i would need to see it in the actual scene lit up and animated" and "animated sprite primarily".
-  - When it reports: look at the clips, run an independent critic on the animation, then show the user.
-  - A11 (lighting/post) waits until A12 is done, because both touch `game/spikes/hd2d`.
-- **A13, witcher narrative revision** (opus, agent aca6e21605d070ea6, brief `docs/orchestration/agents/A13-witcher-revision/brief.md`): D8.
-  - Covers gdd §5 plus a new "Witcher stigma" system, content-format §K, `docs/design/story-witcher.md` (the spine plus a 40-section work order), and a full rewrite of act1/01.
-  - The user also said "i have no idea who tf bertha is", so the slice must make Bertha vivid.
-  - P2/P3/P4 planning waits for it, since the stigma system changes the rules.
+- **A14, Hale witcher still sprite** (opus, agent a91faf1a23453c3c9, brief `docs/orchestration/agents/A14-hale-sprite/brief.md`). When it reports: run 2 independent critic rounds, each critic given the spec, and rule on any conflicts with numbers. Relay the critiques to A14 via SendMessage. Then animate him (an A12-style brief).
+- **Waiting on the user:** feedback on the Bertha animation (dda3332, clips in `docs/art-direction/spike/bertha-*`). Is the idle too subtle? Is a front-only walk acceptable, or do they want angled directions?
+
+**Done this session (late):**
+- A12: Bertha idle + walk, lit in scene (dda3332).
+- A13: D8 witcher revision (2b8cace). Its action items:
+  - the `blame` id kind;
+  - a stigma domain and save section before P4;
+  - the content-format status line;
+  - the rewrite wave for the other 39 sections, using the `story-witcher.md` table.
 
 **Next (in order):**
 1. **Art queue:**
