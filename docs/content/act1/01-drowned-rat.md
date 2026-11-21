@@ -46,7 +46,7 @@ Late September, a little before midnight. Hale, a hired sword between contracts,
 | Sprint, deep mud, mash to escape | `zone.cintra_mudflats`, beats `tut_sprint`, `tut_mud` | Fleeing under the pilings |
 | Crossbow aim / fire | beat `tut_crossbow` | The lantern-man on the quay. Shoot back or keep to cover |
 
-The `tut_*` beats are UI prompts fired by the slice's tutorial controller on the combat events named in the beat descriptions (first enemy wind-up, first enemy block, and so on). See Open questions.
+The `tut_*` beats are UI prompts. The combat ones are fired by `"on": combat_event` triggers in `zone.drowned_rat` (content-format §J.3): first enemy wind-up, first enemy block, first yield, HP below 50%. `tut_dodge` is played by the scene when a thug first kicks a bench.
 
 ## 3. Location layout
 
@@ -216,46 +216,90 @@ interactables:
 triggers:
   - id: t_start
     area: snug
-    on: enter
+    "on": enter
     source: null
     condition: "not quest_active(quest.main_a1) and not ms(ms.a1_rat_survived)"
     once: true
     effects: ["start_quest(quest.main_a1)", "set_checkpoint(rat_start)", "play_beat(bells_unbidden)", "play_beat(wake_in_snug)"]
   - id: t_courier_enters
     area: taproom
-    on: enter
+    "on": enter
     source: null
     condition: "not flag(flag.courier_entered)"
     once: true
     effects: ["set_flag(flag.courier_entered)", "play_beat(courier_stumbles_in)"]
   - id: t_courier_dies_alone
     area: taproom
-    on: interact
+    "on": interact
     source: front_door_handle
     condition: "not flag(flag.courier_dead)"
     once: true
     effects: ["set_flag(flag.courier_dead)", "play_beat(courier_dies_alone)"]
   - id: t_thugs_door
     area: taproom
-    on: interact
+    "on": interact
     source: front_door_handle
     condition: "not flag(flag.thugs_arrived)"
     once: true
     effects: ["set_flag(flag.thugs_arrived)", "set_var(var.rat_thugs_left, 3)", "play_beat(door_kicked)", "start_dialogue(dlg.rat_thugs_standoff)"]
   - id: t_thugs_letter
     area: taproom
-    on: beat_done
+    "on": beat_done
     source: letter_read
     condition: "not flag(flag.thugs_arrived)"
     once: true
     effects: ["set_flag(flag.thugs_arrived)", "set_var(var.rat_thugs_left, 3)", "play_beat(door_kicked)", "start_dialogue(dlg.rat_thugs_standoff)"]
   - id: t_fight_begins
     area: taproom
-    on: beat_done
+    "on": beat_done
     source: fight_begins
     condition: "true"
     once: true
     effects: ["play_beat(bertha_opens_trapdoor)", "play_beat(tut_attack)"]
+  - id: t_tut_block
+    area: taproom
+    "on": combat_event
+    source: first_windup
+    condition: "true"
+    once: true
+    effects: ["play_beat(tut_block)"]
+  - id: t_tut_kick
+    area: taproom
+    "on": combat_event
+    source: first_block
+    condition: "true"
+    once: true
+    effects: ["play_beat(tut_kick)"]
+  - id: t_tut_yield
+    area: taproom
+    "on": combat_event
+    source: first_yield
+    condition: "true"
+    once: true
+    effects: ["play_beat(tut_yield)"]
+  - id: t_tut_quick_item
+    area: taproom
+    "on": combat_event
+    source: player_hp_below
+    threshold: 50
+    condition: "true"
+    once: true
+    effects: ["play_beat(tut_quick_item)"]
+  - id: t_bertha_bottle_bar
+    area: bar
+    "on": combat_event
+    source: enemy_enters_area
+    condition: "not flag(flag.bertha_bottle_thrown)"
+    once: true
+    effects: ["set_flag(flag.bertha_bottle_thrown)", "play_beat(bertha_bottle)"]
+  - id: t_bertha_bottle_hp
+    area: taproom
+    "on": combat_event
+    source: player_hp_below
+    threshold: 40
+    condition: "not flag(flag.bertha_bottle_thrown)"
+    once: true
+    effects: ["set_flag(flag.bertha_bottle_thrown)", "play_beat(bertha_bottle)"]
 hazards:
   - {id: hearth_fire, area: taproom, kind: fire, params: {damage_per_second: 5, radius_m: 1.5, applies_status: burning}}
 checkpoints:
@@ -364,56 +408,56 @@ interactables:
 triggers:
   - id: t_hatch_bolted
     area: hatch_landing
-    on: enter
+    "on": enter
     source: null
     condition: "not ms(ms.a1_rat_survived)"
     once: true
     effects: ["set_flag(flag.rat_fled)", "play_beat(bertha_bolts_hatch)", "set_checkpoint(cp_mud_start)", "play_beat(tut_sprint)"]
   - id: t_lantern_man
     area: pilings_maze
-    on: enter
+    "on": enter
     source: null
     condition: "not ms(ms.a1_rat_survived)"
     once: true
     effects: ["play_beat(lantern_man_spots)", "start_encounter(enc.mudflats_crossbow)"]
   - id: t_cp_pilings
     area: the_margery
-    on: enter
+    "on": enter
     source: null
     condition: "true"
     once: true
     effects: ["set_checkpoint(cp_pilings)", "play_beat(tide_floods_pilings)"]
   - id: t_thugs_ladder
     area: the_margery
-    on: enter
+    "on": enter
     source: null
     condition: "not ms(ms.a1_rat_survived) and var(var.rat_thugs_left) >= 1"
     once: true
     effects: ["set_flag(flag.thugs_on_ladder)", "play_beat(thugs_on_ladder)"]
   - id: t_thugs_land_two
     area: the_margery
-    on: beat_done
+    "on": beat_done
     source: thugs_on_ladder
     condition: "not flag(flag.ladder_cut) and var(var.rat_thugs_left) >= 2"
     once: true
     effects: ["set_flag(flag.thugs_landed)", "start_encounter(enc.mudflats_thugs)"]
   - id: t_thugs_land_one
     area: the_margery
-    on: beat_done
+    "on": beat_done
     source: thugs_on_ladder
     condition: "not flag(flag.ladder_cut) and var(var.rat_thugs_left) == 1"
     once: true
     effects: ["set_flag(flag.thugs_landed)", "start_encounter(enc.mudflats_thug)"]
   - id: t_cp_wreck
     area: eel_weirs
-    on: enter
+    "on": enter
     source: null
     condition: "true"
     once: true
     effects: ["set_checkpoint(cp_wreck)", "play_beat(tide_floods_wreck)", "play_beat(tut_mud)"]
   - id: t_cp_weirs
     area: sluice_steps
-    on: enter
+    "on": enter
     source: null
     condition: "true"
     once: true
@@ -422,9 +466,9 @@ hazards:
   - {id: maze_pockets, area: pilings_maze, kind: deep_mud, params: {speed_mult: 0.6, root_pockets: 1, mash_presses_to_free: 6}}
   - {id: ladder_mud, area: the_margery, kind: deep_mud, params: {speed_mult: 0.6, root_pockets: 0}}
   - {id: weir_mud, area: eel_weirs, kind: deep_mud, params: {speed_mult: 0.6, root_pockets: 3, mash_presses_to_free: 6, safe_path: weir_tops}}
-  - {id: tide_pilings, area: pilings_maze, kind: tide, params: {floods_after_checkpoint: cp_pilings, creep_mps: 0.8, damage_per_second: 6, speed_mult_in_water: 0.5}}
-  - {id: tide_wreck, area: the_margery, kind: tide, params: {floods_after_checkpoint: cp_wreck, creep_mps: 0.9, damage_per_second: 6, speed_mult_in_water: 0.5}}
-  - {id: tide_weirs, area: eel_weirs, kind: tide, params: {floods_after_checkpoint: cp_weirs, creep_mps: 1.0, damage_per_second: 8, speed_mult_in_water: 0.5, channel_always_wet: true}}
+  - {id: tide_pilings, area: pilings_maze, kind: tide, enabled_by: {"on": checkpoint, source: cp_pilings}, params: {creep_mps: 0.8, damage_per_second: 6, speed_mult_in_water: 0.5}}
+  - {id: tide_wreck, area: the_margery, kind: tide, enabled_by: {"on": checkpoint, source: cp_wreck}, params: {creep_mps: 0.9, damage_per_second: 6, speed_mult_in_water: 0.5}}
+  - {id: tide_weirs, area: eel_weirs, kind: tide, enabled_by: {"on": checkpoint, source: cp_weirs}, params: {creep_mps: 1.0, damage_per_second: 8, speed_mult_in_water: 0.5, channel_always_wet: true}}
 checkpoints:
   - {id: cp_mud_start, area: hatch_landing}
   - {id: cp_pilings, area: the_margery}
@@ -475,6 +519,7 @@ areas:
 spawns:
   - {id: rat_door, area: eel_row, default: true}
   - {id: sluice_top, area: fishmarket, default: false}
+  - {id: gutter_lane, area: eel_row}
   - {id: market_gate, area: watch_post, default: false}
 exits:
   - id: rat_door
@@ -515,21 +560,21 @@ interactables:
 triggers:
   - id: t_arrive_survived
     area: fishmarket
-    on: enter
+    "on": enter
     source: null
     condition: "not ms(ms.a1_rat_survived)"
     once: true
     effects: ["reach_milestone(ms.a1_rat_survived)", "add_rep(faction.choir, -30)", "play_beat(thugs_scatter)"]
   - id: t_brask
     area: crane_quay
-    on: enter
+    "on": enter
     source: null
     condition: "not flag(flag.brask_met)"
     once: true
     effects: ["play_beat(brask_arrives)", "start_dialogue(dlg.brask_docks)"]
   - id: t_brask_from_rat
     area: eel_row
-    on: enter
+    "on": enter
     source: null
     condition: "not flag(flag.brask_met)"
     once: true
@@ -959,13 +1004,13 @@ nodes:
     type: line
     speaker: npc.bertha
     text: "Nobody you want to meet. Nobody I want to talk about in my own taproom. Come round the back if you're serious."
-    effects: ["start_dialogue(dlg.bertha_debt_offer)"]
+    effects: ["start_dialogue(dlg.bertha_debt_plea)"]
     next: bye
   rumors:
     type: line
     speaker: npc.bertha
     text: "Plenty. None of it good. Pull up a stool."
-    direction: "Draws a rumor from the tavern pool (gdd rumors system, A07)."
+    effects: ["draw_rumor(npc.bertha)"]
     next: bye
   bye:
     type: end
@@ -1618,6 +1663,7 @@ refutes: []
 
 ```yaml flags
 declare:
+  - {id: flag.bertha_bottle_thrown, type: bool, desc: "Bertha has thrown her one bottle in the taproom fight (beat bertha_bottle)."}
   - {id: flag.courier_entered, type: bool, desc: "The courier has stumbled into the Drowned Rat (beat courier_stumbles_in)."}
   - {id: flag.courier_dead, type: bool, desc: "The courier has died (beat courier_dies or courier_dies_alone)."}
   - {id: flag.letter_taken, type: bool, desc: "The player holds Dravin's letter (from the body or from Bertha)."}
@@ -1640,7 +1686,7 @@ declare:
   - {id: flag.bertha_at_docks, type: bool, desc: "Bertha brought the forgotten letter to the docks."}
   - {id: flag.brask_met, type: bool, desc: "Sergeant Brask has met the player on the docks."}
   - {id: flag.summoned_by_kosk, type: bool, desc: "Brask summoned the player to the palace; opens the palace gate in zone.cintra_streets."}
-  - {id: ms.a1_rat_survived, type: milestone, desc: "The player survived the Drowned Rat (fight, talk-down, or flight)."}
+  - {id: ms.a1_rat_survived, type: milestone, xp: 150, desc: "The player survived the Drowned Rat (fight, talk-down, or flight)."}
 reads:
   - flag.bertha_safehouse
   - ms.a1_audience_done
@@ -1656,7 +1702,7 @@ stages:
     journal: "A royal courier died in my arms at the Drowned Rat, poisoned, with a dwarf-sealed letter from one Dravin Ostrel. His last word was 'Ostrel'. Someone sent men to take that letter back."
     objectives:
       - {id: get_letter, text: "Keep the courier's letter", condition: "has_item(item.dravin_letter)", optional: false}
-      - {id: survive, text: "Survive the men at the door", condition: "ms(ms.a1_rat_survived)", optional: false, xp: 150}
+      - {id: survive, text: "Survive the men at the door", condition: "ms(ms.a1_rat_survived)", optional: false}
       - {id: meet_brask, text: "Find the Lord Marshal's patrol on the docks", condition: "flag(flag.brask_met)", optional: false}
       - {id: learn_poison, text: "Learn what killed the courier", condition: "has_clue(clue.courier_foam)", optional: true, xp: 20}
     on_complete: []
@@ -1665,7 +1711,7 @@ stages:
 
 ## 10. Rumors and event cards (optional)
 
-None defined here. Bertha's `rumors` option draws from the tavern pool authored by A07 (`docs/content/side/14-rumors.md`). Bertha is a rumor source for the Cintra pool.
+None defined here. Bertha's `rumors` option runs `draw_rumor(npc.bertha)` (content-format §J.2) on the pool authored by A07 (`docs/content/side/14-rumors.md`). Bertha is a rumor source for the Cintra pool.
 
 ## 11. Failure states and branches
 
@@ -1715,10 +1761,10 @@ guarantees:
 
 ## 12. Open questions
 
-1. **Tutorial prompt triggers.** The `tut_*` beats fire on combat events (first enemy wind-up, first block, first yield, HP < 50%). The trigger vocabulary (`enter | interact | exit_attempt | beat_done | encounter_done`) has no combat-event hook. Proposed: a slice tutorial controller in presentation that plays these beats, or a new trigger kind `on: combat_event` with `source: first_windup | first_enemy_block | first_yield | hp_below_50`.
-2. **`bertha_bottle`** fires on a combat condition (thug within 3 m of the bar, or player HP < 40%). Same hook as item 2. Bertha is listed as a scripted ally; her only action is this throw.
-3. **Hazard parameters.** `deep_mud` and `tide` use free-form `params` (`speed_mult`, `root_pockets`, `mash_presses_to_free`, `floods_after_checkpoint`, `creep_mps`). The tide "rising behind each checkpoint" (gdd §7.1) needs the zone scene to activate each tide hazard when its checkpoint is reached. Confirm the param names with the zone-scene implementer.
-4. **Milestone XP.** gdd §6.8 says main milestones give 100–250 XP "per data", but no block has an XP field for milestones. I put it on the quest objective tied to the milestone (`survive`, `xp: 150`). Confirm, or add `xp` to milestone declarations.
+1. **Tutorial prompt triggers (resolved by A08).** `"on": combat_event` triggers in `zone.drowned_rat` play the `tut_*` beats (content-format §J.3).
+2. **`bertha_bottle` (resolved by A08).** Two `combat_event` triggers (`enemy_enters_area` at the bar, `player_hp_below` 40) play it once, guarded by `flag.bertha_bottle_thrown`.
+3. **Hazard parameters (resolved by A08).** Each tide hazard turns on at its checkpoint (`enabled_by: {"on": checkpoint, ...}`, §J.3). The remaining `params` are physical tuning for the zone-scene implementer.
+4. **Milestone XP (resolved by A08).** Main-milestone XP now sits on the milestone declaration (`xp`, §J.7).
 5. **`on_yielded` semantics.** I assume it fires once, when the encounter ends with at least one enemy having yielded (and the rest down). If yield can happen mid-fight while others still fight, the yield dialogue should wait until the encounter ends.
-6. **Bertha's debt hook.** `regular_hub/troubles` chains into `dlg.bertha_debt_offer`, which A07 must define (or rename to whatever A07's opening debt dialogue is).
-7. **Rumor source.** Bertha's `rumors` option draws from the tavern pool; the content format has no effect for "draw a rumor". Proposed effect `draw_rumor(pool_id)`.
+6. **Bertha's debt hook (resolved by A08).** `troubles` chains into A07's `dlg.bertha_debt_plea`.
+7. **Rumor source (resolved by A08).** `draw_rumor(npc.bertha)`.

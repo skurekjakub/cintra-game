@@ -68,15 +68,8 @@ exits:
     to_spawn: from_hut
     condition: "quest_active(quest.side_wenna_hair) or quest_done(quest.side_wenna_hair)"
     effects: []
+  - {id: travel_marker, area: fen_path, to_map: true, label: "Leave the mere (travel)", condition: "true", effects: []}
 interactables:
-  - id: travel_marker
-    area: fen_path
-    kind: map_board
-    label: "Leave the mere (travel)"
-    condition: "true"
-    check: null
-    once: false
-    effects: []
   - id: offerings_cairn
     area: fen_path
     kind: readable
@@ -129,21 +122,21 @@ interactables:
 triggers:
   - id: reeds_drowners
     area: reed_beds
-    on: enter
+    "on": enter
     source: null
     condition: "stage() < 2 and not flag(flag.mere_reeds_cleared)"
     once: false
     effects: ["start_encounter(enc.mere_drowners)"]
   - id: reeds_drowners_dark
     area: reed_beds
-    on: enter
+    "on": enter
     source: null
     condition: "stage() >= 2 and not flag(flag.mere_reeds_cleared)"
     once: false
     effects: ["start_encounter(enc.mere_drowners_dark)"]
   - id: burners_arrive
     area: fen_path
-    on: enter
+    "on": enter
     source: null
     condition: "stage() >= 3 and not flag(flag.mere_burners_repelled)"
     once: true
@@ -425,7 +418,7 @@ nodes:
   brew_confirm:
     type: choice
     options:
-      - id: yes
+      - id: "yes"
         text: "Brew it."
         next: handover
       - id: wait
@@ -717,10 +710,10 @@ refutes: []
 
 ```yaml flags
 declare:
-  - {id: ms.a2_wenna_line_resolved, type: milestone, desc: "Wenna brewed 1-2 doses, or the antidote line failed. Part of the Act II gate."}
+  - {id: flag.maelis_poisoned, type: bool, desc: "System-set: the Choir poisoned Maelis at a rest after stage 3 began (gdd §6.2). Declared here, its first reader."}
+  - {id: ms.a2_wenna_line_resolved, type: milestone, xp: 400, desc: "Wenna brewed 1-2 doses, or the antidote line failed. Part of the Act II gate."}
   - {id: flag.wenna_met, type: bool, desc: "The player has met Wenna."}
   - {id: flag.wenna_bulbs_asked, type: bool, desc: "Wenna has asked for her bulbs (the Wenna line is active). Read by side travel cards L3 and V6."}
-  - {id: var.bulbs_recovered, type: int, min: 0, max: 6, desc: "Grey lily bulbs recovered for Wenna. Sources add to it (Attre crates, travel card); the handover sets it to the number actually handed over (Gull Tower bulbs from act1 are counted there)."}
   - {id: flag.wenna_told_truth, type: bool, desc: "The player told Wenna who sent them."}
   - {id: flag.wenna_lied, type: bool, desc: "Wenna caught the player lying."}
   - {id: flag.wenna_stores_stolen, type: bool, desc: "The player stole from Wenna's drying rack."}
@@ -738,7 +731,7 @@ declare:
   - {id: flag.antidote_administered, type: bool, desc: "The Queen has received a dose (rider got through, or administer_antidote(queen)). Set by the antidote system; declared here."}
   - {id: flag.antidote_given_maelis, type: bool, desc: "A dose saved Maelis."}
 reads:
-  - flag.maelis_poisoned
+  - var.bulbs_recovered
   - flag.choir_list_exposed
   - flag.jory_dead
   - item.grey_lily_bulbs
@@ -800,5 +793,5 @@ guarantees:
 - **`send_antidote_rider()` consumption:** this file assumes the effect consumes one `item.wenna_antidote`, like `administer_antidote`. If not, add `take_item(item.wenna_antidote, 1)` before it.
 - **Rider escort:** gdd §6.2 says "no escort was hired" without naming a flag. This file defines `flag.rider_escort_hired`. The rider system must read it.
 - `flag.antidote_rider_intercepted` and `flag.antidote_administered` are system-set but declared here (first section where they can become true). The reconciliation pass may move them to a system declarations file.
-- `flag.maelis_poisoned` is assumed to be set by the escalation system (gdd §6.2, stage 3 rest). It is listed as expected.
-- The side slice's hair reading (`side/08`) predicts the dose count from `var.bulbs_recovered` before the handover, so it can undercount Gull Tower bulbs by 2. Either act1's Gull Tower should also `add_var(var.bulbs_recovered, 2)`, or the reading should use `items(item.grey_lily_bulbs)`.
+- `flag.maelis_poisoned` is set by the escalation system (gdd §6.2, stage 3 rest) and declared here, its first reader (A08).
+- The side slice's hair reading (`side/08`) and the bulb count (resolved by A08): Gull Tower now adds 2 to `var.bulbs_recovered` (declared in act1/06), so readings before the handover count all bulbs found.

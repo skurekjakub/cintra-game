@@ -60,15 +60,8 @@ exits:
     to_spawn: cage_bottom
     condition: "quest_active(quest.side_silver_mine) or quest_done(quest.side_silver_mine)"
     effects: []
+  - {id: track_board, area: south_track, to_map: true, label: "Take the track down to Dun Strept", condition: "true", effects: []}
 interactables:
-  - id: track_board
-    area: south_track
-    kind: map_board
-    label: "Take the track down to Dun Strept"
-    condition: "true"
-    check: null
-    once: false
-    effects: []
   - id: workings_slate
     area: forge_hut
     kind: readable
@@ -105,7 +98,7 @@ interactables:
 triggers:
   - id: knock_heard
     area: headframe
-    on: enter
+    "on": enter
     source: null
     condition: "not visited(zone.silver_mine_shafts)"
     once: true
@@ -238,21 +231,21 @@ interactables:
 triggers:
   - id: rockfall_warning
     area: upper_gallery
-    on: enter
+    "on": enter
     source: null
     condition: "true"
     once: true
     effects: ["play_beat(dust_shiver)"]
   - id: drowners_wake
     area: flooded_level
-    on: enter
+    "on": enter
     source: null
     condition: "not flag(flag.mine_gallery_drained) and not flag(flag.mine_drowners_dealt)"
     once: false
     effects: ["start_encounter(enc.mine_drowners)"]
 hazards:
   - {id: rockfall, area: upper_gallery, kind: collapse, params: {damage: 30, tell: "dust shiver 1.5 s before; on each knock peak", cover: "stand under sound props (no chalk cross)"}}
-  - {id: flood_water, area: flooded_level, kind: deep_mud, params: {speed_mult: 0.5, disabled_when: "flag(flag.mine_gallery_drained)"}}
+  - {id: flood_water, area: flooded_level, kind: deep_mud, active_when: "not flag(flag.mine_gallery_drained)", params: {speed_mult: 0.5}}
   - {id: sump_drop, area: flooded_level, kind: tide, params: {pull_back_damage: 15}}
 checkpoints:
   - {id: shaft_bottom, area: cage_bottom}
@@ -300,6 +293,7 @@ areas:
 spawns:
   - {id: winze_bottom, area: winze_bottom, default: true}
   - {id: ledge, area: sapper_ledge, default: false}
+  - {id: from_ostrel, area: bulkhead_stair}
   - {id: plate, area: rune_plate, default: false}
 exits:
   - id: up_winze
@@ -381,38 +375,47 @@ interactables:
     check: null
     once: true
     effects: ["set_flag(flag.lower_breach_open)", "play_beat(stair_cleared)", "complete_objective(quest.side_silver_mine, open_breach)"]
+  - id: sapper_pack
+    area: sapper_ledge
+    kind: container
+    label: "Search the sappers' pack"
+    condition: "true"
+    check: null
+    once: true
+    effects: []
+    fail_effects: []
 triggers:
   - id: hammer_reveal
     area: hammer_gallery
-    on: enter
+    "on": enter
     source: null
     condition: "true"
     once: true
     effects: ["play_beat(hammer_seen)", "complete_objective(quest.side_silver_mine, find_source)"]
   - id: sappers_spot
     area: dwarven_passage
-    on: enter
+    "on": enter
     source: null
     condition: "stage() >= 3 and not flag(flag.mine_sappers_dealt)"
     once: false
     effects: ["play_beat(sappers_seen)"]
   - id: sappers_fight
     area: sapper_ledge
-    on: enter
+    "on": enter
     source: null
     condition: "stage() >= 3 and not flag(flag.mine_sappers_dealt) and not flag(flag.mine_charges_cut)"
     once: false
     effects: ["start_encounter(enc.mine_choir_sappers)"]
   - id: warden_approach
     area: bulkhead_stair
-    on: enter
+    "on": enter
     source: null
     condition: "stage() >= 4 and not flag(flag.mine_warden_dealt)"
     once: true
     effects: ["play_beat(warden_wakes)", "start_encounter(enc.mine_stray_warden)"]
 hazards:
   - {id: hammer_shock, area: hammer_gallery, kind: collapse, params: {damage: 25, tell: "grit falls on each upswing", cover: "the slot alcoves"}}
-  - {id: warm_vent, area: dwarven_passage, kind: steam, params: {damage_per_second: 4, active_when: "stage() >= 3"}}
+  - {id: warm_vent, area: dwarven_passage, kind: steam, active_when: "stage() >= 3", params: {damage_per_second: 4}}
   - {id: stair_rubble, area: bulkhead_stair, kind: trap, params: {loose_footing: true}}
 checkpoints:
   - {id: breach_entry, area: winze_bottom}
@@ -451,7 +454,7 @@ variants:
 
 ## 4. NPCs present
 **Voice notes.**
-- **Brannoc:** forty, broad, with a burn-scarred forearm and a slow, deliberate Strept burr. He measures every word as if it costs him. He hates Cintra with an old, tired hate (he lost a brother at Marnadal), but he hates hunger more. He never shouts. When he is angry he goes quiet and starts counting things. If the player wears Kosk's badge (`kosk_badge_worn`), his first line is a refusal to speak to "a Marshal's dog", and every Strept check in this file takes the −2 from gdd §6.10.
+- **Brannoc:** forty, broad, with a burn-scarred forearm and a slow, deliberate Strept burr. He measures every word as if it costs him. He hates Cintra with an old, tired hate (he lost a brother at Marnadal), but he hates hunger more. He never shouts. When he is angry he goes quiet and starts counting things. If the player wears Kosk's badge (`equipped(item.kosk_badge)`), his first line is a refusal to speak to "a Marshal's dog", and every Strept check in this file takes the badge's −2 (gdd §6.10).
 - **Old Kettle:** seventy, toothless, half-blind, and happy. He worked the mine before Brannoc was born, and as a boy he once traded with a dwarf at the Ostrel gate. He reads dwarf-marks the way other old men read weather. He talks to the knocking like a neighbour ("there he goes again"). He gives answers sideways, as stories, and is always right.
 
 ```yaml npc

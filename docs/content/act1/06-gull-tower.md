@@ -22,7 +22,7 @@ The signal light on Gull Tower, a coastal watchtower on a headland west of the Y
 - Optional. Open from `ms.a1_audience_done` until escalation stage 2 (gdd §7.1: "Gull Tower stays open until stage 2"), so it can be played after the Fair, early in Act II.
 - `ms.a1_gull_done` fires when Hale gains `clue.gull_bulbs`: from the crates (`cellar_crates`, no check) or, if Seixal was bribed and sailed with the crates, from the bill of lading he leaves behind (`bill_of_lading`, no check). The two are mutually exclusive. It pays `add_xp(200)`.
 - With `clue.chalice_pollen` (section 3), `clue.gull_bulbs` unlocks `ded.poison_via_attre`.
-- Bulbs: taking the last crate gives `item.grey_lily_bulbs` ×2 (gdd §6.9: Gull Tower +2), returned to Wenna in Act II (A05 counts them into `var.bulbs_recovered`). Burning the crates destroys them.
+- Bulbs: taking the last crate gives `item.grey_lily_bulbs` ×2 (gdd §6.9: Gull Tower +2), returned to Wenna in Act II. Taking them also adds 2 to `var.bulbs_recovered` (declared here), so readings before the handover count them; the handover then sets the var to the bulbs actually handed over. Burning the crates destroys them.
 - Stage 1 variant: if played after the Fair, the smugglers are more numerous and nervous (variant `stage1_gull`: +1 smuggler in the yard, gdd §6.1 does not require it but Act II levels need it).
 
 ## 3. Location layout
@@ -90,15 +90,8 @@ exits:
     to_spawn: sea_cave
     condition: "true"
     effects: []
+  - {id: map_leave, area: headland_path, to_map: true, label: "Back to the coast road", condition: "true", effects: []}
 interactables:
-  - id: map_leave
-    area: headland_path
-    kind: map_board
-    label: "Back to the coast road"
-    condition: "true"
-    check: null
-    once: false
-    effects: []
   - id: keeper_body
     area: tower_yard
     kind: search
@@ -143,14 +136,14 @@ interactables:
 triggers:
   - id: t_gull_enter
     area: headland_path
-    on: enter
+    "on": enter
     source: null
     condition: "not visited(zone.gull_tower)"
     once: true
     effects: ["set_checkpoint(gull_path)", "play_beat(dark_tower)"]
   - id: t_yard_fight
     area: tower_yard
-    on: enter
+    "on": enter
     source: null
     condition: "not flag(flag.gull_yard_clear) and not flag(flag.gull_yard_engaged)"
     once: false
@@ -231,7 +224,7 @@ interactables:
     condition: "flag(flag.gull_cellar_clear) and not flag(flag.seixal_bribed) and not has_clue(clue.gull_bulbs)"
     check: null
     once: true
-    effects: ["add_clue(clue.gull_bulbs)", "play_beat(crates_opened)", "reach_milestone(ms.a1_gull_done)", "add_xp(200)", "start_dialogue(dlg.gull_crates_choice)"]
+    effects: ["add_clue(clue.gull_bulbs)", "play_beat(crates_opened)", "reach_milestone(ms.a1_gull_done)", "start_dialogue(dlg.gull_crates_choice)"]
   - id: bill_of_lading
     area: cellar
     kind: pickup
@@ -239,18 +232,18 @@ interactables:
     condition: "flag(flag.seixal_bribed) and not has_clue(clue.gull_bulbs)"
     check: null
     once: true
-    effects: ["give_item(item.gull_bill_of_lading, 1)", "add_clue(clue.gull_bulbs)", "reach_milestone(ms.a1_gull_done)", "add_xp(200)"]
+    effects: ["give_item(item.gull_bill_of_lading, 1)", "add_clue(clue.gull_bulbs)", "reach_milestone(ms.a1_gull_done)"]
 triggers:
   - id: t_cellar_enter
     area: cellar
-    on: enter
+    "on": enter
     source: null
     condition: "not flag(flag.gull_cellar_clear) and not flag(flag.gull_cellar_engaged)"
     once: false
     effects: ["set_checkpoint(gull_cellar)", "start_dialogue(dlg.seixal)"]
   - id: t_cave_enter
     area: sea_cave
-    on: enter
+    "on": enter
     source: null
     condition: "not flag(flag.gull_cellar_clear) and not visited(zone.gull_tower_cellar)"
     once: true
@@ -499,7 +492,7 @@ nodes:
     options:
       - id: take
         text: "Take the good bulbs. Someone may need to know what this poison is made of."
-        effects: ["give_item(item.grey_lily_bulbs, 2)", "set_flag(flag.gull_bulbs_taken)"]
+        effects: ["give_item(item.grey_lily_bulbs, 2)", "add_var(var.bulbs_recovered, 2)", "set_flag(flag.gull_bulbs_taken)"]
         next: take
       - id: burn
         text: "Burn them. All of them."
@@ -705,7 +698,8 @@ text: "The grey lily in the Queen's cup came in through Duke Raimund's ports. Th
 
 ```yaml flags
 declare:
-  - {id: ms.a1_gull_done, type: milestone, desc: "The player learned the Gull Tower crates hold grey lily from Attre."}
+  - {id: var.bulbs_recovered, type: int, min: 0, max: 6, desc: "Grey lily bulbs recovered for Wenna (gdd §6.2). Gull Tower (+2), the Attre crates and the lily-wagon card add to it; the Witch's Mere handover (a2.05) sets it to the number actually handed over."}
+  - {id: ms.a1_gull_done, type: milestone, xp: 200, desc: "The player learned the Gull Tower crates hold grey lily from Attre."}
   - {id: flag.gull_yard_clear, type: bool, desc: "The smugglers in the yard are dealt with."}
   - {id: flag.gull_cellar_clear, type: bool, desc: "Seixal's crew in the cellar is dealt with (any route)."}
   - {id: flag.gull_yard_engaged, type: bool, desc: "The yard fight is running (no re-trigger); cleared if the player flees."}
@@ -772,6 +766,6 @@ guarantees:
 
 ## 12. Open questions
 
-1. **Stage-variant encounters.** gdd §6.1 stage 3 adds +1 member to Choir groups, but there is no data hook for "encounter variant by stage". Gull Tower at stage 1 would benefit from +1 smuggler. Proposed: an `enemies_by_stage` field, or two encounters selected by trigger conditions as in `05-ring-of-nine.md`.
+1. **Stage-variant encounters (A08).** Encounters may now carry `variants` by stage (content-format §J.4). No +1 smuggler is added here; that is a tuning call.
 2. **Bulb total.** gdd §6.2 makes 2 doses need all 6 bulbs. If the Gull bulbs are burned or bribed away, A05 must make sure 6 are still reachable elsewhere, or burning here costs the 2-dose outcome. That is an intended trade-off unless the designer objects.
 3. **Generic crossbow bandit.** gdd §6.7 has no ranged bandit. I reused `enemy.choir_crossbowman` with an `attre_smuggler` variant. A designer may prefer a `bandit` variant `crossbow`.

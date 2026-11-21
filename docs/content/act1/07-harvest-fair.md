@@ -125,50 +125,50 @@ interactables:
 triggers:
   - id: t_fair_arrive
     area: kings_road
-    on: enter
+    "on": enter
     source: null
     condition: "not flag(flag.fair_briefed)"
     once: true
     effects: ["set_checkpoint(fair_arrival)", "play_beat(fair_sights)", "start_dialogue(dlg.kosk_fair_briefing)"]
   - id: t_strike_full
     area: chestnut_corner
-    on: enter
+    "on": enter
     source: null
     condition: "flag(flag.procession_started) and not flag(flag.fair_strike_begun) and not flag(flag.wren_unmasked) and not flag(flag.fair_roof_watch)"
     once: true
     effects: ["set_flag(flag.fair_strike_begun)", "set_checkpoint(the_strike)", "play_beat(wren_signal)", "start_encounter(enc.fair_strike)"]
   - id: t_strike_watched
     area: chestnut_corner
-    on: enter
+    "on": enter
     source: null
     condition: "flag(flag.procession_started) and not flag(flag.fair_strike_begun) and not flag(flag.wren_unmasked) and flag(flag.fair_roof_watch)"
     once: true
     effects: ["set_flag(flag.fair_strike_begun)", "set_checkpoint(the_strike)", "play_beat(wren_signal)", "start_encounter(enc.fair_strike_watched)"]
   - id: t_fire
     area: chestnut_corner
-    on: beat_done
+    "on": beat_done
     source: wren_signal
     condition: "not flag(flag.grease_found)"
     once: true
     effects: ["play_beat(grease_fire)"]
   - id: t_fizzle
     area: chestnut_corner
-    on: beat_done
+    "on": beat_done
     source: wren_signal
     condition: "flag(flag.grease_found)"
     once: true
     effects: ["play_beat(grease_fizzles)"]
   - id: t_pony_bolts
     area: chestnut_corner
-    on: beat_done
+    "on": beat_done
     source: grease_fire
     condition: "not flag(flag.aldric_close_guard)"
     once: true
     effects: ["play_beat(aldric_thrown)"]
 hazards:
-  - {id: grease_fire, area: oil_row, kind: fire, params: {damage_per_second: 6, starts_on_beat: grease_fire, spreads_to: [chestnut_corner], duration_s: 90, applies_status: burning}}
-  - {id: stampede, area: harvest_green, kind: trap, params: {effect: stampede, starts_on_beat: grease_fire, delay_s: 20, damage: 25, knockdown: true, telegraph: bellowing_2s, repeats_every_s: 30}}
-  - {id: lard_vats, area: oil_row, kind: fire, params: {damage_per_second: 10, radius_m: 1.0, starts_on_beat: grease_fire, applies_status: burning}}
+  - {id: grease_fire, area: oil_row, kind: fire, enabled_by: {"on": beat_done, source: grease_fire}, params: {damage_per_second: 6, spreads_to: [chestnut_corner], duration_s: 90, applies_status: burning}}
+  - {id: stampede, area: harvest_green, kind: trap, enabled_by: {"on": beat_done, source: grease_fire}, params: {effect: stampede, delay_s: 20, damage: 25, knockdown: true, telegraph: bellowing_2s, repeats_every_s: 30}}
+  - {id: lard_vats, area: oil_row, kind: fire, enabled_by: {"on": beat_done, source: grease_fire}, params: {damage_per_second: 10, radius_m: 1.0, applies_status: burning}}
 checkpoints:
   - {id: fair_arrival, area: kings_road}
   - {id: procession, area: ribbon_street}
@@ -680,7 +680,7 @@ nodes:
     type: line
     speaker: npc.kosk
     text: "Highness, the horses. Sellsword, you ride back with me. We have a great deal to talk about, and none of it here."
-    effects: ["play_beat(fair_quiet)", "reach_milestone(ms.act1_complete)", "add_xp(250)"]
+    effects: ["play_beat(fair_quiet)", "reach_milestone(ms.act1_complete)"]
     next: chain
   chain:
     type: effect
@@ -703,6 +703,7 @@ The strike is an **escort fight**: `ally.aldric` (HP 200) is on the field. If he
 ```yaml encounter
 id: enc.fair_strike
 zone: zone.chociebuz_fair
+target_priority: [ally.aldric]
 enemies:
   - {enemy: enemy.choir_assassin, count: 2, spawn: oil_smoke, variant: null}
   - {enemy: enemy.choir_cutthroat, count: 2, spawn: oil_smoke, variant: null}
@@ -716,11 +717,14 @@ avoidable_by: []
 on_won: ["set_flag(flag.fair_fight_over)", "play_beat(wren_down)", "start_dialogue(dlg.wren_downed)"]
 on_yielded: ["set_flag(flag.fair_fight_over)", "play_beat(wren_down)", "start_dialogue(dlg.wren_downed)"]
 on_player_fled: []
+escorts:
+  - {ally: ally.aldric, game_over: escort_aldric}
 ```
 
 ```yaml encounter
 id: enc.fair_strike_watched
 zone: zone.chociebuz_fair
+target_priority: [ally.aldric]
 enemies:
   - {enemy: enemy.choir_assassin, count: 2, spawn: oil_smoke, variant: null}
   - {enemy: enemy.choir_cutthroat, count: 2, spawn: oil_smoke, variant: null}
@@ -734,13 +738,16 @@ avoidable_by: []
 on_won: ["set_flag(flag.fair_fight_over)", "play_beat(roof_watch_holds)", "play_beat(wren_down)", "start_dialogue(dlg.wren_downed)"]
 on_yielded: ["set_flag(flag.fair_fight_over)", "play_beat(wren_down)", "start_dialogue(dlg.wren_downed)"]
 on_player_fled: []
+escorts:
+  - {ally: ally.aldric, game_over: escort_aldric}
 ```
 
 ```yaml encounter
 id: enc.fair_wren_early
 zone: zone.chociebuz_fair
+target_priority: [ally.aldric]
 enemies:
-  - {enemy: enemy.choir_assassin, count: 1, spawn: chestnut, variant: wren}
+  - {enemy: enemy.choir_assassin, count: 1, spawn: chestnut, variant: wren, downed_at_zero: true}
   - {enemy: enemy.choir_cutthroat, count: 2, spawn: chestnut, variant: null}
 waves:
   - {after: wave_cleared, enemies: [{enemy: enemy.choir_assassin, count: 2, spawn: green_crowd, variant: null}]}
@@ -752,6 +759,8 @@ avoidable_by: ["dlg.wren_chestnuts"]
 on_won: ["set_flag(flag.fair_fight_over)", "play_beat(wren_down)", "start_dialogue(dlg.wren_downed)"]
 on_yielded: ["set_flag(flag.fair_fight_over)", "play_beat(wren_down)", "start_dialogue(dlg.wren_downed)"]
 on_player_fled: []
+escorts:
+  - {ally: ally.aldric, game_over: escort_aldric}
 ```
 
 **The `wren` variant** of `enemy.choir_assassin`: the ringleader. Same stat block with +30% HP. He is **never killed outright** by the encounter: at 0 HP he drops to one knee (`wren_down`) so that the capture-or-kill choice is a dialogue (gdd says assassins have no `can_yield`; this variant overrides it to a scripted "downed" state). Below 30% HP he uses smoke vanish and runs down Church Lane (`wren_flees`) to the ford, where Kosk's riders corner him (`wren_cornered`); the fight finishes there.
@@ -800,6 +809,7 @@ stack_max: 1
 equip_slot: trinket
 weapon: null
 armor: null
+trinket: {mods: []}
 consumable: null
 readable_text: null
 ```
@@ -834,7 +844,7 @@ text: "A sworn brotherhood marked by pale feathers, with agents in the palace ki
 
 ```yaml flags
 declare:
-  - {id: ms.act1_complete, type: milestone, desc: "Act I complete: Aldric saved at the Fair, the Choir's trail found. Escalation stage 1."}
+  - {id: ms.act1_complete, type: milestone, xp: 250, desc: "Act I complete: Aldric saved at the Fair, the Choir's trail found. Escalation stage 1."}
   - {id: flag.fair_announced, type: bool, desc: "Kosk has announced the Fair ride."}
   - {id: flag.fair_started, type: bool, desc: "The player accepted the ride: point of no return for Act I leads 3-5."}
   - {id: flag.fair_dissuade_tried, type: bool, desc: "The player tried to talk Aldric out of riding."}
@@ -923,7 +933,7 @@ guarantees:
 
 ## 12. Open questions
 
-1. **Scripted downed state for the Wren.** `enemy.choir_assassin` has no `can_yield` (gdd §6.7). The `wren` variant needs a "downed, not dead" flag in enemy data so the encounter ends in dialogue. Proposed field: `variant.downed_at_zero: true`.
-2. **Escort game over.** gdd §6.13 says escort death means game over; content-format §E has `game_over(reason_id)` but no trigger for "ally died". I assumed the companion/escort system calls `game_over(escort_aldric)` itself.
-3. **Assassin target priority.** Assassins should prefer `ally.aldric`. There is no field for target priority; I suggest an enemy `variant` or encounter field `target_priority: [ally.aldric]`.
-4. **Brask as an ally.** `npc.sergeant_brask` appears in `allies` (a scripted shield for Aldric). She is essential. If scripted allies must be `ally.*` ids, she needs one (`ally.brask_escort`).
+1. **Scripted downed state for the Wren (resolved by A08).** The `wren` entry has `downed_at_zero: true` (content-format §J.4).
+2. **Escort game over (resolved by A08).** The Fair encounters list `escorts: [{ally: ally.aldric, game_over: escort_aldric}]` (§J.4).
+3. **Assassin target priority (resolved by A08).** `target_priority: [ally.aldric]` (§J.4).
+4. **Brask as an ally (resolved by A08).** `allies` accepts npc ids (§J.4).

@@ -186,7 +186,7 @@ nodes:
 ```
 
 ### 5.2 Epilogue slides
-Format: one heading per slide, its `id` (`epilogue.<ending>_<nn>_<slug>`), `order`, `condition` (content-format §C, endings calls allowed), an **[ART]** note, then the narration (voiced; subtitled). Slides 10–30 are core. The 9xx slide closes. Everything in between is a variant.
+Format: one `yaml epilogue` block per slide (content-format §J.7): `id` (`epilogue.<ending>_<nn>_<slug>`, or `epilogue.v<nnn>_<slug>` for a shared variant with `ending: null`), `order`, `condition` (§C, endings calls allowed), `title` and the narration `text` (voiced; subtitled). The **[ART]** note sits above each block. Slides 10–30 are core. The 9xx slide closes. Everything in between is a variant.
 
 #### Shared variant pool
 Each variant lists its applicability inside its condition. Shared variants sit at orders 100–700, so they always come after an ending's core slides.
@@ -195,101 +195,241 @@ Each variant lists its applicability inside its condition. Shared variants sit a
 
 #### The Lion Holds (`ending.lion_holds`)
 
-**`epilogue.lion_holds_10_the_lock_holds`** · order 10 · condition `"true"`
 *[ART] The Lock Chamber from above, four gold shafts on the Black Iron Throne; a small figure in a crown kneeling at the horn.*
-> The bolts drove home one after another, and the mountain held its breath again. In Karak Ostrel's tally hall there is a twenty-second notch now, cut fresh beside a boy's name. Nineteen winters. It is not forever. It was never meant to be.
 
-**`epilogue.lion_holds_20_the_queen_mends`** · order 20 · condition `"true"`
+```yaml epilogue
+id: epilogue.lion_holds_10_the_lock_holds
+ending: ending.lion_holds
+order: 10
+condition: "true"
+title: "The lock holds"
+text: "The bolts drove home one after another, and the mountain held its breath again. In Karak Ostrel's tally hall there is a twenty-second notch now, cut fresh beside a boy's name. Nineteen winters. It is not forever. It was never meant to be."
+```
+
 *[ART] Ysolde at a palace window in early spring, a cane, a shawl, her hand on the sill.*
-> Ysolde lived. The lily came out of her slowly, the way it went in, and for a long time she could not hold a cup. By the thaw she walked the length of the long gallery on a cane, and the court watched her do it and remembered whose kingdom it was.
 
-**`epilogue.lion_holds_30_hardened`** · order 30 · condition `"true"`
+```yaml epilogue
+id: epilogue.lion_holds_20_the_queen_mends
+ending: ending.lion_holds
+order: 20
+condition: "true"
+title: "The queen mends"
+text: "Ysolde lived. The lily came out of her slowly, the way it went in, and for a long time she could not hold a cup. By the thaw she walked the length of the long gallery on a cane, and the court watched her do it and remembered whose kingdom it was."
+```
+
 *[ART] Aldric in a plain coat, older in the face than his years, at the war-room table with Kosk; the riding gloves on the map.*
-> Aldric came home hardened beyond his twelve years. He sat at the Marshal's table and asked questions nobody wanted to answer, and kept asking. When they granted {player} a title and lands, it was the boy who chose the words on the patent. He chose them carefully.
 
-**`epilogue.lion_holds_900_close`** · order 900 · condition `"true"`
+```yaml epilogue
+id: epilogue.lion_holds_30_hardened
+ending: ending.lion_holds
+order: 30
+condition: "true"
+title: "Hardened"
+text: "Aldric came home hardened beyond his twelve years. He sat at the Marshal's table and asked questions nobody wanted to answer, and kept asking. When they granted {player} a title and lands, it was the boy who chose the words on the patent. He chose them carefully."
+```
+
 *[ART] {player} on the Marnadal Stairs in summer, the switchbacks green with moss, looking up toward the Old Grey Matron.*
-> They called {player} the Warden of the Stairs, which was a title the court invented and the clans found very funny. Every few years, {player} climbed the Stairs alone to the Weeping Gate, and stood there, and listened. The mountain was quiet. It is quiet still. For now.
+
+```yaml epilogue
+id: epilogue.lion_holds_900_close
+ending: ending.lion_holds
+order: 900
+condition: "true"
+title: "Close"
+text: "They called {player} the Warden of the Stairs, which was a title the court invented and the clans found very funny. Every few years, {player} climbed the Stairs alone to the Weeping Gate, and stood there, and listened. The mountain was quiet. It is quiet still. For now."
+```
 
 ---
 
 #### The Boy King (`ending.boy_king`)
 
-**`epilogue.boy_king_10_sealed`** · order 10 · condition `"true"`
 *[ART] The sealed vault door, gold light fading; Aldric walking out of the chamber small between the kneeling wardens.*
-> The vaults were sealed, and the boy who sealed them walked out of the mountain a king. He was twelve. He had a crown that was too big for him and a kingdom that was too big for anyone.
 
-**`epilogue.boy_king_20_funeral`** · order 20 · condition `"true"`
+```yaml epilogue
+id: epilogue.boy_king_10_sealed
+ending: ending.boy_king
+order: 10
+condition: "true"
+title: "Sealed"
+text: "The vaults were sealed, and the boy who sealed them walked out of the mountain a king. He was twelve. He had a crown that was too big for him and a kingdom that was too big for anyone."
+```
+
 *[ART] Ysolde's funeral in the Abbey of St. Corwen, a new abbot, Aldric alone at the bier in the crown.*
-> They buried Ysolde in St. Corwen, under a new abbot who did not give a sermon. Aldric stood at the bier for the whole of the vigil and did not let anyone take his arm. Afterward he went straight to the council chamber, because there was no one else to go.
 
-**`epilogue.boy_king_30_regency`** · order 30 · condition `"true"`
+```yaml epilogue
+id: epilogue.boy_king_20_funeral
+ending: ending.boy_king
+order: 20
+condition: "true"
+title: "Funeral"
+text: "They buried Ysolde in St. Corwen, under a new abbot who did not give a sermon. Aldric stood at the bier for the whole of the vigil and did not let anyone take his arm. Afterward he went straight to the council chamber, because there was no one else to go."
+```
+
 *[ART] Kosk and Varn on opposite sides of the council table, a boy in the middle chair; through the window, Attre's banners on a far coast.*
-> Kosk and Varn fought over the regency before the funeral bells had stopped. Down the coast, Duke Raimund took the news of the Queen's death as he had always meant to, as a signal. The war Anselm wanted came anyway, in the end. It was only smaller, and slower, and made of men.
 
-**`epilogue.boy_king_900_close`** · order 900 · condition `"true"`
+```yaml epilogue
+id: epilogue.boy_king_30_regency
+ending: ending.boy_king
+order: 30
+condition: "true"
+title: "Regency"
+text: "Kosk and Varn fought over the regency before the funeral bells had stopped. Down the coast, Duke Raimund took the news of the Queen's death as he had always meant to, as a signal. The war Anselm wanted came anyway, in the end. It was only smaller, and slower, and made of men."
+```
+
 *[ART] {player} kneeling before Aldric in the throne room, receiving a sword; the boy's hands steady.*
-> The boy king's first act was to name {player} his sword, the one blade in Cintra he could be certain of. It was not a reward. It was a sentence. {player} served it.
+
+```yaml epilogue
+id: epilogue.boy_king_900_close
+ending: ending.boy_king
+order: 900
+condition: "true"
+title: "Close"
+text: "The boy king's first act was to name {player} his sword, the one blade in Cintra he could be certain of. It was not a reward. It was a sentence. {player} served it."
+```
 
 ---
 
 #### The Shattered Lock (`ending.shattered_lock`)
 
-**`epilogue.shattered_lock_10_buckled`** · order 10 · condition `"true"`
 *[ART] The vault door buckled half open, black breath pouring up through the mountain's tunnels into grey daylight.*
-> The vault doors buckled open, but not all the way. What the dwarves had sealed for four hundred years came out in a single breath: war-engines that walked by themselves, casks of blight in their iron cradles, and the last of the Choir, laughing in the vapour.
 
-**`epilogue.shattered_lock_20_scatter`** · order 20 · condition `"true"`
+```yaml epilogue
+id: epilogue.shattered_lock_10_buckled
+ending: ending.shattered_lock
+order: 10
+condition: "true"
+title: "Buckled"
+text: "The vault doors buckled open, but not all the way. What the dwarves had sealed for four hundred years came out in a single breath: war-engines that walked by themselves, casks of blight in their iron cradles, and the last of the Choir, laughing in the vapour."
+```
+
 *[ART] A Strept goat path with a stranded iron-warden on it, frost on its shoulders; below, a valley village with a burned field in a dead-straight line.*
-> They scattered across the borderlands that winter. A warden found walking a goat path with no throne to answer to. A cask cracked open in a Marnadal ditch, and a dead-straight line of withered crops running away from it toward the sea.
 
-**`epilogue.shattered_lock_30_anselm_dead`** · order 30 · condition `"true"`
+```yaml epilogue
+id: epilogue.shattered_lock_20_scatter
+ending: ending.shattered_lock
+order: 20
+condition: "true"
+title: "Scatter"
+text: "They scattered across the borderlands that winter. A warden found walking a goat path with no throne to answer to. A cask cracked open in a Marnadal ditch, and a dead-straight line of withered crops running away from it toward the sea."
+```
+
 *[ART] The rift's lip; a burned scrap of habit on the iron.*
-> Anselm died in the breath he had opened the door for. Nobody found the body, and nobody looked very hard. His sermons were burned in the Abbey yard on the Marshal's orders, and copied out by hand in a dozen cellars before the ash was cold.
 
-**`epilogue.shattered_lock_900_close`** · order 900 · condition `"true"`
+```yaml epilogue
+id: epilogue.shattered_lock_30_anselm_dead
+ending: ending.shattered_lock
+order: 30
+condition: "true"
+title: "Anselm dead"
+text: "Anselm died in the breath he had opened the door for. Nobody found the body, and nobody looked very hard. His sermons were burned in the Abbey yard on the Marshal's orders, and copied out by hand in a dozen cellars before the ash was cold."
+```
+
 *[ART] {player} and a small company on the road with a cart carrying a chained, dormant warden; Sodden riders watching from a ridge.*
-> {player} spent the next years on the road, hunting what had come out of the mountain before Sodden could claim it. There was always one more cask. There was always someone willing to pay for it. Cintra survived. It learned to sleep lightly.
+
+```yaml epilogue
+id: epilogue.shattered_lock_900_close
+ending: ending.shattered_lock
+order: 900
+condition: "true"
+title: "Close"
+text: "{player} spent the next years on the road, hunting what had come out of the mountain before Sodden could claim it. There was always one more cask. There was always someone willing to pay for it. Cintra survived. It learned to sleep lightly."
+```
 
 ---
 
 #### Ashes & Iron (`ending.ashes_and_iron`)
 
-**`epilogue.ashes_and_iron_10_rupture`** · order 10 · condition `"true"`
 *[ART] Karak Ostrel's main portal from the valley, soot pouring out of it like smoke from a chimney the size of a mountain.*
-> Karak Ostrel ruptured. For three days the Old Grey Matron smoked like a forge, and then the things that had been breathing in the dark for four hundred years began to come down the valleys.
 
-**`epilogue.ashes_and_iron_20_valley`** · order 20 · condition `"true"`
+```yaml epilogue
+id: epilogue.ashes_and_iron_10_rupture
+ending: ending.ashes_and_iron
+order: 10
+condition: "true"
+title: "Rupture"
+text: "Karak Ostrel ruptured. For three days the Old Grey Matron smoked like a forge, and then the things that had been breathing in the dark for four hundred years began to come down the valleys."
+```
+
 *[ART] Soot-choked constructs walking through Tigg in the snow; villagers fleeing across the crossroads.*
-> Soot-choked constructs walked into Tigg and stood in the square. Choir fanatics with ash in their lungs walked behind them, preaching. The Marnadal ran black for a month.
 
-**`epilogue.ashes_and_iron_30_anselm_lives`** · order 30 · condition `"true"`
+```yaml epilogue
+id: epilogue.ashes_and_iron_20_valley
+ending: ending.ashes_and_iron
+order: 20
+condition: "true"
+title: "Valley"
+text: "Soot-choked constructs walked into Tigg and stood in the square. Choir fanatics with ash in their lungs walked behind them, preaching. The Marnadal ran black for a month."
+```
+
 *[ART] A huge soot-wreathed figure on a ridge at dusk, a crowd of grey robes below, listening.*
-> Anselm lived. The ash had him now, and he had the ash. They said he preached from the high passes to anyone who would climb up to hear him, and more climbed every week.
 
-**`epilogue.ashes_and_iron_900_close`** · order 900 · condition `"true"`
+```yaml epilogue
+id: epilogue.ashes_and_iron_30_anselm_lives
+ending: ending.ashes_and_iron
+order: 30
+condition: "true"
+title: "Anselm lives"
+text: "Anselm lived. The ash had him now, and he had the ash. They said he preached from the high passes to anyone who would climb up to hear him, and more climbed every week."
+```
+
 *[ART] {player} on a palisade in the snow at the mouth of the Marnadal Stairs, a mixed company of clansmen, Cintrans and strangers behind them.*
-> {player} saved the boy and lost the valley. The ballads argue about whether that was the right trade. Aldric never did. He sent {player} to hold the passes, and {player} held them, for as long as there was anyone left to hold them with.
+
+```yaml epilogue
+id: epilogue.ashes_and_iron_900_close
+ending: ending.ashes_and_iron
+order: 900
+condition: "true"
+title: "Close"
+text: "{player} saved the boy and lost the valley. The ballads argue about whether that was the right trade. Aldric never did. He sent {player} to hold the passes, and {player} held them, for as long as there was anyone left to hold them with."
+```
 
 ---
 
 #### The Bitter Bargain (`ending.bitter_bargain`)
 
-**`epilogue.bitter_bargain_10_answer`** · order 10 · condition `"true"`
 *[ART] The Lock Chamber, every warden kneeling toward the throne; Aldric's small hand on black iron.*
-> The vault did not open, and it did not close. It answered. Every warden in the mountain rose and turned toward the throne, and the throne belonged to a twelve-year-old boy and whoever stood behind him.
 
-**`epilogue.bitter_bargain_20_crush`** · order 20 · condition `"true"`
+```yaml epilogue
+id: epilogue.bitter_bargain_10_answer
+ending: ending.bitter_bargain
+order: 10
+condition: "true"
+title: "Answer"
+text: "The vault did not open, and it did not close. It answered. Every warden in the mountain rose and turned toward the throne, and the throne belonged to a twelve-year-old boy and whoever stood behind him."
+```
+
 *[ART] A line of iron-wardens marching down the Marnadal road; a burning Choir sanctum behind them; Sodden fen-banners fleeing across a river.*
-> The Choir went first. Then the border barons who had taken Sodden silver. Then Sodden's spears, who had been waiting for a civil war and got iron instead. Nobody who saw a warden march down the Marnadal road ever argued with Cintra again.
 
-**`epilogue.bitter_bargain_30_autocracy`** · order 30 · condition `"true"`
+```yaml epilogue
+id: epilogue.bitter_bargain_20_crush
+ending: ending.bitter_bargain
+order: 20
+condition: "true"
+title: "Crush"
+text: "The Choir went first. Then the border barons who had taken Sodden silver. Then Sodden's spears, who had been waiting for a civil war and got iron instead. Nobody who saw a warden march down the Marnadal road ever argued with Cintra again."
+```
+
 *[ART] Cintra's palace with a warden at every gate; a silent crowd in the square below a proclamation.*
-> Cintra became a kingdom that was feared, and in time a kingdom that was only feared. Corvan had locked the arsenal away so that no king would open it in a temper. His heirs no longer needed a temper. They only needed a reason, and there was always a reason.
 
-**`epilogue.bitter_bargain_900_close`** · order 900 · condition `"true"`
+```yaml epilogue
+id: epilogue.bitter_bargain_30_autocracy
+ending: ending.bitter_bargain
+order: 30
+condition: "true"
+title: "Autocracy"
+text: "Cintra became a kingdom that was feared, and in time a kingdom that was only feared. Corvan had locked the arsenal away so that no king would open it in a temper. His heirs no longer needed a temper. They only needed a reason, and there was always a reason."
+```
+
 *[ART] {player} in black and iron at the king's right hand, a warden behind them like a shadow.*
-> They called {player} the Marshal of Iron. It was not meant kindly. {player} made sure, every day, that it was meant obediently.
+
+```yaml epilogue
+id: epilogue.bitter_bargain_900_close
+ending: ending.bitter_bargain
+order: 900
+condition: "true"
+title: "Close"
+text: "They called {player} the Marshal of Iron. It was not meant kindly. {player} made sure, every day, that it was meant obediently."
+```
 
 ---
 
@@ -297,181 +437,468 @@ Each variant lists its applicability inside its condition. Shared variants sit a
 
 **The Queen and the Prince**
 
-**`epilogue.v110_aldric_coerced`** · order 110 · condition `"finale_seized() and flag(flag.aldric_coerced)"`
 *[ART] Aldric at sixteen, crowned, at a window, back turned to a figure in the doorway.*
-> The king never spoke of the Lock Chamber. He spoke to {player} every day for the rest of his reign, about the wardens, the casks, the borders, and never once about anything else. Courtiers learned not to stand between them. It was like standing between a lock and its key.
 
-**`epilogue.v115_aldric_willing`** · order 115 · condition `"finale_seized() and not flag(flag.aldric_coerced)"`
+```yaml epilogue
+id: epilogue.v110_aldric_coerced
+ending: null
+order: 110
+condition: "finale_seized() and flag(flag.aldric_coerced)"
+title: "Aldric coerced"
+text: "The king never spoke of the Lock Chamber. He spoke to {player} every day for the rest of his reign, about the wardens, the casks, the borders, and never once about anything else. Courtiers learned not to stand between them. It was like standing between a lock and its key."
+```
+
 *[ART] Aldric at sixteen, laughing, a warden kneeling to him in a courtyard.*
-> The king grew up loving it. That was the worst of it, people said later: not that the boy was forced, but that he wasn't. He would sit on the throne's iron in the mountain for hours, listening to it answer.
 
-**`epilogue.v120_queen_bitter`** · order 120 · condition `"finale_seized() and flag(flag.queen_alive)"`
+```yaml epilogue
+id: epilogue.v115_aldric_willing
+ending: null
+order: 115
+condition: "finale_seized() and not flag(flag.aldric_coerced)"
+title: "Aldric willing"
+text: "The king grew up loving it. That was the worst of it, people said later: not that the boy was forced, but that he wasn't. He would sit on the throne's iron in the mountain for hours, listening to it answer."
+```
+
 *[ART] Ysolde on a cane, facing a warden in a palace corridor.*
-> Ysolde lived long enough to see the wardens march. She abdicated in the spring, in favour of the son who no longer needed her, and went to live at the Abbey. She did not take confession there.
 
-**`epilogue.v130_queen_wake`** · order 130 · condition `"finale_oath() == reversed and flag(flag.queen_alive)"`
+```yaml epilogue
+id: epilogue.v120_queen_bitter
+ending: null
+order: 120
+condition: "finale_seized() and flag(flag.queen_alive)"
+title: "Queen bitter"
+text: "Ysolde lived long enough to see the wardens march. She abdicated in the spring, in favour of the son who no longer needed her, and went to live at the Abbey. She did not take confession there."
+```
+
 *[ART] Ysolde, frail, signing a muster order by candlelight.*
-> Ysolde lived to see her kingdom burn at the edges. She signed every muster order herself, in a hand that would not stop shaking. She told no one that she had heard her confessor's voice every time she closed her eyes.
+
+```yaml epilogue
+id: epilogue.v130_queen_wake
+ending: null
+order: 130
+condition: "finale_oath() == reversed and flag(flag.queen_alive)"
+title: "Queen wake"
+text: "Ysolde lived to see her kingdom burn at the edges. She signed every muster order herself, in a hand that would not stop shaking. She told no one that she had heard her confessor's voice every time she closed her eyes."
+```
 
 **Strept** (gdd: Strept peace when `faction.strept ≥ Friendly`)
 
-**`epilogue.v210_strept_allied_sealed`** · order 210 · condition `"finale_oath() == true and rep_tier(faction.strept) >= allied"`
 *[ART] Hesk Ironjaw riding down into Cintra through the Marnadal gate, Corra beside him, spears with Ash Hall timber tied to them.*
-> For the first time in living memory, a chief of Strept rode into Cintra under a flag of his own. Corra carried the spear with the Ash Hall timber tied to it. The clans were given back the high watch the dwarves had cut for them in stone, and paid for keeping it. It was a fragile peace. Both sides tended it like a fire.
 
-**`epilogue.v220_strept_friendly_sealed`** · order 220 · condition `"finale_oath() == true and rep_tier(faction.strept) == friendly"`
+```yaml epilogue
+id: epilogue.v210_strept_allied_sealed
+ending: null
+order: 210
+condition: "finale_oath() == true and rep_tier(faction.strept) >= allied"
+title: "Strept allied sealed"
+text: "For the first time in living memory, a chief of Strept rode into Cintra under a flag of his own. Corra carried the spear with the Ash Hall timber tied to it. The clans were given back the high watch the dwarves had cut for them in stone, and paid for keeping it. It was a fragile peace. Both sides tended it like a fire."
+```
+
 *[ART] Strept shepherds and Cintran soldiers sharing a fire at the stairs-foot bothy.*
-> Strept did not forgive, but it began to trade. Shepherds came down to the Marnadal Watch to sell wool. The garrison learned to buy it at fair prices. A fragile peace, and the Ash Hall still roofless on its crag.
 
-**`epilogue.v230_strept_cold_sealed`** · order 230 · condition `"finale_oath() == true and rep_tier(faction.strept) < friendly"`
+```yaml epilogue
+id: epilogue.v220_strept_friendly_sealed
+ending: null
+order: 220
+condition: "finale_oath() == true and rep_tier(faction.strept) == friendly"
+title: "Strept friendly sealed"
+text: "Strept did not forgive, but it began to trade. Shepherds came down to the Marnadal Watch to sell wool. The garrison learned to buy it at fair prices. A fragile peace, and the Ash Hall still roofless on its crag."
+```
+
 *[ART] Dun Strept's palisade gate shut, a horn on the crag.*
-> Dun Strept kept its gates shut. The clans had watched Cintrans walk up their mountain to save a Cintran boy, and saw no reason to come down. The fragile peace the court announced was mostly announcement.
 
-**`epilogue.v240_strept_apology`** · order 240 · condition `"finale_oath() == true and flag(flag.hesk_apology_given)"`
+```yaml epilogue
+id: epilogue.v230_strept_cold_sealed
+ending: null
+order: 230
+condition: "finale_oath() == true and rep_tier(faction.strept) < friendly"
+title: "Strept cold sealed"
+text: "Dun Strept kept its gates shut. The clans had watched Cintrans walk up their mountain to save a Cintran boy, and saw no reason to come down. The fragile peace the court announced was mostly announcement."
+```
+
 *[ART] Kosk, old and bareheaded, in the roofless Ash Hall, Hesk watching from the door.*
-> In the spring, Bertran Kosk rode to Dun Strept alone, without his badge, and stood in the Ash Hall until Hesk came to see what he wanted. Nobody knows what they said. Kosk came home with a strip of burned timber in his saddlebag and kept it on his desk until he died.
 
-**`epilogue.v250_strept_holds_passes`** · order 250 · condition `"finale_oath() == reversed and rep_tier(faction.strept) >= friendly"`
+```yaml epilogue
+id: epilogue.v240_strept_apology
+ending: null
+order: 240
+condition: "finale_oath() == true and flag(flag.hesk_apology_given)"
+title: "Strept apology"
+text: "In the spring, Bertran Kosk rode to Dun Strept alone, without his badge, and stood in the Ash Hall until Hesk came to see what he wanted. Nobody knows what they said. Kosk came home with a strip of burned timber in his saddlebag and kept it on his desk until he died."
+```
+
 *[ART] Highlanders on a snowy ridge rolling boulders onto a warden in a gorge.*
-> The clans held the high passes. They had kept the high watch before there was a Cintra, the stone said, and they kept it now with slings and boulders and old, bitter skill. Constructs that came up the goat paths did not come down again.
 
-**`epilogue.v260_strept_abandon`** · order 260 · condition `"finale_oath() == reversed and rep_tier(faction.strept) < friendly"`
+```yaml epilogue
+id: epilogue.v250_strept_holds_passes
+ending: null
+order: 250
+condition: "finale_oath() == reversed and rep_tier(faction.strept) >= friendly"
+title: "Strept holds passes"
+text: "The clans held the high passes. They had kept the high watch before there was a Cintra, the stone said, and they kept it now with slings and boulders and old, bitter skill. Constructs that came up the goat paths did not come down again."
+```
+
 *[ART] Dun Strept empty, its gate open in the snow, the clans walking east into the mountains.*
-> The clans did not stay to die for Cintra. They packed Dun Strept onto mules and went east over passes only they knew, and left the high watch to whoever wanted it.
 
-**`epilogue.v270_strept_bargain`** · order 270 · condition `"finale_seized()"`
+```yaml epilogue
+id: epilogue.v260_strept_abandon
+ending: null
+order: 260
+condition: "finale_oath() == reversed and rep_tier(faction.strept) < friendly"
+title: "Strept abandon"
+text: "The clans did not stay to die for Cintra. They packed Dun Strept onto mules and went east over passes only they knew, and left the high watch to whoever wanted it."
+```
+
 *[ART] An iron-warden standing at Dun Strept's gate; Hesk facing it with a spear.*
-> The clans kept the high watch, as the stone said. Now they kept it for an iron king. A warden stood at Dun Strept's gate the whole of that first year. Hesk walked past it every morning and spat.
+
+```yaml epilogue
+id: epilogue.v270_strept_bargain
+ending: null
+order: 270
+condition: "finale_seized()"
+title: "Strept bargain"
+text: "The clans kept the high watch, as the stone said. Now they kept it for an iron king. A warden stood at Dun Strept's gate the whole of that first year. Hesk walked past it every morning and spat."
+```
 
 **Attre and Raimund** (gdd: Attre independence when `faction.attre < Allied` and not `flag.raimund_allied`)
 
-**`epilogue.v310_attre_waits`** · order 310 · condition `"finale_oath() == true and flag(flag.queen_alive) and rep_tier(faction.attre) < allied and not flag(flag.raimund_allied)"`
 *[ART] Raimund at his harbour window, a gold circlet in a drawer.*
-> Duke Raimund put his gold circlet back in its drawer. A living queen was bad for business, but a living queen with a hardened son and a sealed mountain was worse for rebellion. Attre stayed Cintran. Raimund stayed patient.
 
-**`epilogue.v320_attre_ally_sealed`** · order 320 · condition `"finale_oath() == true and (rep_tier(faction.attre) >= allied or flag(flag.raimund_allied))"`
+```yaml epilogue
+id: epilogue.v310_attre_waits
+ending: null
+order: 310
+condition: "finale_oath() == true and flag(flag.queen_alive) and rep_tier(faction.attre) < allied and not flag(flag.raimund_allied)"
+title: "Attre waits"
+text: "Duke Raimund put his gold circlet back in its drawer. A living queen was bad for business, but a living queen with a hardened son and a sealed mountain was worse for rebellion. Attre stayed Cintran. Raimund stayed patient."
+```
+
 *[ART] Attre grain ships unloading at Cintra's docks, Raimund's pennant on the masts.*
-> Raimund did not declare. He sent a fleet of grain to Cintra with his compliments and an invoice. The regency paid both, and Attre's ships sailed under the lion again, at a discount.
 
-**`epilogue.v330_attre_free_boy_king`** · order 330 · condition `"finale_oath() == true and not flag(flag.queen_alive) and rep_tier(faction.attre) < allied and not flag(flag.raimund_allied)"`
+```yaml epilogue
+id: epilogue.v320_attre_ally_sealed
+ending: null
+order: 320
+condition: "finale_oath() == true and (rep_tier(faction.attre) >= allied or flag(flag.raimund_allied))"
+title: "Attre ally sealed"
+text: "Raimund did not declare. He sent a fleet of grain to Cintra with his compliments and an invoice. The regency paid both, and Attre's ships sailed under the lion again, at a discount."
+```
+
 *[ART] Attre's harbour, Cintran banners being torn down, the Duke crowned on the quay.*
-> Attre declared itself free on the day of the Queen's funeral. Raimund wore the circlet he had had made years before and toasted the boy king's health. The sequel to the lock was written in Attre's harbour: civil war.
 
-**`epilogue.v340_attre_bargain`** · order 340 · condition `"finale_seized() and (rep_tier(faction.attre) >= allied or flag(flag.raimund_allied))"`
+```yaml epilogue
+id: epilogue.v330_attre_free_boy_king
+ending: null
+order: 330
+condition: "finale_oath() == true and not flag(flag.queen_alive) and rep_tier(faction.attre) < allied and not flag(flag.raimund_allied)"
+title: "Attre free boy king"
+text: "Attre declared itself free on the day of the Queen's funeral. Raimund wore the circlet he had had made years before and toasted the boy king's health. The sequel to the lock was written in Attre's harbour: civil war."
+```
+
 *[ART] Blight-cask cradles being loaded onto an Attre ship at night.*
-> Raimund knelt to the new king first, before anyone else had worked out that kneeling was required. Attre became the arsenal's port. Its ships carried what came out of the mountain to wherever the throne sent it, and Raimund grew very rich, and never slept again.
 
-**`epilogue.v345_attre_crushed`** · order 345 · condition `"finale_seized() and rep_tier(faction.attre) < allied and not flag(flag.raimund_allied)"`
+```yaml epilogue
+id: epilogue.v340_attre_bargain
+ending: null
+order: 340
+condition: "finale_seized() and (rep_tier(faction.attre) >= allied or flag(flag.raimund_allied))"
+title: "Attre bargain"
+text: "Raimund knelt to the new king first, before anyone else had worked out that kneeling was required. Attre became the arsenal's port. Its ships carried what came out of the mountain to wherever the throne sent it, and Raimund grew very rich, and never slept again."
+```
+
 *[ART] Wardens on the walls of Attre Light; the Duke's banner burning.*
-> Attre was the first city the wardens visited. Raimund had been planning independence for ten years. It lasted one afternoon.
 
-**`epilogue.v350_attre_profiteer`** · order 350 · condition `"finale_oath() == reversed"`
+```yaml epilogue
+id: epilogue.v345_attre_crushed
+ending: null
+order: 345
+condition: "finale_seized() and rep_tier(faction.attre) < allied and not flag(flag.raimund_allied)"
+title: "Attre crushed"
+text: "Attre was the first city the wardens visited. Raimund had been planning independence for ten years. It lasted one afternoon."
+```
+
 *[ART] An Attre smuggler's cutter loading a cracked cask in fog.*
-> Attre sealed its ports, then quietly reopened them to anyone who could pay. Raimund sold to Cintra, to Sodden, and to the Choir's survivors, and said that a merchant does not choose sides in a fire. He only sells water.
 
-**`epilogue.v360_raimund_heir`** · order 360 · condition `"flag(flag.antidote_sold_raimund)"`
+```yaml epilogue
+id: epilogue.v350_attre_profiteer
+ending: null
+order: 350
+condition: "finale_oath() == reversed"
+title: "Attre profiteer"
+text: "Attre sealed its ports, then quietly reopened them to anyone who could pay. Raimund sold to Cintra, to Sodden, and to the Choir's survivors, and said that a merchant does not choose sides in a fire. He only sells water."
+```
+
 *[ART] A thin boy in Attre colours, alive, on a balcony with Raimund's hand on his shoulder.*
-> The Duke's heir lived. The dose that might have saved a queen saved a merchant's son instead. Raimund never forgot who sold it to him, and he never let {player} forget it either.
+
+```yaml epilogue
+id: epilogue.v360_raimund_heir
+ending: null
+order: 360
+condition: "flag(flag.antidote_sold_raimund)"
+title: "Raimund heir"
+text: "The Duke's heir lived. The dose that might have saved a queen saved a merchant's son instead. Raimund never forgot who sold it to him, and he never let {player} forget it either."
+```
 
 **The court: Kosk, Varn and the regency**
 
-**`epilogue.v410_varn_exposed`** · order 410 · condition `"flag(flag.varn_exposed)"`
 *[ART] Varn in a plain coat boarding a ship for Brugge, a clerk carrying a single small trunk.*
-> Chancellor Varn was tried for the river tolls in the spring. He was sentenced to exile instead of the rope, partly because he wept so convincingly. He left for Brugge with one trunk and wrote long letters home that nobody answered.
 
-**`epilogue.v420_varn_blackmailed`** · order 420 · condition `"not flag(flag.varn_exposed) and flag(flag.varn_blackmailed)"`
+```yaml epilogue
+id: epilogue.v410_varn_exposed
+ending: null
+order: 410
+condition: "flag(flag.varn_exposed)"
+title: "Varn exposed"
+text: "Chancellor Varn was tried for the river tolls in the spring. He was sentenced to exile instead of the rope, partly because he wept so convincingly. He left for Brugge with one trunk and wrote long letters home that nobody answered."
+```
+
 *[ART] Varn signing a stack of documents without reading them, sweat on his brow.*
-> Varn kept his chain of office and lost everything else. He signed what he was told to sign, and kept his ledgers in good order now, because someone else had a copy.
 
-**`epilogue.v430_regency_council`** · order 430 · condition `"finale_oath() == true and flag(flag.a3_regency_council)"`
+```yaml epilogue
+id: epilogue.v420_varn_blackmailed
+ending: null
+order: 420
+condition: "not flag(flag.varn_exposed) and flag(flag.varn_blackmailed)"
+title: "Varn blackmailed"
+text: "Varn kept his chain of office and lost everything else. He signed what he was told to sign, and kept his ledgers in good order now, because someone else had a copy."
+```
+
 *[ART] The council table with Kosk and Varn at opposite ends, both signing the same warrant.*
-> The council {player} had forced on them in the war room held. Kosk and Varn sat at opposite ends of the same table for six years and never once agreed on anything except that the other was intolerable. Cintra was governed adequately. It was a novelty.
 
-**`epilogue.v440_varn_backed`** · order 440 · condition `"finale_oath() == true and flag(flag.a3_backed_varn) and not flag(flag.varn_exposed)"`
+```yaml epilogue
+id: epilogue.v430_regency_council
+ending: null
+order: 430
+condition: "finale_oath() == true and flag(flag.a3_regency_council)"
+title: "Regency council"
+text: "The council {player} had forced on them in the war room held. Kosk and Varn sat at opposite ends of the same table for six years and never once agreed on anything except that the other was intolerable. Cintra was governed adequately. It was a novelty."
+```
+
 *[ART] Varn behind a treasury desk, a new set of ledgers, very neat.*
-> Varn kept the treasury, as {player} had advised. He stole less than before. He told everyone this as if it were a virtue, and in a way it was.
 
-**`epilogue.v450_kosk_warned`** · order 450 · condition `"finale_oath() == true and flag(flag.a3_warned_kosk_of_varn) and not flag(flag.varn_exposed)"`
+```yaml epilogue
+id: epilogue.v440_varn_backed
+ending: null
+order: 440
+condition: "finale_oath() == true and flag(flag.a3_backed_varn) and not flag(flag.varn_exposed)"
+title: "Varn backed"
+text: "Varn kept the treasury, as {player} had advised. He stole less than before. He told everyone this as if it were a virtue, and in a way it was."
+```
+
 *[ART] Kosk with the treasury keys on his belt, Varn watching them like a dog watches a bone.*
-> Kosk kept the treasury keys on his own belt from that day on. Varn watched them every time the Marshal walked past, and said nothing, and sweated.
 
-**`epilogue.v460_kosk_cavalry`** · order 460 · condition `"flag(flag.watch_signal_lit) and rep_tier(faction.crown) >= friendly"`
+```yaml epilogue
+id: epilogue.v450_kosk_warned
+ending: null
+order: 450
+condition: "finale_oath() == true and flag(flag.a3_warned_kosk_of_varn) and not flag(flag.varn_exposed)"
+title: "Kosk warned"
+text: "Kosk kept the treasury keys on his own belt from that day on. Varn watched them every time the Marshal walked past, and said nothing, and sweated."
+```
+
 *[ART] Kosk's heavy horse riding back down the Engine Road into daylight, a boy among them.*
-> Kosk's riders came out of the mountain by the old wagon road. The Watch beacon that had called them was kept lit every solstice after, by order, by a squire who never let anyone else touch the pitch.
+
+```yaml epilogue
+id: epilogue.v460_kosk_cavalry
+ending: null
+order: 460
+condition: "flag(flag.watch_signal_lit) and rep_tier(faction.crown) >= friendly"
+title: "Kosk cavalry"
+text: "Kosk's riders came out of the mountain by the old wagon road. The Watch beacon that had called them was kept lit every solstice after, by order, by a squire who never let anyone else touch the pitch."
+```
 
 **Maelis** (gdd: Maelis alive)
 
-**`epilogue.v510_maelis_abbess`** · order 510 · condition `"flag(flag.maelis_recruited) and not flag(flag.maelis_dead) and rep_tier(faction.abbey) >= allied and not finale_seized()"`
 *[ART] Maelis in an abbess's plain grey, opening the scriptorium's iron door for a line of novices.*
-> Sister Maelis was made Abbess of St. Corwen at twenty-four, over the objections of everyone senior to her. She unlocked the scriptorium on her first day and never locked it again. The Book of the Lion was rebound with its fourth verse restored, in her own hand, the right way round.
 
-**`epilogue.v515_maelis_archivist`** · order 515 · condition `"flag(flag.maelis_recruited) and not flag(flag.maelis_dead) and rep_tier(faction.abbey) < allied and not finale_seized()"`
+```yaml epilogue
+id: epilogue.v510_maelis_abbess
+ending: null
+order: 510
+condition: "flag(flag.maelis_recruited) and not flag(flag.maelis_dead) and rep_tier(faction.abbey) >= allied and not finale_seized()"
+title: "Maelis abbess"
+text: "Sister Maelis was made Abbess of St. Corwen at twenty-four, over the objections of everyone senior to her. She unlocked the scriptorium on her first day and never locked it again. The Book of the Lion was rebound with its fourth verse restored, in her own hand, the right way round."
+```
+
 *[ART] Maelis in the drained Drowned Library, copying an iron-leaf by lamplight, surrounded by seated dwarven dead.*
-> Maelis went back to Karak Ostrel the next summer with lamps, paper and a mule, and stayed. She copied the Drowned Library leaf by leaf among the seated archivists, and sent the copies down the Stairs to anyone who asked, so that no one could ever cut a verse out of the world again.
 
-**`epilogue.v520_maelis_bargain`** · order 520 · condition `"finale_seized() and flag(flag.maelis_recruited) and not flag(flag.maelis_dead)"`
+```yaml epilogue
+id: epilogue.v515_maelis_archivist
+ending: null
+order: 515
+condition: "flag(flag.maelis_recruited) and not flag(flag.maelis_dead) and rep_tier(faction.abbey) < allied and not finale_seized()"
+title: "Maelis archivist"
+text: "Maelis went back to Karak Ostrel the next summer with lamps, paper and a mule, and stayed. She copied the Drowned Library leaf by leaf among the seated archivists, and sent the copies down the Stairs to anyone who asked, so that no one could ever cut a verse out of the world again."
+```
+
 *[ART] Maelis walking away from Cintra down an empty road, a satchel of books.*
-> Maelis left Cintra the week the wardens marched. She took the iron-leaf copy of the Rite of Command with her, and nobody has found either of them since. {player} was sent to look, more than once, and came back empty-handed every time, and slowly.
 
-**`epilogue.v530_maelis_dead`** · order 530 · condition `"flag(flag.maelis_dead)"`
+```yaml epilogue
+id: epilogue.v520_maelis_bargain
+ending: null
+order: 520
+condition: "finale_seized() and flag(flag.maelis_recruited) and not flag(flag.maelis_dead)"
+title: "Maelis bargain"
+text: "Maelis left Cintra the week the wardens marched. She took the iron-leaf copy of the Rite of Command with her, and nobody has found either of them since. {player} was sent to look, more than once, and came back empty-handed every time, and slowly."
+```
+
 *[ART] A plain stone in the Abbey cloister; fresh lily-free flowers; a primer of dwarven runes on top.*
-> Maelis is buried in the Abbey cloister, under a stone with no verse on it, because she said once that she had read enough verses for one life. Someone leaves a book on the stone every year at the solstice. It is always the same dwarven primer, and nobody ever sees who.
+
+```yaml epilogue
+id: epilogue.v530_maelis_dead
+ending: null
+order: 530
+condition: "flag(flag.maelis_dead)"
+title: "Maelis dead"
+text: "Maelis is buried in the Abbey cloister, under a stone with no verse on it, because she said once that she had read enough verses for one life. Someone leaves a book on the stone every year at the solstice. It is always the same dwarven primer, and nobody ever sees who."
+```
 
 **Dravin**
 
-**`epilogue.v610_dravin_sealed`** · order 610 · condition `"flag(flag.dravin_recruited) and finale_oath() == true"`
 *[ART] Dravin at the Weeping Gate with Jasia, cutting a notch in the tally; the seventh family tablet in his pack, still blank.*
-> Dravin cut the twenty-second notch himself, with Jasia holding the lamp. The seventh tablet on his family shelf stayed blank. He said he would carve it when there was something to put on it besides "waited", and that this might take a while.
 
-**`epilogue.v620_dravin_hunts`** · order 620 · condition `"flag(flag.dravin_recruited) and finale_oath() == reversed"`
+```yaml epilogue
+id: epilogue.v610_dravin_sealed
+ending: null
+order: 610
+condition: "flag(flag.dravin_recruited) and finale_oath() == true"
+title: "Dravin sealed"
+text: "Dravin cut the twenty-second notch himself, with Jasia holding the lamp. The seventh tablet on his family shelf stayed blank. He said he would carve it when there was something to put on it besides \"waited\", and that this might take a while."
+```
+
 *[ART] Dravin with a hammer standing over a broken warden in a valley field.*
-> Dravin spent his last years hunting his ancestors' work across the borderlands with a hammer and a list. When he found a warden, he would put his hand on its cold core and say the warden-word before he broke it. He said it was only polite.
 
-**`epilogue.v630_dravin_bargain`** · order 630 · condition `"flag(flag.dravin_recruited) and finale_seized()"`
+```yaml epilogue
+id: epilogue.v620_dravin_hunts
+ending: null
+order: 620
+condition: "flag(flag.dravin_recruited) and finale_oath() == reversed"
+title: "Dravin hunts"
+text: "Dravin spent his last years hunting his ancestors' work across the borderlands with a hammer and a list. When he found a warden, he would put his hand on its cold core and say the warden-word before he broke it. He said it was only polite."
+```
+
 *[ART] Dravin's Assengard forge, cold; the Iron-Key's empty cradle; Jasia at the anvil alone.*
-> Dravin left the Key in the throne and walked home to Assengard, and did not speak to {player} again. On the seventh tablet on his shelf, he cut one word, and covered it with a cloth, and Jasia never lifted the cloth.
+
+```yaml epilogue
+id: epilogue.v630_dravin_bargain
+ending: null
+order: 630
+condition: "flag(flag.dravin_recruited) and finale_seized()"
+title: "Dravin bargain"
+text: "Dravin left the Key in the throne and walked home to Assengard, and did not speak to {player} again. On the seventh tablet on his shelf, he cut one word, and covered it with a cloth, and Jasia never lifted the cloth."
+```
 
 **The wyvern, Anselm, Sodden and the rest**
 
-**`epilogue.v650_wyvern_returned`** · order 650 · condition `"flag(flag.wyvern_eggs_returned) and not finale_seized()"`
 *[ART] Five young wyverns tumbling in the air over the Old Grey Matron; Tigg shepherds looking up.*
-> In the spring, five young wyverns tumbled over the Old Grey Matron, learning the wind. The shepherds of Tigg lost a sheep now and then and complained loudly. Nobody tried to climb to the Roost. People who had heard the story said it was hers.
 
-**`epilogue.v655_wyvern_slain`** · order 655 · condition `"flag(flag.wyvern_slain)"`
+```yaml epilogue
+id: epilogue.v650_wyvern_returned
+ending: null
+order: 650
+condition: "flag(flag.wyvern_eggs_returned) and not finale_seized()"
+title: "Wyvern returned"
+text: "In the spring, five young wyverns tumbled over the Old Grey Matron, learning the wind. The shepherds of Tigg lost a sheep now and then and complained loudly. Nobody tried to climb to the Roost. People who had heard the story said it was hers."
+```
+
 *[ART] A wyvern skull nailed over the Tigg inn door.*
-> The shepherds of Tigg bought the wyvern's skull and nailed it over the inn door. Travellers ask about it. The innkeeper tells them about a monster, and doesn't mention the eggs.
 
-**`epilogue.v660_anselm_trial`** · order 660 · condition `"finale_oath() == true and finale_anselm() == alive"`
+```yaml epilogue
+id: epilogue.v655_wyvern_slain
+ending: null
+order: 655
+condition: "flag(flag.wyvern_slain)"
+title: "Wyvern slain"
+text: "The shepherds of Tigg bought the wyvern's skull and nailed it over the inn door. Travellers ask about it. The innkeeper tells them about a monster, and doesn't mention the eggs."
+```
+
 *[ART] Anselm in chains before the council, serene, the Queen's empty chair or the boy king's.*
-> Anselm was tried before the council in the spring. He confessed to everything and repented of nothing, and he was so gentle about it that the clerks wept while they wrote it down. They hanged him at the Ring of Nine, at dawn, which nobody thought was a good idea afterward.
 
-**`epilogue.v665_anselm_wavered`** · order 665 · condition `"finale_oath() == true and finale_anselm() == alive and flag(flag.anselm_wavered)"`
+```yaml epilogue
+id: epilogue.v660_anselm_trial
+ending: null
+order: 660
+condition: "finale_oath() == true and finale_anselm() == alive"
+title: "Anselm trial"
+text: "Anselm was tried before the council in the spring. He confessed to everything and repented of nothing, and he was so gentle about it that the clerks wept while they wrote it down. They hanged him at the Ring of Nine, at dawn, which nobody thought was a good idea afterward."
+```
+
 *[ART] Anselm in a cell, writing by a slit of light.*
-> In his cell he wrote one more sermon, and asked that it be given to {player}. It was four lines long. It said that the counter-gear had not listened to him either, at the end, and that he had been relieved.
 
-**`epilogue.v670_anselm_unmade`** · order 670 · condition `"finale_oath() == true and finale_anselm() == dead"`
+```yaml epilogue
+id: epilogue.v665_anselm_wavered
+ending: null
+order: 665
+condition: "finale_oath() == true and finale_anselm() == alive and flag(flag.anselm_wavered)"
+title: "Anselm wavered"
+text: "In his cell he wrote one more sermon, and asked that it be given to {player}. It was four lines long. It said that the counter-gear had not listened to him either, at the end, and that he had been relieved."
+```
+
 *[ART] An unmarked grave on Marnadal Field, mud and bones and early grass.*
-> They buried what was left of Anselm on Marnadal Field, in an unmarked grave among the boys he had given last rites to. Kosk chose the place. He said it was the only justice he could think of that the Abbot would have understood.
 
-**`epilogue.v675_anselm_bargain`** · order 675 · condition `"finale_seized()"`
+```yaml epilogue
+id: epilogue.v670_anselm_unmade
+ending: null
+order: 670
+condition: "finale_oath() == true and finale_anselm() == dead"
+title: "Anselm unmade"
+text: "They buried what was left of Anselm on Marnadal Field, in an unmarked grave among the boys he had given last rites to. Kosk chose the place. He said it was the only justice he could think of that the Abbot would have understood."
+```
+
 *[ART] A warden standing guard outside a cell with no door.*
-> Anselm was not hanged. The new king had him kept in the mountain, in a cell with no door, and a warden outside it, so that he could listen to the vault answering a crown for the rest of his life. It was the cruellest thing anyone in Cintra had ever done, and it was done by a child.
 
-**`epilogue.v680_sodden_exposed`** · order 680 · condition `"flag(flag.brzezina_plot_exposed) and finale_oath() == reversed and finale_anselm() == fled"`
+```yaml epilogue
+id: epilogue.v675_anselm_bargain
+ending: null
+order: 675
+condition: "finale_seized()"
+title: "Anselm bargain"
+text: "Anselm was not hanged. The new king had him kept in the mountain, in a cell with no door, and a warden outside it, so that he could listen to the vault answering a crown for the rest of his life. It was the cruellest thing anyone in Cintra had ever done, and it was done by a child."
+```
+
 *[ART] A Sodden envoy and a Strept chief at a Cintran council table, all three unhappy.*
-> With its spies in Cintra unmasked and its baron in chains, Sodden came to the table instead of the border. Three peoples who hated one another held the passes together against the ash. It was the most desperate alliance in the history of the north. It held.
 
-**`epilogue.v685_sodden_flank`** · order 685 · condition `"not flag(flag.brzezina_plot_exposed) and finale_oath() == reversed"`
+```yaml epilogue
+id: epilogue.v680_sodden_exposed
+ending: null
+order: 680
+condition: "flag(flag.brzezina_plot_exposed) and finale_oath() == reversed and finale_anselm() == fled"
+title: "Sodden exposed"
+text: "With its spies in Cintra unmasked and its baron in chains, Sodden came to the table instead of the border. Three peoples who hated one another held the passes together against the ash. It was the most desperate alliance in the history of the north. It held."
+```
+
 *[ART] Sodden fen-banners crossing a northern river while Cintra's army looks south.*
-> While Cintra looked south at the burning mountain, Sodden's spears crossed the northern fords, guided by a Cintran baron who had been paid in advance. There was no one left to stop them.
 
-**`epilogue.v690_sodden_quiet`** · order 690 · condition `"flag(flag.brzezina_plot_exposed) and finale_oath() == true"`
+```yaml epilogue
+id: epilogue.v685_sodden_flank
+ending: null
+order: 685
+condition: "not flag(flag.brzezina_plot_exposed) and finale_oath() == reversed"
+title: "Sodden flank"
+text: "While Cintra looked south at the burning mountain, Sodden's spears crossed the northern fords, guided by a Cintran baron who had been paid in advance. There was no one left to stop them."
+```
+
 *[ART] A Sodden spymaster's empty hunting lodge in birch woods.* (cut candidate)
-> The traitor baron hanged, his letters read aloud in council: Sodden waited in its fens and found nothing to wait for. Somewhere in Brzezina, a spymaster with a long memory kept a list. {player}'s name was on it.
 
-**`epilogue.v695_tobiasz`** · order 695 · condition `"flag(flag.tobiasz_freed)"`
+```yaml epilogue
+id: epilogue.v690_sodden_quiet
+ending: null
+order: 690
+condition: "flag(flag.brzezina_plot_exposed) and finale_oath() == true"
+title: "Sodden quiet"
+text: "The traitor baron hanged, his letters read aloud in council: Sodden waited in its fens and found nothing to wait for. Somewhere in Brzezina, a spymaster with a long memory kept a list. {player}'s name was on it."
+```
+
 *[ART] Tobiasz kneeling before Kosk in the war room.* (cut candidate)
-> Tobiasz walked into the Marshal's war room with frostbitten hands and confessed. Kosk listened to the whole thing and then gave him a job in the stables, far from any door that needed a key.
+
+```yaml epilogue
+id: epilogue.v695_tobiasz
+ending: null
+order: 695
+condition: "flag(flag.tobiasz_freed)"
+title: "Tobiasz"
+text: "Tobiasz walked into the Marshal's war room with frostbitten hands and confessed. Kosk listened to the whole thing and then gave him a job in the stables, far from any door that needed a key."
+```
 
 ## 6. Encounters
 None.
@@ -555,7 +982,7 @@ guarantees:
 ```
 
 ## 12. Open questions
-- **Epilogue data format.** content-format.md has no `epilogue` block type, and architecture §8.3 has an `epilogues/` content kind. I wrote the slides as structured markdown (id, order, condition, art, narration) so that a later schema can convert them mechanically. Proposed block: `yaml epilogue` with `{id, ending, order, condition, art, text, cut_candidate}`.
+- **Epilogue data format (resolved by A08).** The slides are `yaml epilogue` blocks (content-format §J.7).
 - **Reversed + alive.** `finale_anselm() == alive` with a reversed oath cannot happen: the aftermath always ends in pursue (dead) or shield (fled). The resolver's assertion would catch it if the finale domain ever produced it.
-- **Flags from other slices** read here (`flag.varn_exposed`, `flag.antidote_sold_raimund`, `flag.maelis_recruited`, `flag.maelis_dead`) are listed under "Expected" in `_ids.md`.
+- **Flags from other slices** (`flag.varn_exposed`, `flag.antidote_sold_raimund`, `flag.maelis_recruited`, `flag.maelis_dead`) are declared once each (A08; see `docs/content/_registry.md`).
 - **Variant cap.** A thorough playthrough can match 10+ variants. Suggest a cap of 8 slides per ending (3 core + up to 4 variants by order + close), with the rest shown in a "Chronicle" page in the journal.

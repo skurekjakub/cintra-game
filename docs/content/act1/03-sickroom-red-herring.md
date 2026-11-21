@@ -112,6 +112,7 @@ areas:
 spawns:
   - {id: antechamber, area: antechamber, default: true}
   - {id: servants_stair, area: servants_stair, default: false}
+  - {id: twist_door, area: antechamber}                # a2.08: the map's "Return to Cintra" lands here
 exits:
   - id: to_hall
     area: antechamber
@@ -124,6 +125,12 @@ exits:
     to_zone: zone.palace_kitchens
     to_spawn: servants_stair
     condition: "true"
+    effects: []
+  - id: to_catacombs                                   # a2.08: the abductors' route
+    area: antechamber
+    to_zone: zone.abbey_catacombs
+    to_spawn: palace_stair
+    condition: "ms(ms.act2_twist)"
     effects: []
 interactables:
   - id: chalice
@@ -159,14 +166,6 @@ interactables:
     check: null
     once: false
     effects: ["start_dialogue(dlg.kosk_chalice)"]
-  - id: queen_bedside
-    area: bedchamber
-    kind: search
-    label: "Speak with the Queen"
-    condition: "true"
-    check: null
-    once: false
-    effects: ["start_dialogue(dlg.ysolde_sickroom)"]
   - id: hairbrush
     area: dressing_room
     kind: search
@@ -175,28 +174,43 @@ interactables:
     check: null
     once: true
     effects: ["give_item(item.ysolde_hair, 1)", "play_beat(hair_taken)"]
+  - id: give_antidote_by_hand                          # a2.08: a carried dose, by hand
+    area: bedchamber
+    kind: lever
+    label: "Give the Queen the counter-dose"
+    condition: "has_item(item.wenna_antidote) and not flag(flag.antidote_administered) and not ms(ms.act2_twist)"
+    check: null
+    once: true
+    effects: ["administer_antidote(queen)"]
 triggers:
   - id: t_sick_enter
     area: antechamber
-    on: enter
+    "on": enter
     source: null
     condition: "not visited(zone.palace_sickroom)"
     once: true
     effects: ["set_checkpoint(sickroom_in)", "play_beat(sickroom_air)"]
   - id: t_aldric_window
     area: window_seat
-    on: enter
+    "on": enter
     source: null
     condition: "not flag(flag.aldric_sickroom_done) and not ms(ms.act1_complete)"
     once: true
     effects: ["start_dialogue(dlg.aldric_sickroom)"]
   - id: t_sick_done_chalice
     area: oratory
-    on: interact
+    "on": interact
     source: chalice
     condition: "flag(flag.varn_chase_won) or flag(flag.varn_chase_lost)"
     once: true
-    effects: ["reach_milestone(ms.a1_sickroom_done)", "add_xp(200)"]
+    effects: ["reach_milestone(ms.a1_sickroom_done)"]
+  - id: twist_return                                   # a2.08: the Act II gate opens the twist
+    area: antechamber
+    "on": enter
+    source: null
+    condition: "ms(ms.a2_wenna_line_resolved) and ded(ded.anselm_treason_proven) and has_item(item.true_fourth_verse) and not flag(flag.twist_started)"
+    once: true
+    effects: ["set_flag(flag.twist_started)", "start_dialogue(dlg.twist_kosk)"]
 hazards: []
 checkpoints:
   - {id: sickroom_in, area: antechamber}
@@ -208,8 +222,12 @@ beats:
   - {id: read_fell_notes, description: "Master Fell's notes: 'Wasting fever, chronic. Tremor of the hands, numbness of the feet, sweats at night. Prescribed: poppy. The Abbot's restorative tonic, twice daily.' A later line, crossed out: 'Fever? No fever.'"}
   - {id: hair_taken, description: "Ilse watches, lips pressed thin, as Hale winds a few grey-streaked strands from the brush into a twist of linen."}
   - {id: chalice_guarded, description: "Kosk's soldier wraps the chalice and flagon in linen and carries them out. From now on the Queen's wine comes up under the Marshal's seal."}
+  - {id: queen_dies, description: "a2.08. Ysolde's breathing stops between one word and the next. Aldric does not let go of her hand."}
+  - {id: investiture, description: "a2.08. Ysolde (or Kosk) sets the Lion's Crown on Aldric's head; the guards on the door kneel."}
+  - {id: night_falls, description: "a2.08. Fade. Candles burnt low. The palace sleeps."}
+  - {id: bells_at_night, description: "a2.08. Across the river the Abbey bells ring, unbidden, wrong, all at once."}
 npcs:
-  - {npc: npc.ysolde, area: bedchamber, condition: "true"}
+  - {npc: npc.ysolde, area: bedchamber, condition: "true", dialogue: dlg.ysolde_sickroom}
   - {npc: npc.kosk, area: antechamber, condition: "not flag(flag.chalice_secured)"}
   - {npc: npc.aldric, area: window_seat, condition: "not ms(ms.act1_complete)"}
   - {npc: npc.physician_fell, area: antechamber, condition: "true"}
@@ -227,6 +245,12 @@ variants:
     when: "stage() >= 1"
     description: "The Queen is bedridden, feverish, curtains closed. Anselm's tonic bottles crowd the shelf (gdd §6.2 condition 1+ is read by the Queen's dialogue)."
     npcs_absent: [npc.kosk]
+    encounters_disabled: []
+    interactables_disabled: []
+  - id: twist_night                                    # a2.08
+    when: "flag(flag.twist_started)"
+    description: "Night. Kosk's men on the door, the Crown on a cushion by the bed, Aldric on a stool."
+    npcs_absent: [npc.anselm]
     encounters_disabled: []
     interactables_disabled: []
 ```
@@ -307,7 +331,7 @@ interactables:
 triggers:
   - id: t_kitchen_enter
     area: great_kitchen
-    on: enter
+    "on": enter
     source: null
     condition: "not visited(zone.palace_kitchens)"
     once: true
@@ -429,50 +453,62 @@ interactables:
 triggers:
   - id: t_roofs_enter
     area: tanners_lane
-    on: enter
+    "on": enter
     source: null
     condition: "not flag(flag.varn_alerted)"
     once: true
     effects: ["set_checkpoint(chancellery_in)", "play_beat(solar_glow)"]
   - id: t_roofs_enter_top
     area: gable_bridge
-    on: enter
+    "on": enter
     source: null
     condition: "not flag(flag.varn_alerted)"
     once: true
     effects: ["set_checkpoint(roofs_in)", "play_beat(solar_glow)"]
   - id: t_alarm
     area: clerks_hall
-    on: beat_done
-    source: guard_alarm
+    "on": alarm
+    source: null
     condition: "not flag(flag.varn_alerted)"
     once: true
-    effects: ["set_flag(flag.varn_alerted)", "start_encounter(enc.chancellery_guards)", "play_beat(varn_flees)"]
+    effects: ["play_beat(guard_alarm)", "set_flag(flag.varn_alerted)", "start_encounter(enc.chancellery_guards)", "play_beat(varn_flees)"]
   - id: t_cornered
     area: tanners_drop
-    on: beat_done
+    "on": beat_done
     source: varn_cornered
     condition: "not flag(flag.varn_chase_won)"
     once: true
     effects: ["play_beat(varn_caught)", "start_dialogue(dlg.varn_caught)"]
   - id: t_escaped
     area: tanners_drop
-    on: beat_done
+    "on": beat_done
     source: varn_escapes
     condition: "true"
     once: true
     effects: ["set_flag(flag.varn_chase_lost)", "add_rumor(rumor.r02_varn_ledgers)"]
   - id: t_sick_done_escape
     area: tanners_drop
-    on: beat_done
+    "on": beat_done
     source: varn_escapes
     condition: "has_clue(clue.chalice_pollen)"
     once: true
-    effects: ["reach_milestone(ms.a1_sickroom_done)", "add_xp(200)"]
+    effects: ["reach_milestone(ms.a1_sickroom_done)"]
 hazards:
-  - {id: kicked_brazier, area: the_leads, kind: fire, params: {damage_per_second: 5, radius_m: 1.5, starts_on_beat: varn_flees, applies_status: burning}}
+  - {id: kicked_brazier, area: the_leads, kind: fire, enabled_by: {"on": beat_done, source: varn_flees}, params: {damage_per_second: 5, radius_m: 1.5, applies_status: burning}}
   - {id: loose_slates, area: toll_house_roof, kind: trap, params: {effect: slide, slide_m: 3, stagger_s: 0.8, avoid_by: gutter_walk}}
   - {id: plank_gap, area: the_leads, kind: trap, params: {effect: gap, width_m: 2, needs: sprint_jump, opens_if_player_behind_m: 6}}
+chases:
+  - id: varn_chase
+    quarry: npc.varn
+    start_on: {"on": beat_done, source: varn_flees}
+    route: [solar, the_leads, toll_house_roof, tanners_drop]
+    lose_distance_m: 25
+    lose_after_s: 5
+    catch_distance_m: 2
+    cornered_when: "flag(flag.carriage_gone)"
+    on_caught: []
+    on_escaped: ["play_beat(varn_escapes)"]
+    on_cornered: ["play_beat(varn_cornered)"]
 checkpoints:
   - {id: chancellery_in, area: tanners_lane}
   - {id: roofs_in, area: gable_bridge}
@@ -484,8 +520,8 @@ beats:
   - {id: varn_sees_face, description: "Through the glass, Varn looks up from the brazier and sees Hale's face. He shrieks."}
   - {id: varn_flees, description: "Varn snatches a satchel of half-burned ledgers, kicks the brazier over, and scrambles out of the solar window onto the leads, surprisingly fast. Chase begins; checkpoint chase_start."}
   - {id: varn_caught, description: "Hale catches Varn by the collar at the edge of the drop. The satchel splits; half-burned pages flutter down into Tanners' Lane. Varn bursts into tears."}
-  - {id: varn_escapes, description: "Varn drops onto the lean-to, into the carriage. 'Drive! Drive, Mossy, damn you!' Wheels on cobbles; gone. A single scorched page drifts down. Fired by the chase controller (see §3.3 rules)."}
-  - {id: varn_cornered, description: "Varn reaches the drop and finds the lane empty: no carriage. He turns, wheezing, back to the parapet. Fired instead of varn_escapes when flag.carriage_gone is set."}
+  - {id: varn_escapes, description: "Varn drops onto the lean-to, into the carriage. 'Drive! Drive, Mossy, damn you!' Wheels on cobbles; gone. A single scorched page drifts down. Played by the chase (`chases.varn_chase.on_escaped`)."}
+  - {id: varn_cornered, description: "Varn reaches the drop and finds the lane empty: no carriage. He turns, wheezing, back to the parapet. Played by the chase (`on_cornered`) instead of varn_escapes when flag.carriage_gone is set."}
   - {id: scrap_found, description: "In the cold ash under the brazier grate, one ledger quire that didn't burn through: toll sums, two columns that don't agree, ten years running."}
   - {id: scrap_ash, description: "Ash, ash, and more ash. If anything survived, Hale can't find it."}
 npcs:
@@ -1276,7 +1312,7 @@ nodes:
     else: open
   done:
     type: effect
-    effects: ["reach_milestone(ms.a1_sickroom_done)", "add_xp(200)"]
+    effects: ["reach_milestone(ms.a1_sickroom_done)"]
     next: open
   open:
     type: line
@@ -1382,9 +1418,10 @@ nodes:
 ```yaml encounter
 id: enc.chancellery_guards
 zone: zone.chancellery_rooftops
+posture: sentry
 enemies:
   - {enemy: enemy.bandit, count: 1, spawn: guard_landing, variant: hired_guard}
-  - {enemy: enemy.bandit, count: 1, spawn: guard_hall, variant: hired_guard}
+  - {enemy: enemy.bandit, count: 1, spawn: guard_hall, variant: hired_guard, posture: patrol, route: [clerks_hall], loop_s: 30}
 waves: []
 attack_tokens: null
 allow_yield: true
@@ -1534,7 +1571,7 @@ declare:
   - {id: flag.varn_chase_lost, type: bool, desc: "Varn escaped in his carriage (soft fail: no blackmail; solar re-search available)."}
   - {id: flag.varn_blackmailed, type: bool, desc: "The player blackmails Varn (gdd §6.1 stage 1 exemption, §6.12)."}
   - {id: flag.varn_spared, type: bool, desc: "The player let Varn go and kept his secret for free."}
-  - {id: ms.a1_sickroom_done, type: milestone, desc: "Chalice evidence found and the Varn red herring resolved (won or lost)."}
+  - {id: ms.a1_sickroom_done, type: milestone, xp: 200, desc: "Chalice evidence found and the Varn red herring resolved (won or lost)."}
 reads:
   - ms.a1_audience_done
   - flag.fair_started
@@ -1604,8 +1641,8 @@ guarantees:
 
 ## 12. Open questions
 
-1. **Chase controller.** gdd has stealth (§6.5) but no chase rules. I specified the chase in level terms (§3.3: fixed route, lose at 25 m for 5 s or at the carriage, catch within 2 m). It needs a small presentation component that fires `varn_caught` / `varn_cornered` / `varn_escapes`. `varn_cornered` should start `dlg.varn_caught` like `varn_caught` (the `grab_varn` interactable).
-2. **Patrols vs encounter.** The two hired guards are stealth patrol NPCs before the alarm and an encounter after it. The zone schema has no "patrol" list; I assumed the encounter's enemies stand at their spawn under stealth AI until `start_encounter` fires.
-3. **Hazard activation.** `kicked_brazier` uses `params.starts_on_beat`. Same open question as the other files: hazards need an activation hook.
-4. **Dialogue override per location.** NPCs have one default `dialogue`. Where a character needs a location-specific conversation (the Queen in the sickroom, Kosk over the chalice, Aldric at the window), I used an interactable or an `enter` trigger that runs `start_dialogue`. A `dialogue` override on zone `npcs` entries would be cleaner.
+1. **Chase (resolved by A08).** `zone.chancellery_rooftops` has a `chases` entry (content-format §J.5) with the §3.3 rules; it plays `varn_escapes` / `varn_cornered`, and the `grab_varn` interactable is the catch.
+2. **Patrols vs encounter (resolved by A08).** `enc.chancellery_guards` has `posture: sentry`, and the hall guard patrols `clerks_hall` (§J.4). They engage on the alarm.
+3. **Hazard activation (resolved by A08).** `kicked_brazier` has `enabled_by: {"on": beat_done, source: varn_flees}` (§J.3).
+4. **Dialogue override per location (resolved by A08).** The Queen uses the zone `npcs` entry's `dialogue: dlg.ysolde_sickroom` (§J.5). Kosk over the chalice and Aldric at the window stay an interactable and a trigger, because they are actions, not greetings.
 5. **Clue support ids.** `clue.queen_knows_vaults` sits in the poisoner theory (gdd §6.11) and supports `anselm` only because he is the one person she told. Confirm that this is not too strong a hint for Act I.

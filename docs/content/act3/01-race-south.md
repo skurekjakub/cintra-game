@@ -51,19 +51,11 @@ exits:
   - id: to_palace_hall
     area: door_hall
     to_zone: zone.palace_hall
-    to_spawn: war_room_door
+    to_spawn: war_room
     condition: "true"
     effects: []
+  - {id: kosk_map, area: map_table, to_map: true, label: "Take the road south", condition: "has_item(item.lion_crown)", effects: ["unlock_map_node(map.stairs_foot)", "unlock_map_node(map.dun_strept)", "unlock_map_node(map.assengard)", "add_map_pin(map.marnadal_watch)", "reach_milestone(ms.a3_departed)"]}
 interactables:
-  - id: kosk_map
-    area: map_table
-    kind: map_board
-    label: "Take the road south"
-    condition: "has_item(item.lion_crown)"
-    check: null
-    once: false
-    effects: ["unlock_map_node(map.stairs_foot)", "unlock_map_node(map.dun_strept)", "unlock_map_node(map.assengard)", "add_map_pin(map.marnadal_watch)", "reach_milestone(ms.a3_departed)"]
-    fail_effects: []
   - id: supply_crate
     area: supply_wall
     kind: container
@@ -101,23 +93,9 @@ interactables:
     effects: ["give_item(item.varn_unsent_letters, 1)"]
     fail_effects: ["play_beat(varn_catches_you)"]
 triggers:
-  - id: act_three_begins
-    area: door_hall
-    on: enter
-    source: null
-    condition: "act() < 3"
-    once: true
-    effects: ["set_act(3)"]
-  - id: main_quest_begins
-    area: door_hall
-    on: enter
-    source: null
-    condition: "not quest_active(quest.main_a3) and not quest_done(quest.main_a3)"
-    once: true
-    effects: ["start_quest(quest.main_a3)"]
   - id: council_opens
     area: door_hall
-    on: enter
+    "on": enter
     source: null
     condition: "not flag(flag.a3_war_council_held)"
     once: true
@@ -135,9 +113,9 @@ beats:
 npcs:
   - {npc: npc.kosk, area: map_table, condition: "true"}
   - {npc: npc.ysolde, area: litter_alcove, condition: "flag(flag.queen_alive) and queen() <= 2"}
-  - {npc: npc.varn, area: varn_corner, condition: "not flag(flag.varn_exposed)"}
+  - {npc: npc.varn, area: varn_corner, condition: "not flag(flag.varn_exposed)", dialogue: dlg.a3_varn_war_room}
   - {npc: npc.outrider_lenka, area: window_bay, condition: "true"}
-  - {npc: npc.maelis, area: window_bay, condition: "flag(flag.maelis_recruited) and not flag(flag.maelis_dead)"}
+  - {npc: npc.maelis, area: window_bay, condition: "flag(flag.maelis_recruited) and not flag(flag.maelis_dead)", dialogue: dlg.a3_maelis_war_room}
   - {npc: npc.dravin, area: supply_wall, condition: "flag(flag.dravin_recruited)"}
 encounters: []
 loot:
@@ -729,9 +707,9 @@ guarantees:
 ```
 
 ## 12. Open questions
-- **Act transition owner.** a3.01 runs `set_act(3)` on entry if `act() < 3`, and `start_quest(quest.main_a3)` if the quest is not yet active. If act2/08 (A05) already does both at `ms.act2_twist`, these triggers do nothing. The reconciliation pass should keep exactly one owner.
+- **Act transition owner (resolved by A08).** a2.08 owns `set_act(3)` and `start_quest(quest.main_a3)` (content-format §J.7). This section no longer has a fallback.
 - **`item.lion_crown` ownership.** The gdd says Aldric "carries the Crown's authority" into Act III but has no item for the physical crown. I declared `item.lion_crown` here and hand it to the player, because story.md §7.7 has Aldric speak the Oath "wearing the Crown". If act2/08 also gives a crown item, merge to one id.
 - **Kosk's default dialogue in Act III.** `npc.kosk` is declared by A04 with its own default `dialogue`. After the council has run, interacting with Kosk in the war room should open `dlg.a3_war_council` at node `hub`. The format cannot start a dialogue at a node, so I suggest Kosk's A04 dialogue branch on `act() == 3` and `start_dialogue(dlg.a3_war_council)` (the opening re-gives nothing: `give_item` of a key item already held should be a no-op, but the converter tests should confirm this).
-- **Exit to the travel map.** content-format §F.1 has no explicit "leave to map" exit. Every Act III zone uses a `map_board` interactable at its entry point to leave to the map. Please confirm this convention.
-- **`npc.ysolde`, `npc.varn`, `npc.kosk`, `npc.maelis`** are expected from A04. `flag.varn_exposed`, `flag.maelis_recruited` and `flag.maelis_dead` are expected from A04, A05 and A07 (see `_ids.md`).
+- **Exit to the travel map (resolved by A08).** Zones leave to the map through an exit with `to_map: true` (content-format §J.5).
+- **Cross-slice ids (resolved by A08).** `npc.ysolde`, `npc.varn`, `npc.kosk` and `npc.maelis` are declared in act1; `flag.varn_exposed` and `flag.maelis_recruited` are declared where they are first set, and `flag.maelis_dead` (system-set) in a2.08. See `docs/content/_registry.md`.
 - **Escalation wording.** The gdd has no time mechanic. story.md's "three-day lead" became "a long lead" and "fast horses". No mechanic in this slice counts days. Time words appear only as atmosphere in lines and narration.

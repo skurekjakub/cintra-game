@@ -65,15 +65,8 @@ exits:
     to_spawn: village_track
     condition: "true"
     effects: []
+  - {id: waymarker, area: crossroads, to_map: true, label: "The bent waymarker (travel)", condition: "true", effects: []}
 interactables:
-  - id: waymarker
-    area: crossroads
-    kind: map_board
-    label: "The bent waymarker (travel)"
-    condition: "true"
-    check: null
-    once: false
-    effects: []
   - id: bounty_notice
     area: crossroads
     kind: readable
@@ -143,21 +136,21 @@ interactables:
 triggers:
   - id: mob_on_arrival
     area: crossroads
-    on: enter
+    "on": enter
     source: null
     condition: "not flag(flag.tigg_mob_resolved)"
     once: true
     effects: ["play_beat(mob_at_gibbet)", "start_dialogue(dlg.tigg_mob)"]
   - id: proclaimers
     area: crossroads
-    on: enter
+    "on": enter
     source: null
     condition: "stage() >= 3 and not flag(flag.aske_exposed)"
     once: true
     effects: ["play_beat(aske_preaches)", "start_dialogue(dlg.aske_open)"]
   - id: aske_fight_done
     area: shrine
-    on: encounter_done
+    "on": encounter_done
     source: enc.aske_unmasked
     condition: "true"
     once: true
@@ -334,41 +327,41 @@ interactables:
 triggers:
   - id: wyvern_on_field
     area: landing_field
-    on: enter
+    "on": enter
     source: null
     condition: "not ms(ms.a2_tigg_resolved) and var(var.tigg_beacons_lit) < 3"
     once: false
     effects: ["set_checkpoint(before_wyvern)", "play_beat(wyvern_arrives)", "start_encounter(enc.tigg_wyvern)"]
   - id: wolves_in_gully
     area: wolf_gully
-    on: enter
+    "on": enter
     source: null
     condition: "true"
     once: true
     effects: ["start_encounter(enc.tigg_wolves)"]
   - id: ring_complete_a
     area: beacon_ridge
-    on: interact
+    "on": interact
     source: beacon_a
     condition: "var(var.tigg_beacons_lit) >= 3"
     once: true
     effects: ["play_beat(wyvern_veers_off)", "set_flag(flag.wyvern_driven_by_smoke)", "reach_milestone(ms.a2_tigg_resolved)"]
   - id: ring_complete_b
     area: beacon_ridge
-    on: interact
+    "on": interact
     source: beacon_b
     condition: "var(var.tigg_beacons_lit) >= 3"
     once: true
     effects: ["play_beat(wyvern_veers_off)", "set_flag(flag.wyvern_driven_by_smoke)", "reach_milestone(ms.a2_tigg_resolved)"]
   - id: ring_complete_c
     area: wolf_gully
-    on: interact
+    "on": interact
     source: beacon_c
     condition: "var(var.tigg_beacons_lit) >= 3"
     once: true
     effects: ["play_beat(wyvern_veers_off)", "set_flag(flag.wyvern_driven_by_smoke)", "reach_milestone(ms.a2_tigg_resolved)"]
 hazards:
-  - {id: gully_scree, area: wolf_gully, kind: collapse, params: {trigger: sprint, damage: 15, knockdown: true}}
+  - {id: gully_scree, area: wolf_gully, kind: collapse, params: {tripped_by: sprint, damage: 15, knockdown: true}}
 checkpoints:
   - {id: before_wyvern, area: high_fold}
 beats:
@@ -1167,7 +1160,7 @@ stack_max: 5
 equip_slot: null
 weapon: null
 armor: null
-consumable: {effects: [], use_time: 2.0}
+consumable: {effects: ["chill_rate_mod(-50)"], use_time: 2.0}
 readable_text: null
 ```
 
@@ -1235,7 +1228,7 @@ refutes: []
 
 ```yaml flags
 declare:
-  - {id: ms.a2_tigg_resolved, type: milestone, desc: "The wyvern has been driven away from Tigg (fight to 50% HP or the tar-beacon ring)."}
+  - {id: ms.a2_tigg_resolved, type: milestone, xp: 300, desc: "The wyvern has been driven away from Tigg (fight to 50% HP or the tar-beacon ring)."}
   - {id: flag.tigg_mob_resolved, type: bool, desc: "The hanging at the gibbet has been resolved one way or another."}
   - {id: flag.ned_saved, type: bool, desc: "Ned was saved from the rope."}
   - {id: flag.ned_held, type: bool, desc: "Ned is held in the pound pending proof."}
@@ -1271,15 +1264,15 @@ stages:
   - id: the_marnadal_road
     journal: "Kosk has sent me south along the Marnadal road. Cintra needs three things before winter: Old Wenna's cure for the Queen, proof that will hang the traitor, and the true fourth verse of the Pact."
     objectives:
-      - {id: antidote_line, text: "Get Old Wenna's counter-dose for the Queen, or learn that there is none", condition: "ms(ms.a2_wenna_line_resolved)", optional: false, xp: 400}
+      - {id: antidote_line, text: "Get Old Wenna's counter-dose for the Queen, or learn that there is none", condition: "ms(ms.a2_wenna_line_resolved)", optional: false}
       - {id: proof, text: "Find proof of the traitor's guilt", condition: "ded(ded.anselm_treason_proven)", optional: false, xp: 300}
       - {id: true_verse, text: "Recover the true fourth verse", condition: "has_item(item.true_fourth_verse)", optional: false, xp: 300}
-      - {id: lead_tigg, text: "Find out what is taking Tigg's sheep", condition: "ms(ms.a2_tigg_resolved)", optional: true, xp: 300}
-      - {id: lead_oak, text: "Search Hanged Man's Oak for the Choir's orders", condition: "ms(ms.a2_cipher_taken)", optional: true, xp: 300}
-      - {id: lead_jory, text: "Deal with Ninefingers Jory at the crossings", condition: "ms(ms.a2_jory_dealt)", optional: true, xp: 250}
-      - {id: lead_field, text: "Walk Marnadal Field on the night of the new moon", condition: "ms(ms.a2_torc_taken)", optional: true, xp: 350}
-      - {id: lead_attre, text: "Find out what Duke Raimund's ships carry", condition: "ms(ms.a2_attre_ledger)", optional: true, xp: 400}
-      - {id: lead_vel_aram, text: "Break the Choir's muster at Vel Aram", condition: "ms(ms.a2_vel_aram_cleared)", optional: true, xp: 200}
+      - {id: lead_tigg, text: "Find out what is taking Tigg's sheep", condition: "ms(ms.a2_tigg_resolved)", optional: true}
+      - {id: lead_oak, text: "Search Hanged Man's Oak for the Choir's orders", condition: "ms(ms.a2_cipher_taken)", optional: true}
+      - {id: lead_jory, text: "Deal with Ninefingers Jory at the crossings", condition: "ms(ms.a2_jory_dealt)", optional: true}
+      - {id: lead_field, text: "Walk Marnadal Field on the night of the new moon", condition: "ms(ms.a2_torc_taken)", optional: true}
+      - {id: lead_attre, text: "Find out what Duke Raimund's ships carry", condition: "ms(ms.a2_attre_ledger)", optional: true}
+      - {id: lead_vel_aram, text: "Break the Choir's muster at Vel Aram", condition: "ms(ms.a2_vel_aram_cleared)", optional: true}
       - {id: lead_wenna, text: "Find the hedge-witch of the mere", condition: "visited(zone.witchs_mere)", optional: true, xp: 50}
     on_complete: []
     next: []
@@ -1345,8 +1338,8 @@ guarantees:
 ```
 
 ## 12. Open questions
-- **Ending an encounter by a beat:** there is no effect that forces a boss to flee mid-fight. The tar ring is therefore designed to work only **before** she is engaged; once the fight has started, the player must win it. A `force_flee(enc.x)` effect would let half-lit rings shorten the fight.
+- **Ending an encounter by a beat (A08):** `force_flee(enc.x)` and `end_encounter(enc.x, outcome)` now exist (content-format §J.2). The tar ring still works only before the fight, as designed.
 - **Trigger order:** the `ring_complete_*` triggers assume an `interact` trigger fires **after** the interactable's own effects (so `var.tigg_beacons_lit` is already 3). Please confirm in the zone runtime.
-- `item.frost_tallow`'s effect (Chill rate −50% for one zone visit) has no effect op in content-format §E; the consumable's `effects` list is empty and the item system must apply it by id. `item.field_draught` and `item.frost_tallow` are declared here because Tigg is the first Act II shop (gdd: field draught is Act II+).
+- `item.frost_tallow`'s effect (resolved by A08): `chill_rate_mod(-50)` (content-format §J.2). `item.field_draught` and `item.frost_tallow` are declared here.
 - `item.tar_pot` is a key item so it can't be sold, but leftover pots stay in the inventory. A `quest` item category would be cleaner.
 - Stage 3 rule "Choir encounter groups +1 member" applies to `enc.aske_unmasked` and `enc.tigg_proclaimers` automatically (system rule, not authored here).

@@ -59,16 +59,9 @@ spawns:
   - {id: lookout, area: lookout_rock}
   - {id: ford, area: stream_ford}
   - {id: knoll_east, area: oak_knoll}
-exits: []
+exits:
+  - {id: travel_marker, area: north_track, to_map: true, label: "Leave the Oak (travel)", condition: "true", effects: []}
 interactables:
-  - id: travel_marker
-    area: north_track
-    kind: map_board
-    label: "Leave the Oak (travel)"
-    condition: "true"
-    check: null
-    once: false
-    effects: []
   - id: hollow_trunk
     area: oak_knoll
     kind: container
@@ -153,27 +146,27 @@ interactables:
 triggers:
   - id: courier_bolts_on_alarm
     area: oak_knoll
-    on: beat_done
-    source: alarm
+    "on": alarm
+    source: null
     condition: "flag(flag.courier_arrived) and not flag(flag.oak_courier_down) and not flag(flag.tether_cut)"
     once: true
-    effects: ["play_beat(courier_escapes)", "set_flag(flag.oak_courier_escaped)", "start_encounter(enc.oak_escort)"]
+    effects: ["play_beat(alarm)", "play_beat(courier_escapes)", "set_flag(flag.oak_courier_escaped)", "start_encounter(enc.oak_escort)"]
   - id: courier_runs_on_foot
     area: oak_knoll
-    on: beat_done
-    source: alarm
+    "on": alarm
+    source: null
     condition: "flag(flag.courier_arrived) and not flag(flag.oak_courier_down) and flag(flag.tether_cut)"
     once: true
-    effects: ["start_encounter(enc.oak_courier_chase)"]
+    effects: ["play_beat(alarm)", "start_encounter(enc.oak_courier_chase)"]
   - id: disguised_greeting
     area: oak_knoll
-    on: beat_done
+    "on": beat_done
     source: courier_at_trunk
-    condition: "has_item(item.choir_robe) and has_item(item.pale_feather) and not flag(flag.oak_courier_down)"
+    condition: "equipped(item.choir_robe) and has_item(item.pale_feather) and not flag(flag.oak_courier_down)"
     once: true
     effects: ["start_dialogue(dlg.oswy_brother)"]
 hazards:
-  - {id: dead_crown, area: oak_knoll, kind: collapse, params: {trigger: heavy_impacts, impacts: 2, damage: 40, knockdown: true}}
+  - {id: dead_crown, area: oak_knoll, kind: collapse, params: {tripped_by: heavy_impacts, impacts: 2, damage: 40, knockdown: true}}
   - {id: smoulder_mounds, area: charcoal_clearing, kind: fire, params: {damage_per_second: 5}}
   - {id: ford_mud, area: stream_ford, kind: deep_mud, params: {speed_mult: 0.6}}
 checkpoints:
@@ -395,7 +388,7 @@ nodes:
     type: line
     speaker: npc.brother_oswy
     text: "Brothers! Brothers, to me!"
-    effects: ["play_beat(alarm)"]
+    effects: ["raise_alarm()"]
     next: bye
   fate:
     type: choice
@@ -483,7 +476,7 @@ nodes:
     type: line
     speaker: npc.brother_oswy
     text: "That's not... that's not how it goes. Who are you? Brothers!"
-    effects: ["play_beat(alarm)"]
+    effects: ["raise_alarm()"]
     next: bye
   grabbed:
     type: effect
@@ -498,8 +491,9 @@ nodes:
 ```yaml encounter
 id: enc.oak_escort
 zone: zone.hanged_mans_oak
+posture: sentry
 enemies:
-  - {enemy: enemy.choir_zealot, count: 1, spawn: knoll_east, variant: null}
+  - {enemy: enemy.choir_zealot, count: 1, spawn: knoll_east, variant: null, posture: patrol, route: [oak_knoll], loop_s: 30}
   - {enemy: enemy.choir_crossbowman, count: 1, spawn: lookout, variant: null}
 waves: []
 attack_tokens: null
@@ -516,8 +510,9 @@ Design: placed at zone load in stealth posture once `courier_arrives` plays (the
 ```yaml encounter
 id: enc.oak_escort_reinforced
 zone: zone.hanged_mans_oak
+posture: sentry
 enemies:
-  - {enemy: enemy.choir_zealot, count: 2, spawn: knoll_east, variant: null}
+  - {enemy: enemy.choir_zealot, count: 2, spawn: knoll_east, variant: null, posture: patrol, route: [oak_knoll, bracken_slope], loop_s: 40}
   - {enemy: enemy.choir_crossbowman, count: 1, spawn: lookout, variant: null}
 waves:
   - {after: wave_cleared, enemies: [{enemy: enemy.choir_crossbowman, count: 1, spawn: ford, variant: null}]}
@@ -651,7 +646,7 @@ text: "The cipher's orders and the ferrymen's iron crates both point to the same
 
 ```yaml flags
 declare:
-  - {id: ms.a2_cipher_taken, type: milestone, desc: "The player holds Anselm's cipher (taken at the Oak, bought from Jory, or found on Oswy at Vel Aram)."}
+  - {id: ms.a2_cipher_taken, type: milestone, xp: 300, desc: "The player holds Anselm's cipher (taken at the Oak, bought from Jory, or found on Oswy at Vel Aram)."}
   - {id: flag.courier_arrived, type: bool, desc: "The courier has come up the north track."}
   - {id: flag.tether_cut, type: bool, desc: "The courier's horse was cut loose; he cannot ride away."}
   - {id: flag.oak_courier_down, type: bool, desc: "The courier has been seized, turned or beaten."}
@@ -717,7 +712,7 @@ guarantees:
 ```
 
 ## 12. Open questions
-- **Alarm hook:** the format has no trigger type for a stealth alarm. This file uses the convention `on: beat_done, source: alarm`, where the stealth system (or a dialogue) plays the zone's `alarm` beat. Vel Aram and Attre use the same convention.
-- **Stealth posture of encounters:** encounter enemies here must spawn in a patrol or sentry state at `courier_arrives` and engage only on alarm. The encounter schema has no field for that. Proposed: `posture: patrol | sentry | hostile` on `encounter`.
+- **Alarm hook (resolved by A08):** alarm triggers are `"on": alarm` and scripted alarms run `raise_alarm()` (content-format §J.2, §J.3). The `alarm` beat is the presentation.
+- **Stealth posture of encounters (resolved by A08):** the escort encounters carry `posture` and patrol `route`s (content-format §J.4).
 - **Seizure as an interactable:** the seize interaction is a scripted takedown on a lever-type interactable. It assumes the stealth system raises the alarm before the player can reach the trunk if seen.
 - `enemy.choir_thug` with `variant: courier` (lower HP, no combo, flees) needs a variant entry in enemy data.

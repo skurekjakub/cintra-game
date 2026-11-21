@@ -95,6 +95,7 @@ sources: [npc.bertha, npc.tigg_innkeeper, npc.attre_tapster]
 available: "true"
 on_hear: ["add_map_pin(map.witchs_mere)"]
 verified_by: "has_clue(clue.chalice_pollen)"
+credibility_when: "flag(flag.bertha_safehouse) and heard_from(rumor.r01_poisoned_cup, npc.bertha)"
 ```
 
 ```yaml rumor
@@ -105,6 +106,7 @@ sources: [npc.bertha]
 available: "ms(ms.a1_audience_done)"
 on_hear: []
 verified_by: "has_clue(clue.varn_ledgers)"
+credibility_when: "flag(flag.bertha_safehouse) and heard_from(rumor.r02_varn_ledgers, npc.bertha)"
 ```
 True, but it covers embezzlement, not treason. gdd §6.18: after a lost Varn chase, `clue.varn_ledgers` can still be found by a Wits 6 search of his solar once this rumor is heard. The solar interactable (A04) should test `rumor_heard(rumor.r02_varn_ledgers)`. Travel card L1 can also add this rumor.
 
@@ -116,6 +118,7 @@ sources: [npc.bertha, npc.tigg_innkeeper]
 available: "true"
 on_hear: ["add_map_pin(map.tigg)"]
 verified_by: "ms(ms.a2_tigg_resolved)"
+credibility_when: "flag(flag.bertha_safehouse) and heard_from(rumor.r03_dragon_amell, npc.bertha)"
 ```
 Half-true: it is a wyvern. Present from stage 0 (gdd §6.1).
 
@@ -127,6 +130,7 @@ sources: [npc.bertha, npc.tigg_innkeeper]
 available: "true"
 on_hear: []
 verified_by: "ded(ded.anselm_treason_proven)"
+credibility_when: "flag(flag.bertha_safehouse) and heard_from(rumor.r04_living_saint, npc.bertha)"
 ```
 A cover story. "Verified" here means exposed: the journal marks it as Choir cover once Anselm's treason is proven.
 
@@ -138,6 +142,7 @@ sources: [npc.bertha, npc.tigg_innkeeper, npc.dun_strept_alewife, npc.brannoc]
 available: "true"
 on_hear: []
 verified_by: "has_clue(clue.vault_knocking) or has_clue(clue.ghost_vault_weapons) or visited(zone.ko_forge_of_echoes)"
+credibility_when: "flag(flag.bertha_safehouse) and heard_from(rumor.r05_dwarves_inside, npc.bertha)"
 ```
 
 ```yaml rumor
@@ -148,6 +153,7 @@ sources: [npc.bertha, npc.attre_tapster, npc.harl_brine]
 available: "true"
 on_hear: ["add_map_pin(map.attre)"]
 verified_by: "ms(ms.a2_attre_ledger)"
+credibility_when: "flag(flag.bertha_safehouse) and heard_from(rumor.r06_raimund_crown, npc.bertha)"
 ```
 Exaggerated: there is no crown, but he does want independence.
 
@@ -159,6 +165,7 @@ sources: [npc.bertha, npc.tigg_innkeeper]
 available: "true"
 on_hear: ["add_map_pin(map.ferrymen_camp)"]
 verified_by: "has_clue(clue.jory_iron_crates)"
+credibility_when: "flag(flag.bertha_safehouse) and heard_from(rumor.r07_iron_crates, npc.bertha)"
 ```
 
 ```yaml rumor
@@ -169,6 +176,7 @@ sources: [npc.tigg_innkeeper, npc.dun_strept_alewife, npc.bertha]
 available: "true"
 on_hear: ["add_map_pin(map.marnadal_field)"]
 verified_by: "ms(ms.a2_torc_taken)"
+credibility_when: "flag(flag.bertha_safehouse) and heard_from(rumor.r08_new_moon_dead, npc.bertha)"
 ```
 
 ```yaml rumor
@@ -179,6 +187,7 @@ sources: [npc.bertha]
 available: "ms(ms.a1_audience_done)"
 on_hear: []
 verified_by: "ms(ms.act2_twist)"
+credibility_when: "flag(flag.bertha_safehouse) and heard_from(rumor.r09_aldric_dwarven, npc.bertha)"
 ```
 True: Anselm's conditioning. The twist verifies it.
 
@@ -190,6 +199,7 @@ sources: [npc.bertha, npc.tigg_innkeeper, npc.attre_tapster]
 available: "stage() >= 1"
 on_hear: []
 verified_by: "flag(flag.brzezina_plot_exposed) or flag(flag.drozd_road_met)"
+credibility_when: "flag(flag.bertha_safehouse) and heard_from(rumor.r10_sodden_spears, npc.bertha)"
 ```
 False: just border scouts. Exposing the Brzezina plot, or Drozd's own word on the road (travel card L5 rival), shows the truth: Sodden waits, it does not march.
 
@@ -203,6 +213,7 @@ sources: [npc.bertha, npc.tigg_innkeeper]
 available: "ms(ms.a1_audience_done)"
 on_hear: ["add_map_pin(map.barrows)"]
 verified_by: "visited(zone.barrows_tomb)"
+credibility_when: "flag(flag.bertha_safehouse) and heard_from(rumor.r11_corvan_tomb, npc.bertha)"
 ```
 
 ```yaml rumor
@@ -213,6 +224,7 @@ sources: [npc.attre_tapster, npc.harl_brine, npc.bertha]
 available: "ms(ms.act1_complete)"
 on_hear: ["add_map_pin(map.morrow_gull)"]
 verified_by: "has_item(item.taster_dispatch)"
+credibility_when: "flag(flag.bertha_safehouse) and heard_from(rumor.r12_morrow_gull, npc.bertha)"
 ```
 
 ```yaml rumor
@@ -244,6 +256,7 @@ sources: [npc.tigg_innkeeper, npc.bertha]
 available: "ms(ms.act1_complete)"
 on_hear: ["set_flag(flag.marnadal_watch_hook)", "add_map_pin(map.marnadal_watch)"]
 verified_by: "visited(zone.marnadal_watch_tower)"
+credibility_when: "flag(flag.bertha_safehouse) and heard_from(rumor.r15_watch_deserted, npc.bertha)"
 ```
 Also added by travel cards L4, L7 (knight yields) and the refugee column.
 
@@ -255,6 +268,7 @@ sources: [npc.bertha]
 available: "ms(ms.a1_audience_done) and not flag(flag.maelis_ledgers_done)"
 on_hear: []
 verified_by: "flag(flag.maelis_ledgers_done)"
+credibility_when: "flag(flag.bertha_safehouse) and heard_from(rumor.r16_scriptorium_locked, npc.bertha)"
 ```
 
 ```yaml rumor
@@ -275,6 +289,7 @@ sources: [npc.bertha, npc.tigg_innkeeper]
 available: "ms(ms.act1_complete) and not flag(flag.brzezina_plot_exposed)"
 on_hear: ["set_flag(flag.brzezina_hook)", "add_map_pin(map.brzezina_woods)"]
 verified_by: "flag(flag.brzezina_plot_exposed) or flag(flag.hollec_blackmailed)"
+credibility_when: "flag(flag.bertha_safehouse) and heard_from(rumor.r18_brzezina_lodge, npc.bertha)"
 ```
 
 ```yaml rumor
@@ -317,7 +332,7 @@ guarantees:
 ```
 
 ## 12. Open questions
-- **Credibility from Bertha.** architecture §4.17 has `credibility_visible(id, facts)`. I assume it returns true when `perk(perk.read_the_room)`, or when the rumor is verified, or (new) when `flag(flag.bertha_safehouse)` and the rumor was heard from `npc.bertha`. The last case needs the pool to remember the source of each heard rumor.
-- **Tavern keeper ids** (`npc.tigg_innkeeper`, `npc.attre_tapster`, `npc.dun_strept_alewife`) are guesses; the reconciliation pass should map them to whatever A05/A06 declare.
+- **Credibility from Bertha (resolved by A08).** Every rumor Bertha can tell has `credibility_when: "flag(flag.bertha_safehouse) and heard_from(<rumor>, npc.bertha)"` (content-format §J.7). `credibility_visible` also returns true with `perk.read_the_room` or once the rumor is verified.
+- **Tavern keeper ids (resolved by A08).** `npc.tigg_innkeeper` (a2.01), `npc.attre_tapster` (a2.06) and `npc.dun_strept_alewife` (a3.02) are declared once; see `docs/content/_registry.md`.
 - **Rumor 3 at stage 0.** gdd §6.1 says stage 0 "adds" the wyvern rumor to the pool. I made it available from new game instead; the effect is the same.
 - **Drink price.** Not set in content; the application owns it (architecture §4.17).

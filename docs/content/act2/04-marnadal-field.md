@@ -58,16 +58,9 @@ spawns:
   - {id: dyke_line, area: strept_dyke}
   - {id: lines_stakes, area: cintran_lines}
   - {id: pickers, area: pickers_camp}
-exits: []
+exits:
+  - {id: travel_marker, area: ford_road, to_map: true, label: "Leave the field (travel)", condition: "true", effects: ["clear_flag(flag.new_moon_vigil)"]}
 interactables:
-  - id: travel_marker
-    area: ford_road
-    kind: map_board
-    label: "Leave the field (travel)"
-    condition: "true"
-    check: null
-    once: false
-    effects: ["clear_flag(flag.new_moon_vigil)"]
   - id: vigil_fire
     area: vigil_stones
     kind: rest
@@ -121,35 +114,35 @@ interactables:
 triggers:
   - id: meet_champion
     area: strept_dyke
-    on: enter
+    "on": enter
     source: null
     condition: "flag(flag.new_moon_vigil) and not ms(ms.a2_torc_taken)"
     once: false
     effects: ["start_dialogue(dlg.callum_darrach)"]
   - id: meet_odo
     area: cintran_lines
-    on: enter
+    "on": enter
     source: null
     condition: "flag(flag.new_moon_vigil) and not flag(flag.odo_met)"
     once: true
     effects: ["set_flag(flag.odo_met)", "start_dialogue(dlg.odo_vane)"]
   - id: charge_on_lanes
     area: charge_lanes
-    on: enter
+    "on": enter
     source: null
     condition: "flag(flag.new_moon_vigil) and not flag(flag.field_rite_performed) and not flag(flag.held_the_line) and not flag(flag.odo_stood_down)"
     once: false
     effects: ["set_checkpoint(vigil_camp)", "play_beat(charge_sounds)", "start_encounter(enc.marnadal_charge)"]
   - id: charge_footonly
     area: charge_lanes
-    on: enter
+    "on": enter
     source: null
     condition: "flag(flag.new_moon_vigil) and not flag(flag.field_rite_performed) and not flag(flag.held_the_line) and flag(flag.odo_stood_down)"
     once: false
     effects: ["set_checkpoint(vigil_camp)", "start_encounter(enc.marnadal_footmen)"]
   - id: choir_column
     area: ford_road
-    on: enter
+    "on": enter
     source: null
     condition: "stage() == 3 and not ms(ms.a2_vel_aram_cleared)"
     once: true
@@ -294,7 +287,7 @@ nodes:
     type: branch
     cases:
       - {if: "flag(flag.champion_grants_torc)", next: granted_again}
-      - {if: "flag(flag.kosk_badge_worn)", next: badge}
+      - {if: "equipped(item.kosk_badge)", next: badge}
       - {if: "flag(flag.held_the_line) or flag(flag.field_rite_performed)", next: honoured}
     else: first
   badge:
@@ -405,7 +398,7 @@ nodes:
   greet:
     type: branch
     cases:
-      - {if: "flag(flag.kosk_badge_worn) or has_item(item.kosk_writ)", next: greet_marshal}
+      - {if: "equipped(item.kosk_badge) or has_item(item.kosk_writ)", next: greet_marshal}
     else: greet_plain
   greet_marshal:
     type: line
@@ -696,7 +689,7 @@ text: "Anselm and 'one brother' carried the last parley. The clans heard there w
 
 ```yaml flags
 declare:
-  - {id: ms.a2_torc_taken, type: milestone, desc: "The player lifted Callum's torc from the clan ditch."}
+  - {id: ms.a2_torc_taken, type: milestone, xp: 350, desc: "The player lifted Callum's torc from the clan ditch."}
   - {id: flag.torc_rite_known, type: bool, desc: "The player knows the Strept naming rite. Revenants stop rising again (gdd §6.7). Read by act3 Dun Strept."}
   - {id: flag.new_moon_vigil, type: bool, desc: "The player chose to keep vigil; the field is in its new-moon variant. Cleared on leaving."}
   - {id: flag.field_rite_performed, type: bool, desc: "The player spoke the naming rite at the clan stones during the vigil."}
@@ -707,7 +700,6 @@ declare:
   - {id: flag.rusk_hostile, type: bool, desc: "Gammer Rusk was driven off or fought."}
   - {id: flag.torc_sold, type: bool, desc: "The player sold the torc to Rusk. Act III must use Kosk's apology for Hesk. Read by act3 Dun Strept."}
 reads:
-  - flag.kosk_badge_worn
   - flag.yorek_freed
   - item.kosk_writ
   - perk.kingmaker
@@ -756,7 +748,7 @@ guarantees:
 ```
 
 ## 12. Open questions
-- **Kosk's badge:** gdd §6.9 says the badge gives **−20** to Strept dialogue checks; gdd §6.10 says **−2** to Intimidate against Strept. This file only reads `flag.kosk_badge_worn` (expected to be maintained by the inventory when `item.kosk_writ` is equipped as a badge) to make Callum refuse. The penalty size needs one answer.
+- **Kosk's badge (resolved by A08):** the badge is `item.kosk_badge` (a trinket given with the writ in a1.02). Worn, it gives −2 to checks against Strept speakers (gdd §6.10, its `trinket.mods`). This file reads `equipped(item.kosk_badge)` to make Callum refuse.
 - **Champion and rite text** are aligned with act3/02 (Darrach Hall's torc; the cairn-words "Home from the mud. Home from the iron. The hill holds you now.").
 - `ded.choir_provoked_marnadal` is new and supports Act III's Kosk apology scene (Kosk can be told that the parley was poisoned). Act III may want to read it.
 - The new-moon state is a flag cleared by the map marker. If the player saves and loads mid-vigil, the flag persists, which is intended.

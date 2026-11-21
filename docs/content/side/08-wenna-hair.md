@@ -19,7 +19,7 @@ Old Wenna will not take a Cintran's word for anything, least of all the Queen's 
 ## 2. Progress and escalation
 - **Availability:** Act II, once the player has visited `zone.witchs_mere` (escalation stage 1–3). It closes at `ms.act2_twist`, when the antidote question resolves itself (gdd §6.2).
 - **Location:** `map.witchs_mere`. The offer is made in A05's `zone.witchs_mere`. The reading happens in this section's `zone.wenna_scrying_hollow`, behind the hut.
-- **Start:** A05's Wenna dialogue should offer an option that runs `start_dialogue(dlg.wenna_hair_offer)` (see Expected in `_ids.md`).
+- **Start:** A05's Wenna dialogue should offer an option that runs `start_dialogue(dlg.wenna_hair_offer)` (wired in a2.05's Wenna dialogue; checked by A08).
 - **The hair:** `item.ysolde_hair` comes from A04's sickroom (Presence 5, with Kosk's leave). If the player does not have it, the quest sends them back to Cintra. The `cintra — tigg` edge is open in Act II, and the Cintra hub stays open until stage 4.
 - **Milestones:** none set. The section reads `ms.a2_wenna_line_resolved` (what Wenna says about doses) and `ms.act2_twist` (closing).
 - **Payoff:** `flag.queen_reading_known` and +15 Wenna reputation (gdd §7.4), plus another +15 if she is allowed to keep a strand. In data, the reading reveals:
@@ -90,21 +90,21 @@ interactables:
 triggers:
   - id: reading_starts
     area: hollow_floor
-    on: enter
+    "on": enter
     source: null
     condition: "has_item(item.ysolde_hair) and quest_active(quest.side_wenna_hair) and not flag(flag.queen_reading_known)"
     once: true
     effects: ["set_checkpoint(hollow_cp)", "start_dialogue(dlg.wenna_hair_reading)"]
   - id: watchers_spring
     area: plank_path
-    on: exit_attempt
+    "on": exit_attempt
     source: up_to_hut
     condition: "stage() >= 3 and flag(flag.queen_reading_known) and not flag(flag.wenna_kept_strand) and not flag(flag.choir_list_exposed) and not flag(flag.wenna_hollow_watchers_dealt)"
     once: true
     effects: ["set_checkpoint(hollow_cp)", "play_beat(watchers_rise)", "start_encounter(enc.wenna_hollow_watchers)"]
   - id: crow_warns
     area: plank_path
-    on: exit_attempt
+    "on": exit_attempt
     source: up_to_hut
     condition: "stage() >= 3 and flag(flag.queen_reading_known) and flag(flag.wenna_kept_strand) and not flag(flag.choir_list_exposed) and not flag(flag.wenna_hollow_watchers_dealt)"
     once: true
@@ -536,5 +536,5 @@ guarantees:
 ## 12. Open questions
 - `item.ysolde_hair` is gated by Presence 5 in A04's sickroom (gdd §6.9). For the quest to be reachable by any build, A04 might add a check-free route, such as a bribe to a lady's maid or Maelis cutting it at confession. That is A04's decision; it is logged in this slice's report.
 - `rep_tier(faction.wenna) <= hostile` assumes comparison with the lowest tier works (gdd: tiers are ordered and comparable).
-- The dose lines read `var.bulbs_recovered` at the moment of reading. If A05 tracks "bulbs handed over" separately from "bulbs recovered", the branch should read the handed-over count.
+- The dose lines read `var.bulbs_recovered` (resolved by A08): every bulb source, Gull Tower included, adds to it before the handover, and the handover sets it to the count handed over.
 - The reading also tells the player how the mitigations stand (`flag.chalice_secured`, `flag.food_taster_exposed`). That uses the gdd §6.2 formula as written and invents no new rule.

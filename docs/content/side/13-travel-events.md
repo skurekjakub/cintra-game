@@ -17,10 +17,11 @@ level_band: [1, 12]
 Every entry of the three terrain tables in story.md §11 and gdd.md §6.3, written as an `event_card`, plus the nine escalation-pool entries, the two forced hazard events on map edges, and the small arenas that travel fights load. A card is shown as a modal over the travel map (the game pauses, as in dialogue). An option that starts a fight loads the terrain's arena in real time. When the fight ends, the journey resumes and the party token arrives. Cards never cost time. They cost blood, crowns, reputation, or a consumable, and they pay out in clues, map pins, side-quest hooks, and small favours from the road.
 
 ## 2. Progress and escalation
+- **Tables:** the d8 tables themselves, with each slot's card, are in `world/02-encounter-tables.md` (A08).
 - **Roll:** once per journey, on the chance in gdd §6.3. The d8 picks `table_slot` 1–7 on the route's majority terrain. A d8 of **8** draws from that terrain's escalation pool (`table_slot: esc`). The pool's first entry on each terrain is the story's slot 8.
-- **Escalation rule:** at `stage() >= 2`, if the result is not already a pool entry, a d6 is rolled. On 1–2 the result is replaced by a random entry from the terrain's pool. Pool cards whose `requires` is false (for example `esc.m_stray_warden` below stage 4) are rerolled, as in gdd §6.3.
+- **Escalation rule:** at `stage() >= 2`, if the result is not already a pool entry, a d6 is rolled. On 1–2 the result is replaced by a random entry from the terrain's pool. Pool cards whose `requires` is false (for example `event.esc_m_stray_warden` below stage 4) are rerolled, as in gdd §6.3.
 - **Rerolls:** a card whose `requires` is false, or the same card as the previous journey, is rerolled up to 3 times; then the road is quiet.
-- **Stage flavour:** stage 3 adds one member to every Choir group (gdd §6.1, applied by the system, not by these cards). Stage 2 doubles the drowner weight on valley tables (system). Stage 4 uses mountain tables only (system). Cards below read `stage()` only where the text or options change.
+- **Stage flavour:** stage 3 adds one member to every Choir group (gdd §6.1, applied by the system, not by these cards). Stage 2 doubles the drowner weight on valley tables (valley slot 4's `alt` in `world/02-encounter-tables.md`). Stage 4 uses mountain tables only (system). Cards below read `stage()` only where the text or options change.
 - **Hooks:** L4 starts the Marnadal Watch hook, L5 the Brzezina hook, V7 the Rozrog hook, V4 can pin Rozrog or Vel Aram, V6 nudges the current Wenna objective, M5 and M7 give Act III verse-theory clues.
 - **Recurring rival:** once `flag.drozd_rival` is set (side 04), lowlands slot 5 is taken by `event.l5_drozd_returns` instead of the tinker (see §12).
 - No milestones are set here.
@@ -124,7 +125,7 @@ spawns:
   - {id: high_ground, area: boulder}
 exits: []
 interactables:
-  - {id: drowned_pack, area: willow_bank, kind: search, label: "Search the snagged pack", condition: "true", check: null, once: true, effects: ["give_item(item.crossbow_bolts, 6)"], fail_effects: []}
+  - {id: drowned_pack, area: willow_bank, kind: search, label: "Search the snagged pack", condition: "true", check: null, once: true, effects: ["give_item(item.crossbow_bolt, 6)"], fail_effects: []}
 triggers: []
 hazards:
   - {id: deep_water, area: shallows, kind: deep_mud, params: {speed_mult: 0.5}}
@@ -265,7 +266,7 @@ essential: false
 dialogue: null
 barks: ["Good Crown steel. Barely bled on.", "Don't ask where it's from and I won't ask where you're going.", "Bolts, a buckler, a brigandine. Make an offer."]
 combat: enemy.bandit
-shop: {stock: [{item: item.crossbow_bolts, count: 20}, {item: item.poultice, count: 3}, {item: item.watch_brigandine, count: 1}], price_mod: 0.8}
+shop: {stock: [{item: item.crossbow_bolt, count: 20}, {item: item.poultice, count: 3}, {item: item.watch_brigandine, count: 1}], price_mod: 0.8}
 ```
 
 ```yaml item
@@ -510,7 +511,7 @@ attack_tokens: null
 allow_yield: true
 allies: []
 checkpoint: arena_start
-avoidable_by: ["esc.l_feather_proclamations"]
+avoidable_by: ["event.esc_l_feather_proclamations"]
 on_won: ["give_item(item.pale_feather, 1)", "add_rep(faction.crown, 3)"]
 on_yielded: ["give_item(item.pale_feather, 1)", "add_rep(faction.crown, 3)"]
 on_player_fled: []
@@ -527,7 +528,7 @@ attack_tokens: null
 allow_yield: false
 allies: []
 checkpoint: arena_start
-avoidable_by: ["esc.v_drowner_swarm"]
+avoidable_by: ["event.esc_v_drowner_swarm"]
 on_won: []
 on_yielded: []
 on_player_fled: []
@@ -543,7 +544,7 @@ attack_tokens: null
 allow_yield: true
 allies: []
 checkpoint: arena_start
-avoidable_by: ["esc.v_blight_wagon"]
+avoidable_by: ["event.esc_v_blight_wagon"]
 on_won: ["give_item(item.fire_oil, 2)"]
 on_yielded: ["give_item(item.fire_oil, 2)"]
 on_player_fled: []
@@ -559,7 +560,7 @@ attack_tokens: null
 allow_yield: false
 allies: []
 checkpoint: arena_start
-avoidable_by: ["esc.m_stray_warden"]
+avoidable_by: ["event.esc_m_stray_warden"]
 on_won: ["add_xp(75)"]
 on_yielded: []
 on_player_fled: []
@@ -600,6 +601,7 @@ refutes: []
 ## 8. Flags set and read
 ```yaml flags
 declare:
+  - {id: flag.journey_guides, type: bool, desc: "Strept scouts guide the party for the rest of this journey (event.m2_strept_scouts). Set with set_flag_until(..., journey_end)."}
   - {id: flag.marnadal_watch_hook, type: bool, desc: "Marnadal Watch side-quest hook started (deserter card L4 or rumor r15)."}
   - {id: flag.brzezina_hook, type: bool, desc: "Brzezina side-quest hook started (Sodden tinker card L5 or rumor r18)."}
   - {id: flag.rozrog_hook, type: bool, desc: "Rozrog side-quest hook started (woodwose totems V7, burners V4, or rumor r17)."}
@@ -608,7 +610,7 @@ declare:
   - {id: flag.knight_duel_won, type: bool, desc: "Beat Ser Gaudric Vell in single combat (L7)."}
   - {id: flag.cairn_cache_taken, type: bool, desc: "The dwarven cairn cache (M5) was taken; the card no longer appears."}
   - {id: flag.shrine_oath_found, type: bool, desc: "The Oath shrine (M7) was read; the card no longer appears."}
-  - {id: flag.blue_fires_active, type: bool, desc: "esc.m_blue_fires: warmth sources give no warmth in the arrival zone. The arrival zone clears it on exit (see §12)."}
+  - {id: flag.blue_fires_active, type: bool, desc: "event.esc_m_blue_fires: warmth sources give no warmth in the arrival zone. Set with set_flag_until(..., zone_exit), so leaving the arrival zone clears it."}
   - {id: flag.drozd_road_met, type: bool, desc: "Drozd's road encounter (L5 rival variant) has happened."}
 reads:
   - flag.wenna_bulbs_asked
@@ -693,7 +695,7 @@ text: "A man in a Crown-blue brigandine with the badge cut off has laid out bolt
 options:
   - {id: shop, text: "Look over his wares.", effects: ["open_shop(npc.deserter_wat)"], next: null}
   - {id: ask, text: "'Who's holding the Watch now?'", effects: ["set_flag(flag.marnadal_watch_hook)", "add_map_pin(map.marnadal_watch)", "add_rumor(rumor.r15_watch_deserted)"], next: null}
-  - {id: shame, text: "'You left a boy up there alone.' [Persuade 6]", tag: persuade, check: {skill: persuade, dc: 6, pass_effects: ["set_flag(flag.marnadal_watch_hook)", "add_map_pin(map.marnadal_watch)", "give_item(item.crossbow_bolts, 10)", "add_xp(30)"], fail_effects: ["set_flag(flag.marnadal_watch_hook)"]}, next: null}
+  - {id: shame, text: "'You left a boy up there alone.' [Persuade 6]", tag: persuade, check: {skill: persuade, dc: 6, pass_effects: ["set_flag(flag.marnadal_watch_hook)", "add_map_pin(map.marnadal_watch)", "give_item(item.crossbow_bolt, 10)", "add_xp(30)"], fail_effects: ["set_flag(flag.marnadal_watch_hook)"]}, next: null}
   - {id: seize, text: "'That's Crown property. Hand it over.' [Intimidate 6]", tag: intimidate, check: {skill: intimidate, dc: 6, pass_effects: ["give_item(item.watch_brigandine, 1)", "set_flag(flag.marnadal_watch_hook)", "add_rep(faction.crown, 2)"], fail_effects: []}, next: null}
   - {id: leave, text: "Ride on.", next: null}
 combat: null
@@ -739,9 +741,7 @@ requires: "true"
 title: "A harvest supper"
 text: "A village has trestles out on the green: pease pudding, cider, a pig on a spit. 'Sit, stranger. There's beds in the tithe barn, and nobody's asking your business.'"
 options:
-  - {id: stay_a1, text: "Eat, drink, and listen.", condition: "act() == 1", effects: ["heal_player(full)", "add_rumor(rumor.r05_dwarves_inside)"], next: null}
-  - {id: stay_a2, text: "Eat, drink, and listen.", condition: "act() >= 2 and stage() < 3", effects: ["heal_player(full)", "add_rumor(rumor.r08_new_moon_dead)"], next: null}
-  - {id: stay_a3, text: "Eat what they can spare, and listen.", condition: "stage() >= 3", effects: ["heal_player(full)", "add_rumor(rumor.r09_aldric_dwarven)"], next: null}
+  - {id: stay, text: "Eat, drink, and listen.", effects: ["heal_player(full)", "draw_rumor()"], next: null}
   - {id: give, text: "Leave coin for the widows' table. [Bribe 10]", tag: bribe, bribe: 10, effects: ["heal_player(full)", "add_rep(faction.crown, 2)"], next: null}
   - {id: decline, text: "Thank them and push on.", next: null}
 combat: null
@@ -902,13 +902,13 @@ requires: "true"
 title: "Clan scouts shadowing you"
 text: "Twice you've seen a figure on the ridgeline in a grey plaid, and twice it was gone before you looked again. Now there are three, and one has a bow strung."
 options:
-  - {id: friends, text: "Raise an open hand. They know you. [Strept: Friendly]", tag: sway, condition: "rep_tier(faction.strept) >= friendly", effects: ["add_xp(30)", "add_rumor(rumor.r14_mine_knocking)"], next: null}
+  - {id: friends, text: "Raise an open hand. They know you. [Strept: Friendly]", tag: sway, condition: "rep_tier(faction.strept) >= friendly", effects: ["set_flag_until(flag.journey_guides, journey_end)", "add_xp(30)", "add_rumor(rumor.r14_mine_knocking)"], next: null}
   - {id: hail, text: "Call out in the clan greeting. [Persuade 6]", tag: persuade, check: {skill: persuade, dc: 6, pass_effects: ["add_rep(faction.strept, 3)", "add_xp(45)"], fail_effects: ["add_rep(faction.strept, -2)"]}, next: null}
   - {id: shoot, text: "Put a bolt near the archer's feet.", effects: ["start_encounter(enc.travel_strept_scouts)"], next: null}
   - {id: ignore, text: "Keep walking. Let them watch.", next: null}
 combat: enc.travel_strept_scouts
 ```
-*Friendly text:* the scouts come down and walk the next stretch with you, pointing out where the snow is rotten. One of them mentions the miners' knocking. Persuade checks against Strept take −2 when the Marshal's writ is worn as a badge (gdd §6.9, applied by the system). The gdd's "guides for this journey" effect has no effect op; see §12.
+*Friendly text:* the scouts come down and walk the next stretch with you, pointing out where the snow is rotten. One of them mentions the miners' knocking. Checks against Strept take −2 while `item.kosk_badge` is worn (gdd §6.9, its `trinket.mods`). "Guides for this journey" is `set_flag_until(flag.journey_guides, journey_end)`: the mountain-edge hazard (`world/01-travel-map.md`) does not fire for the rest of this journey.
 
 ```yaml event_card
 id: event.m3_frost_troll
@@ -947,8 +947,8 @@ requires: "not flag(flag.cairn_cache_taken)"
 title: "A dwarf in the snow"
 text: "A dwarf stands in the snow ahead, beard braided with iron rings. You can see the rocks through him. He lifts one arm and points, unmoving, at a cairn you'd have walked past."
 options:
-  - {id: dig, text: "Go to the cairn and dig.", effects: ["set_flag(flag.cairn_cache_taken)", "add_clue(clue.cairn_marker)", "give_item(item.field_draught, 2)", "give_item(item.frost_tallow, 1)", "give_item(item.crossbow_bolts, 10)"], next: null}
-  - {id: bow, text: "Bow to him first, as the dwarves bow. [Lore 6]", tag: lore, check: {skill: lore, dc: 6, pass_effects: ["set_flag(flag.cairn_cache_taken)", "add_clue(clue.cairn_marker)", "give_item(item.field_draught, 2)", "give_item(item.frost_tallow, 1)", "give_item(item.crossbow_bolts, 10)", "give_item(item.antitoxin, 2)"], fail_effects: ["set_flag(flag.cairn_cache_taken)", "add_clue(clue.cairn_marker)", "give_item(item.field_draught, 2)"]}, next: null}
+  - {id: dig, text: "Go to the cairn and dig.", effects: ["set_flag(flag.cairn_cache_taken)", "add_clue(clue.cairn_marker)", "give_item(item.field_draught, 2)", "give_item(item.frost_tallow, 1)", "give_item(item.crossbow_bolt, 10)"], next: null}
+  - {id: bow, text: "Bow to him first, as the dwarves bow. [Lore 6]", tag: lore, check: {skill: lore, dc: 6, pass_effects: ["set_flag(flag.cairn_cache_taken)", "add_clue(clue.cairn_marker)", "give_item(item.field_draught, 2)", "give_item(item.frost_tallow, 1)", "give_item(item.crossbow_bolt, 10)", "give_item(item.antitoxin, 2)"], fail_effects: ["set_flag(flag.cairn_cache_taken)", "add_clue(clue.cairn_marker)", "give_item(item.field_draught, 2)"]}, next: null}
   - {id: leave, text: "Leave the dead to themselves.", next: null}
 combat: null
 ```
@@ -962,8 +962,8 @@ requires: "ms(ms.act1_complete)"
 title: "Ambush on the switchback"
 text: "Fresh boot-prints in the snow, many of them, and then none: someone swept the track. Above, on the next bend, a glint that could be ice. Or a lens."
 options:
-  - {id: disguise, text: "Pull up the Choir hood and walk on, feather showing. [Item: Choir robe]", tag: item, condition: "has_item(item.choir_robe) and has_item(item.pale_feather)", effects: ["add_xp(60)"], next: null}
-  - {id: spot, text: "Read the slope for the shooter's nest. [Investigate 6]", tag: investigate, check: {skill: investigate, dc: 6, pass_effects: ["add_xp(45)", "start_encounter(enc.travel_choir_rearguard)"], fail_effects: ["damage_player(28)", "start_encounter(enc.travel_choir_rearguard)"]}, next: null}
+  - {id: disguise, text: "Pull up the Choir hood and walk on, feather showing. [Item: Choir robe]", tag: item, condition: "equipped(item.choir_robe) and has_item(item.pale_feather)", effects: ["add_xp(60)"], next: null}
+  - {id: spot, text: "Read the slope for the shooter's nest. [Investigate 6]", tag: investigate, check: {skill: investigate, dc: 6, pass_effects: ["add_xp(45)", "start_encounter(enc.travel_choir_rearguard, player_first)"], fail_effects: ["start_encounter(enc.travel_choir_rearguard, enemy_first)"]}, next: null}
   - {id: charge, text: "Charge the bend before they're ready.", effects: ["start_encounter(enc.travel_choir_rearguard)"], next: null}
 combat: enc.travel_choir_rearguard
 ```
@@ -990,7 +990,7 @@ The legible fragment is the Oath's last line, verbatim: *"...Till nineteen winte
 `table_slot: esc`. A d8 of 8 draws from the terrain's pool; at stage ≥ 2 a d6 of 1–2 also swaps any other result for a pool card.
 
 ```yaml event_card
-id: esc.l_withered_line
+id: event.esc_l_withered_line
 terrain: lowlands
 table_slot: esc
 requires: "true"
@@ -999,13 +999,13 @@ text: "Through the stubble of a barley field runs a line of dead crops, a pace w
 options:
   - {id: study, text: "Kneel and dig into the dead soil. [Lore 6]", tag: lore, check: {skill: lore, dc: 6, pass_effects: ["add_xp(60)"], fail_effects: []}, next: null}
   - {id: farmer, text: "Ask the farmer at the field's edge.", effects: ["add_rumor(rumor.r05_dwarves_inside)"], next: null}
-  - {id: on, text: "Walk on along the line.", next: null}
+  - {id: "on", text: "Walk on along the line.", next: null}
 combat: null
 ```
 *Lore pass text:* the soil smells of struck flint and old pennies. Under the plough-depth there is a thin black crust, the same tar that wept from the Ring of Nine. Something underground is venting along an old seam, all the way from the mountains.
 
 ```yaml event_card
-id: esc.l_feather_proclamations
+id: event.esc_l_feather_proclamations
 terrain: lowlands
 table_slot: esc
 requires: "stage() >= 2"
@@ -1019,7 +1019,7 @@ combat: enc.esc_feather_proclaimers
 ```
 
 ```yaml event_card
-id: esc.l_refugee_column
+id: event.esc_l_refugee_column
 terrain: lowlands
 table_slot: esc
 requires: "stage() >= 2"
@@ -1034,7 +1034,7 @@ combat: null
 ```
 
 ```yaml event_card
-id: esc.v_black_river
+id: event.esc_v_black_river
 terrain: valley
 table_slot: esc
 requires: "true"
@@ -1049,7 +1049,7 @@ combat: null
 Every option chills: the "Chill" in gdd §6.3. *Lore pass text:* not soot. Mineral silt and something oily, ground fine, the way a mill grinds. Something is grinding under the mountain.
 
 ```yaml event_card
-id: esc.v_drowner_swarm
+id: event.esc_v_drowner_swarm
 terrain: valley
 table_slot: esc
 requires: "stage() >= 2"
@@ -1063,7 +1063,7 @@ combat: enc.esc_drowner_swarm
 ```
 
 ```yaml event_card
-id: esc.v_blight_wagon
+id: event.esc_v_blight_wagon
 terrain: valley
 table_slot: esc
 requires: "stage() >= 2"
@@ -1078,21 +1078,21 @@ combat: enc.esc_blight_wagon
 *Agility pass text:* the cask splits and burns out in a roar, taking both zealots' nerve with it; they run. A blight-cask, one of Corvan's, out of Ostrel's outer tunnels. Someone is testing them.
 
 ```yaml event_card
-id: esc.m_blue_fires
+id: event.esc_m_blue_fires
 terrain: mountain
 table_slot: esc
 requires: "true"
 title: "Cold blue fire"
 text: "When you strike a light, the flame comes up blue and gives no heat. The lantern too. Every fire on the mountain burns cold tonight, as if something under the rock is drinking the warmth."
 options:
-  - {id: endure, text: "Push on without warmth.", effects: ["set_flag(flag.blue_fires_active)"], next: null}
-  - {id: tallow, text: "Grease yourself with frost-tallow. [Item: frost-tallow]", tag: item, condition: "has_item(item.frost_tallow)", effects: ["take_item(item.frost_tallow, 1)", "set_flag(flag.blue_fires_active)", "add_xp(30)"], next: null}
+  - {id: endure, text: "Push on without warmth.", effects: ["set_flag_until(flag.blue_fires_active, zone_exit)"], next: null}
+  - {id: tallow, text: "Grease yourself with frost-tallow. [Item: frost-tallow]", tag: item, condition: "has_item(item.frost_tallow)", effects: ["take_item(item.frost_tallow, 1)", "set_flag_until(flag.blue_fires_active, zone_exit)", "add_xp(30)"], next: null}
 combat: null
 ```
 Per gdd §6.3, campfires give no warmth in the journey's arrival zone. Frost-tallow halves the Chill rate for that zone visit (gdd §6.9); the card only lets the player apply it in advance.
 
 ```yaml event_card
-id: esc.m_tremor
+id: event.esc_m_tremor
 terrain: mountain
 table_slot: esc
 requires: "true"
@@ -1105,7 +1105,7 @@ combat: null
 ```
 
 ```yaml event_card
-id: esc.m_stray_warden
+id: event.esc_m_stray_warden
 terrain: mountain
 table_slot: esc
 requires: "stage() >= 4"
@@ -1131,21 +1131,21 @@ requires: "not flag(flag.jory_crossing_granted)"
 title: "Ford the Marnadal"
 text: "No barge for you without Jory's leave. The ford is chest-deep and fast, brown water piling against the marker stakes."
 options:
-  - {id: ford, text: "Ford it. [Agility 5]", check: {skill: agility, dc: 5, pass_effects: ["add_xp(30)"], fail_effects: ["damage_player(25)", "take_item(item.poultice, 1)"]}, next: null}
+  - {id: ford, text: "Ford it. [Agility 5]", check: {skill: agility, dc: 5, pass_effects: ["add_xp(30)"], fail_effects: ["damage_player_pct(25)", "take_random_consumable(1)"]}, next: null}
   - {id: turn_back, text: "Turn back. Find Jory, or another road.", effects: ["cancel_journey()"], next: null}
 combat: null
 ```
-Fail costs 25% HP and one random consumable in gdd §6.3. Content has no "percent" or "random item" op; see §12. `take_item` on a missing poultice is a no-op the engine must allow (§12).
+Fail costs 25% HP and one random consumable (gdd §6.3): `damage_player_pct(25)`, `take_random_consumable(1)` (content-format §J.2).
 
 ```yaml event_card
 id: event.snow_choked_pass
 terrain: none
 table_slot: null
-requires: "stage() >= 2 and not flag(flag.strept_guides) and not in_party(companion.dravin)"
+requires: "stage() >= 2 and not flag(flag.strept_guides) and not flag(flag.journey_guides) and not in_party(companion.dravin)"
 title: "Snow-choked pass"
 text: "The pass is drifted to the waist and the wind has teeth. No guide to show you where the snow is rotten over the drops."
 options:
-  - {id: push, text: "Push through. [Grit 6]", check: {skill: grit, dc: 6, pass_effects: ["add_xp(40)"], fail_effects: ["apply_status(chill, 2)", "damage_player(30)"]}, next: null}
+  - {id: push, text: "Push through. [Grit 6]", check: {skill: grit, dc: 6, pass_effects: ["add_xp(40)"], fail_effects: ["apply_status(chill, 2)", "damage_player_pct(30)"]}, next: null}
   - {id: turn_back, text: "Turn back and come again with a guide.", effects: ["cancel_journey()"], next: null}
 combat: null
 ```
@@ -1179,16 +1179,16 @@ guarantees:
 ```
 
 ## 12. Open questions
-- **Hazard checks on attributes.** gdd §6.3 writes hazards as "Agility 6", "Grit 6", "Grit 7", but content-format §C's `skill()` lists only persuade/intimidate/investigate/lore. I wrote `check: {skill: agility|grit, dc: N}` and assume the check resolver accepts attribute names (the stat value plus bonuses). Alternatively add `stat` checks to the format.
-- **Off-scale DCs.** gdd §6.3 uses Wits 5, Presence 7, Agility 5, Grit 7; content-format §I wants 4/6/8/10. I kept the gdd values where the gdd names them (L2 5, L7 7, ford 5, tremor 7) and used the scale elsewhere.
-- **Percent damage and random consumables.** gdd's "25% HP" and "one random consumable" have no effect op. I used `damage_player(25)` and `take_item(item.poultice, 1)` as stand-ins. Proposal: `damage_player_pct(N)` and `take_random_consumable()`. `take_item` on an item the player lacks should be a no-op, not a failure.
-- **Turning back from a forced hazard.** Every card needs an option with no condition and no check, but the two forced hazards (`event.ford_marnadal`, `event.snow_choked_pass`) are checks by nature. I added a "Turn back" option using a proposed new effect `cancel_journey()` (the token returns to the start node, no encounter roll). It is **not** in content-format §E yet and will fail the content tests until added. Alternative: drop the rule for `terrain: none` cards.
-- **"Guides for this journey" (M2).** No effect expresses a journey-scoped modifier. The Friendly option gives XP and a rumor only. Proposal: `journey_modifier(guides)`.
-- **"+1 rumor" (L6).** No `draw_rumor()` effect exists, so the supper gives a fixed rumor per act. Proposal: `draw_rumor(source)`.
-- **`flag.blue_fires_active`.** The flag needs clearing when the player leaves the arrival zone. No zone owns that. Proposal: the travel application clears it on the next `JourneyStarted`, or add a journey-scoped status op.
-- **Two cards on one slot (L5).** `event.l5_sodden_tinker` and `event.l5_drozd_returns` share slot 5 with mutually exclusive `requires`. I assume the table resolves a slot to the first card in file order whose `requires` is true. If a slot holds exactly one entry, move the Drozd card to the lowlands escalation pool instead.
-- **Escalation-pool ids.** gdd names the pool entries `esc.*`, so the pool cards use `esc.*` as their `event_card` id (stored under `event_cards/`). Rename to `event.esc_*` if the converter requires the `event.` prefix.
+- **Hazard checks on attributes (resolved by A08).** `check: {skill: agility|grit, dc: N}` is an attribute check (content-format §J.1).
+- **DCs (resolved by A08).** Any DC from 4 to 10 is valid; the gdd values (5, 7) stay.
+- **Percent damage and random consumables (resolved by A08).** `damage_player_pct(N)` and `take_random_consumable(N)` (§J.2). `take_item` of an item the player lacks is a no-op.
+- **Turning back from a forced hazard (resolved by A08).** `cancel_journey()` is in §J.2. The forced hazards are attached to map edges in `world/01-travel-map.md`.
+- **"Guides for this journey" (M2) (resolved by A08).** `set_flag_until(flag.journey_guides, journey_end)`; the snow-choked-pass hazard condition reads it.
+- **"+1 rumor" (L6) (resolved by A08).** The supper runs `draw_rumor()`.
+- **`flag.blue_fires_active` (resolved by A08).** Set with `set_flag_until(flag.blue_fires_active, zone_exit)`.
+- **Two cards on one slot (L5) (resolved by A08).** The lowlands table (`world/02-encounter-tables.md`) rolls the tinker on slot 5, with the Drozd card as the slot's `alt` while its condition holds.
+- **Escalation-pool ids (resolved by A08).** The pool cards are `event.esc_*`; the encounter tables carry the gdd's `esc.*` ids as pool entries that reference them.
 - **L3 bulb after a fight.** If the Wenna option's check fails and the fight is won, the player should still get the bulb. Encounters cannot read conditions in `on_won`, so I propose `enc.travel_lily_wagon` gets a variant `enc.travel_lily_wagon_wenna` or the arena gets a conditional pickup. Left for the reconciliation pass.
-- **Consumable ids** (`item.poultice`, `item.field_draught`, `item.frost_tallow`, `item.fire_oil`, `item.antitoxin`, `item.crossbow_bolts`) are named from gdd §6.9 but not declared there. I expect A04 (first shops) to declare them.
-- `flag.roost_resolved` (M4) is expected from A06's Wyvern's Roost.
-- **M6 first strike.** The Investigate pass should start the fight without the sharpshooter's opening shot. Encounters have no "ambush / ambushed" field; I propose an optional `opening: player_first | enemy_first` on `encounter`, or an encounter variant. Until then both outcomes load the same fight and only the fail applies `damage_player(28)`.
+- **Consumable ids (resolved by A08).** All are declared once (act1 and act2 shops); the bolt id is `item.crossbow_bolt`.
+- `flag.roost_resolved` (M4) is declared by act3/05 (checked by A08).
+- **M6 first strike (resolved by A08).** `start_encounter(enc.travel_choir_rearguard, player_first | enemy_first)` (§J.2, §J.4).

@@ -66,13 +66,13 @@ exits:
   - id: to_cloister
     area: vestry
     to_zone: zone.abbey_st_corwen
-    to_spawn: scriptorium_door
+    to_spawn: cloister_door
     condition: "not flag(flag.scriptorium_alarm)"
     effects: []
   - id: garden_gate
     area: herb_garden
     to_zone: zone.abbey_st_corwen
-    to_spawn: herb_garden_gate
+    to_spawn: cloister_door
     condition: "true"
     effects: []
   - id: bell_rope_down
@@ -196,17 +196,26 @@ interactables:
     once: false
     effects: ["start_dialogue(dlg.maelis_ledgers_done)"]
     fail_effects: []
+  - id: vestry_chest
+    area: vestry
+    kind: container
+    label: "Open the vestry chest"
+    condition: "true"
+    check: null
+    once: true
+    effects: []
+    fail_effects: []
 triggers:
   - id: alarm_fight
     area: copying_hall
-    on: beat_done
-    source: alarm_raised
+    "on": alarm
+    source: null
     condition: "not flag(flag.scriptorium_alarm)"
     once: true
-    effects: ["set_flag(flag.scriptorium_alarm)", "add_rep(faction.abbey, -5)", "start_encounter(enc.scriptorium_alarm)"]
+    effects: ["play_beat(alarm_raised)", "set_flag(flag.scriptorium_alarm)", "add_rep(faction.abbey, -5)", "start_encounter(enc.scriptorium_alarm)"]
   - id: first_entry
     area: vestry
-    on: enter
+    "on": enter
     source: null
     condition: "not visited(zone.abbey_scriptorium)"
     once: true
@@ -534,7 +543,7 @@ nodes:
     type: line
     speaker: npc.brother_faddo
     text: "Brother Hollin! Brother Hollin, there's a man up here!"
-    effects: ["play_beat(alarm_raised)"]
+    effects: ["raise_alarm()"]
     next: bye
   leave_line:
     type: line
@@ -589,7 +598,7 @@ nodes:
         next: writ_answer
       - id: fight
         text: "Draw steel."
-        effects: ["play_beat(alarm_raised)"]
+        effects: ["raise_alarm()"]
         next: bye
       - id: retreat
         text: "I'm lost. I'll go."
@@ -605,7 +614,7 @@ nodes:
     type: line
     speaker: npc.brother_hollin
     text: "The Abbot sends no one at night. The Abbot sends me. Brothers!"
-    effects: ["play_beat(alarm_raised)"]
+    effects: ["raise_alarm()"]
     next: bye
   feather_answer:
     type: branch
@@ -622,7 +631,7 @@ nodes:
     type: line
     speaker: npc.brother_hollin
     text: "Then say the words. ...No? A feather off a dead man. Brothers, to me!"
-    effects: ["play_beat(alarm_raised)"]
+    effects: ["raise_alarm()"]
     next: bye
   book_answer:
     type: line
@@ -640,7 +649,7 @@ nodes:
         once: true
       - id: book_fight
         text: "Then we finish this."
-        effects: ["play_beat(alarm_raised)"]
+        effects: ["raise_alarm()"]
         next: bye
   book_pass:
     type: line
@@ -652,7 +661,7 @@ nodes:
     type: line
     speaker: npc.brother_hollin
     text: "No. No, the Abbot is right, and you are the lie. Brothers!"
-    effects: ["play_beat(alarm_raised)"]
+    effects: ["raise_alarm()"]
     next: bye
   threat_pass:
     type: line
@@ -665,13 +674,13 @@ nodes:
     type: line
     speaker: npc.brother_hollin
     text: "I shod horses that kicked harder than you. Brothers!"
-    effects: ["play_beat(alarm_raised)"]
+    effects: ["raise_alarm()"]
     next: bye
   writ_answer:
     type: line
     speaker: npc.brother_hollin
     text: "The Marshal burned the Strept halls with children in them. His writ is ash in God's house. Brothers, to me!"
-    effects: ["play_beat(alarm_raised)"]
+    effects: ["raise_alarm()"]
     next: bye
   retreat_answer:
     type: line
@@ -729,13 +738,13 @@ nodes:
     type: line
     speaker: npc.maelis
     text: "Pip will run it to the palace gate. Kosk's men will be pulling feathers out of collars by noon. And I'm coming with you. There's nothing left for me in this house."
-    effects: ["set_flag(flag.maelis_ledgers_done)", "add_rep(faction.abbey, 15)", "recruit(companion.maelis)"]
+    effects: ["set_flag(flag.maelis_ledgers_done)", "add_rep(faction.abbey, 15)", "recruit(companion.maelis)", "set_flag(flag.maelis_recruited)"]
     next: bye
   kept:
     type: line
     speaker: npc.maelis
     text: "Then you're keeping thirty-eight knives in your pocket. Every day they stay sheathed is a day they choose where to cut. But it's your neck. And mine: I'm coming with you."
-    effects: ["set_flag(flag.maelis_ledgers_done)", "add_rep(faction.abbey, 5)", "recruit(companion.maelis)"]
+    effects: ["set_flag(flag.maelis_ledgers_done)", "add_rep(faction.abbey, 5)", "recruit(companion.maelis)", "set_flag(flag.maelis_recruited)"]
     next: bye
   bye:
     type: end
@@ -759,6 +768,7 @@ avoidable_by: ["dlg.hollin_caught", "dlg.faddo_bribe"]
 on_won: ["set_flag(flag.hollin_dealt)"]
 on_yielded: ["set_flag(flag.hollin_dealt)"]
 on_player_fled: []
+on_executed: ["add_rep(faction.abbey, -5)"]
 ```
 
 Notes: two lay brothers with cudgels come down the gallery ladder while a crossbowman (a Choir-sworn brother with a hunting crossbow) holds the gallery rail. When they fall, Hollin (`warden` variant: thug stats, +20 HP) comes from his lectern. All four can yield; the player can spare or kill them, and killing monks in the scriptorium costs `faction.abbey` −5 per kill (applied by the encounter's yield system as a standard "execute" penalty; see open questions). The player can also break off at any time through the bell rope or the drain; leaving the fight does not lose anything already taken. If the press has not been opened yet, it can still be opened after the fight (or picked: the fail branch no longer matters once the alarm is up).
@@ -927,8 +937,8 @@ guarantees:
 ```
 
 ## 12. Open questions
-- **Stealth alarm as a beat:** this file assumes the stealth system plays the zone beat `alarm_raised` when a guard reaches suspicion 100 (gdd §6.5 "the zone's alarm branch fires"). If the engine uses a different hook (for example a reserved trigger `on: alarm`), rename the trigger here.
-- **Executing yielded monks:** a per-kill Abbey −5 penalty is described in prose; there is no encounter field for "on execute" effects. Either add one to the encounter schema or drop the penalty.
+- **Stealth alarm (resolved by A08):** the alarm trigger is `"on": alarm` (content-format §J.3); scripted alarms run `raise_alarm()`. The `alarm_raised` beat is its presentation.
+- **Executing yielded monks (resolved by A08):** `enc.scriptorium_alarm` has `on_executed: ["add_rep(faction.abbey, -5)"]` (content-format §J.4).
 - **Two placements of one NPC:** Maelis appears in two areas with exclusive conditions. Confirm the zone schema allows repeated `npc` entries.
 - **Interacting with Maelis here** runs her default dialogue (A04). The hand-off uses interactables (`handoff_vestry`, `handoff_garden`) so it does not depend on A04's dialogue.
 - **Feather password:** Hollin accepts a pale feather plus Lore 6 (knowing the Choir's call-and-response, "the light from dark", from Anselm's sermons). A branch node on `skill(lore) >= 6` is used rather than a check node so the player cannot retry; flag if branches should not test skills.

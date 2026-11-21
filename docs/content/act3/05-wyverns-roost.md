@@ -122,28 +122,28 @@ interactables:
 triggers:
   - id: she_watches
     area: saddle_south
-    on: enter
+    "on": enter
     source: null
     condition: "not flag(flag.roost_resolved)"
     once: true
     effects: ["set_checkpoint(saddle)", "play_beat(she_watches)"]
   - id: warband_parts
     area: saddle_south
-    on: enter
+    "on": enter
     source: null
     condition: "in_party(ally.strept_warband)"
     once: true
     effects: ["play_beat(warband_parts)"]
   - id: standoff
     area: nest_approach
-    on: enter
+    "on": enter
     source: null
     condition: "has_item(item.wyvern_eggs) and not flag(flag.roost_resolved)"
     once: false
     effects: ["start_dialogue(dlg.wyvern_standoff)"]
   - id: nest_attack
     area: nest_approach
-    on: enter
+    "on": enter
     source: null
     condition: "not has_item(item.wyvern_eggs) and not flag(flag.roost_resolved)"
     once: false
@@ -262,7 +262,7 @@ interactables:
 triggers:
   - id: harry_begins
     area: chain_walk
-    on: enter
+    "on": enter
     source: null
     condition: "not flag(flag.wyvern_slain) and not flag(flag.wyvern_eggs_returned)"
     once: true

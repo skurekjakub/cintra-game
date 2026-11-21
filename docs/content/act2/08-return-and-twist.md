@@ -28,7 +28,7 @@ The player rides back into Cintra with proof that the Queen's confessor is her p
 
 ## 3. Location layout
 
-**The sickroom, twist variant** (`zone.palace_sickroom`, owned by act1; this section adds a variant, see the integration patch below). It is night, a fire in the grate, and Kosk's own men on the door. The Queen's bed is curtained, with Aldric on a stool beside it. A side table holds the Lion's Crown on a cushion, brought from the treasury for the investiture. The windows look across the river to the Abbey's dark bell tower.
+**The sickroom, twist variant** (`zone.palace_sickroom`, owned by act1; this section adds a variant, its additions live in act1's zone block). It is night, a fire in the grate, and Kosk's own men on the door. The Queen's bed is curtained, with Aldric on a stool beside it. A side table holds the Lion's Crown on a cushion, brought from the treasury for the investiture. The windows look across the river to the Abbey's dark bell tower.
 
 **The catacombs beneath St. Corwen** (`zone.abbey_catacombs`, dungeon, about 90 × 50 m, a linear chase with two side pockets).
 1. **Palace stair** (entry): a narrow stair from the palace chapel's crypt (behind a tomb slab that is now open) down 12 m into the old catacomb line. Drugged guards lie on the steps.
@@ -39,52 +39,8 @@ The player rides back into Cintra with proof that the Queen's confessor is her p
 6. **Abbey crypt stair** (side exit, south): up into the Abbey of St. Corwen (`zone.abbey_st_corwen`, act1).
 7. **Sluice chamber:** the river exit, an iron sluice gate on the Yaruga with a mooring ring and cut ropes. The boat is gone. On the wall by the ring, a tailless lion and the word OSTREL are scratched with a ring-stone (Aldric's sign from Act I, `flag.aldric_promise`).
 
-```text
-INTEGRATION PATCH for zone.palace_sickroom (owned by act1/03-sickroom-red-herring.md).
-Please add to that zone block:
+The twist's additions to `zone.palace_sickroom` (the `twist_door` spawn, `give_antidote_by_hand`, the `twist_return` trigger, the beats `queen_dies`, `investiture`, `night_falls` and `bells_at_night`, the `twist_night` variant and the `to_catacombs` exit) now live in act1's zone block (`act1/03-sickroom-red-herring.md`, applied by A08). The map's "Return to Cintra" action places the player at `zone.palace_sickroom` / `twist_door`.
 
-spawns:
-  - {id: twist_door, area: <sickroom door area>}
-interactables:
-  - id: give_antidote_by_hand
-    area: <bedside area>
-    kind: lever
-    label: "Give the Queen the counter-dose"
-    condition: "has_item(item.wenna_antidote) and not flag(flag.antidote_administered) and not ms(ms.act2_twist)"
-    check: null
-    once: true
-    effects: ["administer_antidote(queen)"]
-triggers:
-  - id: twist_return
-    area: <sickroom door area>
-    on: enter
-    source: null
-    condition: "ms(ms.a2_wenna_line_resolved) and ded(ded.anselm_treason_proven) and has_item(item.true_fourth_verse) and not flag(flag.twist_started)"
-    once: true
-    effects: ["set_flag(flag.twist_started)", "start_dialogue(dlg.twist_kosk)"]
-beats:
-  - {id: queen_dies, description: "Ysolde's breathing stops between one word and the next. Aldric does not let go of her hand."}
-  - {id: investiture, description: "Ysolde (or Kosk) sets the Lion's Crown on Aldric's head; the guards on the door kneel."}
-  - {id: night_falls, description: "Fade. Candles burnt low. The palace sleeps."}
-  - {id: bells_at_night, description: "Across the river the Abbey bells ring, unbidden, wrong, all at once."}
-variants:
-  - id: twist_night
-    when: "flag(flag.twist_started)"
-    description: "Night. Kosk's men on the door, the Crown on a cushion by the bed, Aldric on a stool."
-    npcs_absent: [npc.anselm]
-    encounters_disabled: []
-    interactables_disabled: []
-exits:
-  - id: to_catacombs
-    area: <sickroom door area>
-    to_zone: zone.abbey_catacombs
-    to_spawn: palace_stair
-    condition: "ms(ms.act2_twist)"
-    effects: []
-
-The map's "Return to Cintra" action (unlocked by the Act II gate) should place the player at
-zone.palace_sickroom / twist_door.
-```
 
 ```yaml zone
 id: zone.abbey_catacombs
@@ -167,20 +123,20 @@ interactables:
 triggers:
   - id: rearguard
     area: servants_junction
-    on: enter
+    "on": enter
     source: null
     condition: "not flag(flag.rearguard_beaten)"
     once: true
     effects: ["set_checkpoint(junction_cp)", "play_beat(rearguard_waits)", "start_encounter(enc.catacomb_rearguard)"]
   - id: oil_trap_walk
     area: ossuary_gallery
-    on: enter
+    "on": enter
     source: null
     condition: "not flag(flag.oil_wire_cut) and not flag(flag.oil_trap_sprung)"
     once: true
     effects: ["set_flag(flag.oil_trap_sprung)"]
 hazards:
-  - {id: oil_wall, area: ossuary_gallery, kind: fire, params: {active_after_beat: oil_burst, damage_per_second: 8, duration_s: 10, disabled_by_flag: flag.oil_wire_cut}}
+  - {id: oil_wall, area: ossuary_gallery, kind: fire, enabled_by: {"on": beat_done, source: oil_burst}, active_when: "not flag(flag.oil_wire_cut)", params: {damage_per_second: 8, duration_s: 10}}
   - {id: seep, area: flooded_crypt, kind: deep_mud, params: {speed_mult: 0.7}}
 checkpoints:
   - {id: catacomb_entry, area: palace_stair}
@@ -329,10 +285,10 @@ nodes:
   publish_confirm:
     type: choice
     options:
-      - id: yes
+      - id: "yes"
         text: "Publish it. He sold the poison. Let him answer."
         next: publish_betray
-      - id: no
+      - id: "no"
         text: "No. Keep it. He may yet be worth more as a friend."
         next: plan_choice
   publish_betray:
@@ -728,7 +684,8 @@ refutes: []
 
 ```yaml flags
 declare:
-  - {id: ms.a2_return_cintra, type: milestone, desc: "The player returned to Cintra with the Act II gate met. Not an Act II progress milestone; it fires the pending rider resolution."}
+  - {id: flag.maelis_dead, type: bool, desc: "System-set: Maelis died of the Choir poison (gdd §6.2, §6.13). Declared here, its first reader."}
+  - {id: ms.a2_return_cintra, type: milestone, xp: 100, desc: "The player returned to Cintra with the Act II gate met. Not an Act II progress milestone; it fires the pending rider resolution."}
   - {id: ms.act2_twist, type: milestone, desc: "Aldric's abduction is discovered. Escalation stage 4."}
   - {id: flag.twist_started, type: bool, desc: "The twist sickroom scene has begun."}
   - {id: flag.queen_alive, type: bool, desc: "The Queen survives the twist (= flag.antidote_administered at the resolution). Read by the endings."}
@@ -750,7 +707,6 @@ reads:
   - flag.raimund_allied
   - flag.oswy_witness
   - flag.liss_left
-  - flag.maelis_dead
   - flag.aldric_promise
   - flag.aldric_trusts_player
   - flag.aldric_guard_doubled
@@ -772,7 +728,7 @@ stages:
   - id: return_to_cintra
     journal: "I have the cure (or the knowledge there is none), the proof, and the true verse. Cintra, then. Kosk is waiting."
     objectives:
-      - {id: see_kosk, text: "Return to the Queen's sickroom in Cintra", condition: "ms(ms.a2_return_cintra)", optional: false, xp: 100}
+      - {id: see_kosk, text: "Return to the Queen's sickroom in Cintra", condition: "ms(ms.a2_return_cintra)", optional: false}
       - {id: crown, text: "See Aldric given the Crown's authority", condition: "flag(flag.aldric_co_sovereign) or flag(flag.aldric_emergency_writ) or flag(flag.aldric_crowned_king)", optional: false, xp: 100}
     on_complete: []
     next: []
@@ -833,9 +789,9 @@ guarantees:
 ```
 
 ## 12. Open questions
-- **Sickroom ownership:** the twist runs in act1's `zone.palace_sickroom`. The integration patch above lists exactly what act1's zone block needs (a spawn, one interactable, one trigger, four beats, a variant, an exit). If act1 prefers, the twist could use a separate `zone.palace_sickroom_night`, but gdd §7.2 calls it a variant.
+- **Sickroom ownership:** the twist runs in act1's `zone.palace_sickroom`. A08 applied the twist's additions (a spawn, one interactable, one trigger, four beats, a variant, an exit) to act1's zone block. If act1 prefers, the twist could use a separate `zone.palace_sickroom_night`, but gdd §7.2 calls it a variant.
 - **Order of the twist resolution** (see §2 deviation note): flags are set just before `ms.act2_twist`, not at it.
-- **`set_act(3)` placement:** stage 4 already "begins Act III" in gdd §6.1. Act is set here at the sluice so the catacombs remain Act II content; the escalation card and the act change are one short catacomb chase apart.
-- **`start_quest(quest.main_a3)`** is fired here. act3 should not start it again in `act3/01-race-south.md`.
-- **`flag.maelis_dead`** is assumed to be set by the companion system when the scripted Maelis poisoning kills her (gdd §6.13). It is listed as expected.
+- **`set_act(3)` placement (resolved by A08):** this section owns `set_act(3)` and `start_quest(quest.main_a3)` (content-format §J.7); act3/01 has no fallback.
+- **`start_quest(quest.main_a3)`** is fired here only (A08 removed act3/01's fallback).
+- **`flag.maelis_dead`** is set by the companion system when the scripted poisoning kills Maelis (gdd §6.13) and is declared here, its first reader (A08).
 - `map.stairs_foot` is used as a map pin for the Race South; act3 owns the map unlocks.

@@ -57,15 +57,8 @@ exits:
     to_spawn: raft_bow
     condition: "flag(flag.ferry_fare_paid)"
     effects: []
+  - {id: track_board, area: bluff_cut, to_map: true, label: "Climb back to the road", condition: "true", effects: []}
 interactables:
-  - id: track_board
-    area: bluff_cut
-    kind: map_board
-    label: "Climb back to the road"
-    condition: "true"
-    check: null
-    once: false
-    effects: []
   - id: ferryman
     area: landing
     kind: search
@@ -118,14 +111,14 @@ interactables:
 triggers:
   - id: first_sight
     area: landing
-    on: enter
+    "on": enter
     source: null
     condition: "not visited(zone.grey_ferry_crossing)"
     once: true
     effects: ["play_beat(raft_rides_low)"]
   - id: thief_punished
     area: landing
-    on: interact
+    "on": interact
     source: coin_bowl
     condition: "true"
     once: true
@@ -224,28 +217,28 @@ interactables:
 triggers:
   - id: fog_closes
     area: mid_channel
-    on: enter
+    "on": enter
     source: null
     condition: "true"
     once: true
     effects: ["play_beat(fog_closes)"]
   - id: dead_ask_toll
     area: mid_channel
-    on: enter
+    "on": enter
     source: null
     condition: "flag(flag.ferryman_wronged) and not flag(flag.dead_toll_settled)"
     once: false
     effects: ["start_dialogue(dlg.dead_toll)"]
   - id: drowners_rise
     area: far_shore
-    on: enter
+    "on": enter
     source: null
     condition: "stage() >= 2"
     once: true
     effects: ["play_beat(silt_boils)", "start_encounter(enc.grey_ferry_drowners)"]
 hazards:
   - {id: deep_water, area: raft, kind: tide, params: {fall_off_damage: 15, return_to: raft}}
-  - {id: far_silt, area: far_shore, kind: deep_mud, params: {speed_mult: 0.6, condition: "stage() >= 2"}}
+  - {id: far_silt, area: far_shore, kind: deep_mud, active_when: "stage() >= 2", params: {speed_mult: 0.6}}
 checkpoints:
   - {id: before_crossing, area: raft}
   - {id: before_far_shore, area: far_shore}

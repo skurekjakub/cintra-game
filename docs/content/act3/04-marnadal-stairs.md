@@ -88,16 +88,8 @@ exits:
     to_spawn: west_anchor
     condition: "true"
     effects: []
+  - {id: foot_board, area: stairs_foot_camp, to_map: true, label: "Go down to the valley roads", condition: "true", effects: []}
 interactables:
-  - id: foot_board
-    area: stairs_foot_camp
-    kind: map_board
-    label: "Go down to the valley roads"
-    condition: "true"
-    check: null
-    once: false
-    effects: []
-    fail_effects: []
   - id: foot_fire
     area: stairs_foot_camp
     kind: rest
@@ -173,28 +165,28 @@ interactables:
 triggers:
   - id: rearguard_hail
     area: rearguard_barricade
-    on: enter
+    "on": enter
     source: null
     condition: "not flag(flag.stairs_rearguard_resolved) and not flag(flag.stairs_rearguard_talked)"
     once: true
     effects: ["set_flag(flag.stairs_rearguard_talked)", "set_checkpoint(before_barricade)", "play_beat(barricade_hail)", "start_dialogue(dlg.ostwin_barricade)"]
   - id: rearguard_return
     area: rearguard_barricade
-    on: enter
+    "on": enter
     source: null
     condition: "not flag(flag.stairs_rearguard_resolved) and flag(flag.stairs_rearguard_talked) and not flag(flag.stairs_ledge_taken)"
     once: false
     effects: ["start_encounter(enc.stairs_rearguard)"]
   - id: guides_point
     area: goat_gate
-    on: enter
+    "on": enter
     source: null
     condition: "flag(flag.strept_guides)"
     once: true
     effects: ["play_beat(guides_point_ledge)"]
   - id: direct_bark
     area: goat_gate
-    on: enter
+    "on": enter
     source: null
     condition: "not flag(flag.strept_guides)"
     once: true
@@ -290,6 +282,7 @@ interactables:
   - id: nest_rope_1
     area: sniper_cliff
     kind: lever
+    activate_by: shot
     label: "Shoot nest 1's hanging rope (crossbow)"
     condition: "not flag(flag.spans_sharpshooters_cleared)"
     check: null
@@ -299,6 +292,7 @@ interactables:
   - id: nest_rope_2
     area: sniper_cliff
     kind: lever
+    activate_by: shot
     label: "Shoot nest 2's hanging rope (crossbow)"
     condition: "not flag(flag.spans_sharpshooters_cleared)"
     check: null
@@ -317,14 +311,14 @@ interactables:
 triggers:
   - id: snipers_open_fire
     area: span_2
-    on: enter
+    "on": enter
     source: null
     condition: "not flag(flag.spans_sharpshooters_cleared) and not in_party(ally.strept_warband)"
     once: true
     effects: ["set_checkpoint(gorge_hut)", "play_beat(first_shot)", "start_encounter(enc.stairs_sharpshooters)"]
   - id: snipers_open_fire_warband
     area: span_2
-    on: enter
+    "on": enter
     source: null
     condition: "not flag(flag.spans_sharpshooters_cleared) and in_party(ally.strept_warband)"
     once: true
@@ -457,21 +451,21 @@ interactables:
 triggers:
   - id: troll_a_rises
     area: first_bridge
-    on: enter
+    "on": enter
     source: null
     condition: "not flag(flag.troll_a_resolved)"
     once: true
     effects: ["set_checkpoint(gorge_edge_cp)", "play_beat(troll_rises)", "start_encounter(enc.ice_bridge_troll)"]
   - id: terrace_warm
     area: fire_pot_terrace
-    on: interact
+    "on": interact
     source: fire_pot_3
     condition: "var(var.ice_fire_pots) >= 3 and not flag(flag.troll_b_resolved)"
     once: true
     effects: ["set_flag(flag.troll_b_turned)", "set_flag(flag.troll_b_resolved)", "play_beat(troll_turns_from_fire)", "add_xp(120)"]
   - id: troll_b_wakes
     area: troll_den
-    on: enter
+    "on": enter
     source: null
     condition: "not flag(flag.troll_b_resolved)"
     once: true
@@ -572,7 +566,7 @@ nodes:
       - id: robe
         text: "[Item: Choir robe] New word from the top, brother. You're called up. All of you. The Abbot wants every blade at the Lock when the light comes. [Persuade 8]"
         tag: item
-        condition: "has_item(item.choir_robe)"
+        condition: "equipped(item.choir_robe)"
         once: true
         check: {skill: persuade, dc: 8, pass: robe_pass, fail: robe_fail}
       - id: cipher
@@ -748,7 +742,8 @@ enemies:
 waves: []
 attack_tokens: null
 allow_yield: true
-allies: [ally.strept_warband]
+allies:
+  - {ally: ally.strept_warband, condition: "in_party(ally.strept_warband)"}
 checkpoint: before_barricade
 avoidable_by: ["dlg.ostwin_barricade"]
 on_won: ["set_flag(flag.stairs_rearguard_resolved)", "set_flag(flag.stairs_rearguard_killed)"]
@@ -766,7 +761,8 @@ enemies:
 waves: []
 attack_tokens: null
 allow_yield: true
-allies: [ally.strept_warband]
+allies:
+  - {ally: ally.strept_warband, condition: "in_party(ally.strept_warband)"}
 checkpoint: before_barricade
 avoidable_by: ["dlg.ostwin_barricade"]
 on_won: ["set_flag(flag.stairs_rearguard_resolved)", "set_flag(flag.stairs_rearguard_killed)"]
@@ -803,7 +799,8 @@ enemies:
 waves: []
 attack_tokens: null
 allow_yield: false
-allies: [ally.strept_warband]
+allies:
+  - {ally: ally.strept_warband, condition: "in_party(ally.strept_warband)"}
 checkpoint: gorge_hut
 avoidable_by: []
 on_won: ["set_flag(flag.spans_sharpshooters_cleared)"]
@@ -821,7 +818,8 @@ enemies:
 waves: []
 attack_tokens: null
 allow_yield: false
-allies: [ally.strept_warband]
+allies:
+  - {ally: ally.strept_warband, condition: "in_party(ally.strept_warband)"}
 checkpoint: gorge_edge_cp
 avoidable_by: []
 on_won: ["set_flag(flag.troll_a_resolved)", "set_flag(flag.troll_a_killed)"]
@@ -837,7 +835,8 @@ enemies:
 waves: []
 attack_tokens: null
 allow_yield: false
-allies: [ally.strept_warband]
+allies:
+  - {ally: ally.strept_warband, condition: "in_party(ally.strept_warband)"}
 checkpoint: fire_terrace
 avoidable_by: []
 on_won: ["set_flag(flag.troll_b_resolved)", "set_flag(flag.troll_b_killed)"]
@@ -964,7 +963,7 @@ guarantees:
 ```
 
 ## 12. Open questions
-- **Crossbow-hit interactables.** `nest_rope_1/2` are `lever` interactables activated by a crossbow hit, not by Interact. The zone schema has no "shot" trigger. The presentation layer should map a bolt hit on the rope to the interactable.
+- **Crossbow-hit interactables (resolved by A08).** `nest_rope_1/2` have `activate_by: shot` (content-format §J.3).
 - **Patrol sighting starts an encounter.** Troll B's patrol uses the stealth vision cone. Being seen should start `enc.serac_troll`, which needs a presentation hook. The content triggers only cover the den.
-- **Ally ids in `allies`.** I list `ally.strept_warband` in encounter `allies`. It should spawn only when `in_party(ally.strept_warband)`. The schema example lists only npc ids.
+- **Ally ids in `allies` (resolved by A08).** The war-band entries carry `condition: "in_party(ally.strept_warband)"` (content-format §J.4).
 - **Snow-choked pass.** The gdd §6.3 mountain-edge hazard is a travel event owned by the map. It is not repeated here.

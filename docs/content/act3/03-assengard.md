@@ -58,17 +58,9 @@ spawns:
   - {id: choir_yard, area: forge_yard}
   - {id: choir_roof, area: sawmill_yard}
   - {id: vault_inside, area: key_vault}
-exits: []
+exits:
+  - {id: bridge_board, area: river_bridge, to_map: true, label: "Take the road", condition: "true", effects: []}
 interactables:
-  - id: bridge_board
-    area: river_bridge
-    kind: map_board
-    label: "Take the road"
-    condition: "true"
-    check: null
-    once: false
-    effects: []
-    fail_effects: []
   - id: goose_rest
     area: goose_inn
     kind: rest
@@ -135,7 +127,7 @@ interactables:
 triggers:
   - id: cell_at_forge
     area: forge_yard
-    on: enter
+    "on": enter
     source: null
     condition: "act() == 3 and not flag(flag.dravin_recruited) and not flag(flag.assengard_raid_done)"
     once: true
@@ -499,13 +491,13 @@ nodes:
       - id: robe_orders
         text: "[Item: Choir robe] [Item: Anselm's cipher] Brother. New orders in the Abbot's cipher: the Key no longer matters. You're called up to the Lock Chamber before the light. [Persuade 6]"
         tag: item
-        condition: "has_item(item.choir_robe) and has_item(item.anselm_cipher)"
+        condition: "equipped(item.choir_robe) and has_item(item.anselm_cipher)"
         once: true
         check: {skill: persuade, dc: 6, pass: withdraw, fail: robe_fail}
       - id: robe_only
         text: "[Item: Choir robe] I've come from the mountain. The Abbot wants you there, not here. [Persuade 8]"
         tag: item
-        condition: "has_item(item.choir_robe) and not has_item(item.anselm_cipher)"
+        condition: "equipped(item.choir_robe) and not has_item(item.anselm_cipher)"
         once: true
         check: {skill: persuade, dc: 8, pass: withdraw, fail: robe_fail}
       - id: scare

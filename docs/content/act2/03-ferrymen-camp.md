@@ -60,24 +60,10 @@ spawns:
   - {id: weir_reeds, area: eel_weirs}
   - {id: yard_tents, area: camp_yard}
   - {id: lamprey_aft, area: lamprey_deck}
-exits: []
+exits:
+  - {id: travel_marker, area: toll_landing, to_map: true, label: "Leave by the Tigg track (travel)", condition: "true", effects: []}
+  - {id: ferry_winch, area: rope_ferry, to_map: true, label: "Cross on the rope ferry (travel south)", condition: "flag(flag.jory_crossing_granted)", effects: []}
 interactables:
-  - id: travel_marker
-    area: toll_landing
-    kind: map_board
-    label: "Leave by the Tigg track (travel)"
-    condition: "true"
-    check: null
-    once: false
-    effects: []
-  - id: ferry_winch
-    area: rope_ferry
-    kind: map_board
-    label: "Cross on the rope ferry (travel south)"
-    condition: "flag(flag.jory_crossing_granted)"
-    check: null
-    once: false
-    effects: []
   - id: shed_door
     area: crate_shed
     kind: door
@@ -138,21 +124,21 @@ interactables:
 triggers:
   - id: meet_at_gate
     area: barge_wall
-    on: enter
+    "on": enter
     source: null
     condition: "not flag(flag.jory_met) and not flag(flag.jory_dead)"
     once: true
     effects: ["set_flag(flag.jory_met)", "start_dialogue(dlg.bollard_gate)"]
   - id: weirs_attack
     area: eel_weirs
-    on: enter
+    "on": enter
     source: null
     condition: "not flag(flag.weir_cleared)"
     once: false
     effects: ["set_checkpoint(weir_path_cp)", "start_encounter(enc.weir_drowners)"]
   - id: choir_agents_present
     area: toll_landing
-    on: enter
+    "on": enter
     source: null
     condition: "stage() >= 3 and not ms(ms.a2_jory_dealt) and not flag(flag.jory_choir_agents_dealt)"
     once: true
@@ -506,7 +492,7 @@ nodes:
         text: "You'll give it to me for nothing, Jory. You owe me your fingers."
         condition: "flag(flag.jory_yielded)"
         next: cipher_sold
-      - id: no
+      - id: "no"
         text: "Too rich for me."
         next: hub
   cipher_sold:
@@ -528,7 +514,7 @@ nodes:
         tag: bribe
         bribe: 60
         next: invitation_sold
-      - id: no
+      - id: "no"
         text: "Not today."
         next: hub
   invitation_sold:
@@ -746,6 +732,9 @@ stack_max: 1
 equip_slot: trinket
 weapon: null
 armor: null
+trinket:
+  mods:
+    - {mod: bleed_buildup_pct, value: 10}
 consumable: null
 readable_text: null
 ```
@@ -772,7 +761,7 @@ refutes: []
 
 ```yaml flags
 declare:
-  - {id: ms.a2_jory_dealt, type: milestone, desc: "Jory has admitted the crate trade (any route) or the player took his tally by force."}
+  - {id: ms.a2_jory_dealt, type: milestone, xp: 250, desc: "Jory has admitted the crate trade (any route) or the player took his tally by force."}
   - {id: flag.jory_crossing_granted, type: bool, desc: "Free passage on the rope ferry (opens ferrymen_camp - marnadal_field without the ford)."}
   - {id: flag.jory_met, type: bool, desc: "Bollard greeted the player at the gate."}
   - {id: flag.jory_yielded, type: bool, desc: "Jory was beaten and spared."}
@@ -841,5 +830,5 @@ guarantees:
 
 ## 12. Open questions
 - The encounter `on_won` / `on_yielded` both hand over to `dlg.jory_yielded`. This assumes Jory is the last enemy standing and always reaches the yield threshold before death (he is scripted as essential until the dialogue). Mark Jory's combat instance `can_yield` and non-lethal until `dlg.jory_yielded`.
-- `item.tamas_knife` is a trinket with no stat block in the schema (trinket bonuses are not specified in gdd §6.9). Proposed: +10% bleed build-up on slash.
+- `item.tamas_knife` (resolved by A08): its `trinket.mods` give +10% bleed build-up (content-format §J.6).
 - Paying the 30-crown toll grants the crossing but not the milestone. The milestone is about the crate truth, not the passage.

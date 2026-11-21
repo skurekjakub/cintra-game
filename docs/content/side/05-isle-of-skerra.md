@@ -62,15 +62,8 @@ exits:
     to_spawn: from_village
     condition: "true"
     effects: []
+  - {id: ferry_board, area: jetty, to_map: true, label: "Take a boat back to the mainland", condition: "true", effects: []}
 interactables:
-  - id: ferry_board
-    area: jetty
-    kind: map_board
-    label: "Take a boat back to the mainland"
-    condition: "true"
-    check: null
-    once: false
-    effects: []
   - id: bargain_beam
     area: tide_shrine
     kind: readable
@@ -126,21 +119,21 @@ interactables:
 triggers:
   - id: arrive
     area: jetty
-    on: enter
+    "on": enter
     source: null
     condition: "not quest_active(quest.side_skerra) and not quest_done(quest.side_skerra) and not quest_failed(quest.side_skerra)"
     once: true
     effects: ["start_quest(quest.side_skerra)", "play_beat(fog_landing)", "set_checkpoint(village_landing)"]
   - id: ronat_leaves_hut
     area: tam_hut
-    on: interact
+    "on": interact
     source: hearthstone_known
     condition: "has_item(item.selkie_pelt)"
     once: true
     effects: ["play_beat(ronat_walks_out)"]
   - id: ronat_leaves_hut_search
     area: tam_hut
-    on: interact
+    "on": interact
     source: hearthstone_search
     condition: "has_item(item.selkie_pelt)"
     once: true
@@ -221,14 +214,14 @@ interactables:
 triggers:
   - id: buyers_block
     area: causeway
-    on: enter
+    "on": enter
     source: null
     condition: "has_item(item.selkie_pelt) and not flag(flag.skerra_buyers_dealt)"
     once: true
     effects: ["set_checkpoint(causeway_start)", "start_dialogue(dlg.fenn_galt_causeway)"]
   - id: ronat_waiting
     area: skerry_top
-    on: enter
+    "on": enter
     source: null
     condition: "has_item(item.selkie_pelt)"
     once: true
@@ -887,7 +880,7 @@ stack_max: 3
 equip_slot: null
 weapon: null
 armor: null
-consumable: null
+consumable: {effects: [], use_time: 0, quick_slot: false}
 readable_text: null
 ```
 
@@ -989,6 +982,6 @@ guarantees:
 ```
 
 ## 12. Open questions
-- `item.serpent_lure` is a consumable that is used through an interactable (06), not from a quick slot. Its `consumable` is null. Should the item schema mark "use only via interactable"?
+- `item.serpent_lure` (resolved by A08) has `consumable: {effects: [], use_time: 0, quick_slot: false}` (content-format §J.6).
 - Fenn Galt is both an npc and one of the three bandits in the encounter. The schema has no way to say "this npc is enemy #3 of the encounter". Presentation should bind him to the spear bandit.
 - Trap hazard `slick_weed` uses params (`slip_on_sprint`, `stagger_s`) that the hazard system does not define yet.

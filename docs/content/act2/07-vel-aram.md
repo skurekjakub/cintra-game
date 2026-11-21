@@ -92,15 +92,8 @@ exits:
     to_spawn: postern_cistern
     condition: "flag(flag.postern_found)"
     effects: []
+  - {id: travel_marker, area: ravine_road, to_map: true, label: "Leave Vel Aram (travel)", condition: "true", effects: []}
 interactables:
-  - id: travel_marker
-    area: ravine_road
-    kind: map_board
-    label: "Leave Vel Aram (travel)"
-    condition: "true"
-    check: null
-    once: false
-    effects: []
   - id: gibbet_body
     area: ravine_road
     kind: search
@@ -117,7 +110,7 @@ interactables:
     check: {skill: investigate, dc: 4}
     once: true
     effects: ["set_flag(flag.trip_line_cut)"]
-    fail_effects: ["play_beat(alarm)"]
+    fail_effects: ["raise_alarm()"]
   - id: cage_pin
     area: stable_ruin
     kind: lever
@@ -134,7 +127,7 @@ interactables:
     condition: "not flag(flag.yorek_freed)"
     check: null
     once: true
-    effects: ["set_flag(flag.yorek_freed)", "play_beat(alarm)", "start_dialogue(dlg.yorek)"]
+    effects: ["set_flag(flag.yorek_freed)", "raise_alarm()", "start_dialogue(dlg.yorek)"]
   - id: warden_mark
     area: well_house
     kind: readable
@@ -155,21 +148,21 @@ interactables:
 triggers:
   - id: outer_alarm
     area: outer_ward
-    on: beat_done
-    source: alarm
+    "on": alarm
+    source: null
     condition: "not flag(flag.va_outer_alarm)"
     once: true
-    effects: ["set_flag(flag.va_outer_alarm)", "start_encounter(enc.va_muster)"]
+    effects: ["play_beat(alarm)", "set_flag(flag.va_outer_alarm)", "start_encounter(enc.va_muster)"]
   - id: tunnel_arrival
     area: ravine_road
-    on: enter
+    "on": enter
     source: null
     condition: "ms(ms.a2_vel_aram_cleared) and not flag(flag.va_left_after_clear)"
     once: true
     effects: ["set_flag(flag.va_left_after_clear)", "play_beat(muster_marches)"]
 hazards:
-  - {id: bell_line, area: barbican, kind: trap, params: {trigger: walk_upright, on_trigger_beat: alarm, disabled_by_flag: flag.trip_line_cut}}
-  - {id: rotten_hoarding, area: wall_walk, kind: collapse, params: {trigger: sprint_roll_or_combat, segment_m: 8, damage: 30, knockdown: true}}
+  - {id: bell_line, area: barbican, kind: trap, active_when: "not flag(flag.trip_line_cut)", on_tripped: ["raise_alarm()"], params: {tripped_by: walk_upright}}
+  - {id: rotten_hoarding, area: wall_walk, kind: collapse, params: {tripped_by: sprint_roll_or_combat, segment_m: 8, damage: 30, knockdown: true}}
 checkpoints:
   - {id: va_arrival, area: ravine_road}
   - {id: well_cp, area: well_house}
@@ -352,38 +345,38 @@ interactables:
     condition: "not flag(flag.powder_blown)"
     check: null
     once: true
-    effects: ["set_flag(flag.powder_blown)", "play_beat(powder_blast)", "play_beat(alarm)"]
+    effects: ["set_flag(flag.powder_blown)", "play_beat(powder_blast)", "raise_alarm()"]
 triggers:
   - id: muster_sermon
     area: nave
-    on: enter
+    "on": enter
     source: null
     condition: "not flag(flag.va_sermon_seen) and not ms(ms.a2_vel_aram_cleared) and not flag(flag.va_sanctum_alarm)"
     once: true
     effects: ["set_flag(flag.va_sermon_seen)", "play_beat(muster_sermon)", "start_dialogue(dlg.prior_ulric)"]
   - id: cellarer_cracks
     area: reagent_store
-    on: enter
+    "on": enter
     source: null
     condition: "not has_item(item.wyvern_eggs) and not flag(flag.eggs_lost) and not flag(flag.cellarer_dealt)"
     once: true
     effects: ["start_dialogue(dlg.aumery)"]
   - id: sanctum_alarm
     area: nave
-    on: beat_done
-    source: alarm
+    "on": alarm
+    source: null
     condition: "not flag(flag.va_sanctum_alarm)"
     once: true
-    effects: ["set_flag(flag.va_sanctum_alarm)", "play_beat(bell_rings)"]
+    effects: ["play_beat(alarm)", "set_flag(flag.va_sanctum_alarm)", "play_beat(bell_rings)"]
   - id: bell_brings_muster
     area: nave
-    on: beat_done
+    "on": beat_done
     source: bell_rings
     condition: "not flag(flag.bell_rope_cut) and not ms(ms.a2_vel_aram_cleared)"
     once: true
     effects: ["start_encounter(enc.va_bell_reinforcements)"]
 hazards:
-  - {id: aisle_vault, area: south_aisle, kind: collapse, params: {trigger: heavy_impacts, impacts: 2, damage: 50, blocks_area_after: true}}
+  - {id: aisle_vault, area: south_aisle, kind: collapse, params: {tripped_by: heavy_impacts, impacts: 2, damage: 50, blocks_area_after: true}}
   - {id: refectory_oil, area: refectory, kind: fire, params: {ignites_on: fire, damage_per_second: 6}}
   - {id: powder, area: cellarers_store, kind: fire, params: {ignites_on: fire_or_bolt, burst_damage: 80, radius_m: 4, collapses_doorway: true}}
 checkpoints:
@@ -533,27 +526,27 @@ interactables:
 triggers:
   - id: hound_wakes_ledge
     area: hound_pit
-    on: enter
+    "on": enter
     source: null
     condition: "not flag(flag.soot_hound_dormant) and not flag(flag.soot_hound_slain) and not flag(flag.hound_awake)"
     once: true
     effects: ["set_flag(flag.hound_awake)", "set_checkpoint(pit_cp)", "play_beat(hound_wakes)", "start_encounter(enc.va_soot_hound)"]
   - id: hound_wakes_alarm
     area: engine_gallery
-    on: beat_done
-    source: alarm
+    "on": alarm
+    source: null
     condition: "not flag(flag.soot_hound_dormant) and not flag(flag.soot_hound_slain) and not flag(flag.hound_awake)"
     once: true
-    effects: ["set_flag(flag.hound_awake)", "set_checkpoint(pit_cp)", "play_beat(hound_wakes)", "start_encounter(enc.va_soot_hound)"]
+    effects: ["play_beat(alarm)", "set_flag(flag.hound_awake)", "set_checkpoint(pit_cp)", "play_beat(hound_wakes)", "start_encounter(enc.va_soot_hound)"]
   - id: postern_water
     area: sunken_postern
-    on: enter
+    "on": enter
     source: null
     condition: "not flag(flag.cistern_cleared)"
     once: true
     effects: ["start_encounter(enc.va_cistern_drowners)"]
 hazards:
-  - {id: steam_vents, area: engine_gallery, kind: steam, params: {active_when_beat: hound_wakes, damage_per_second: 8, cycle_s: 4}}
+  - {id: steam_vents, area: engine_gallery, kind: steam, enabled_by: {"on": beat_done, source: hound_wakes}, params: {damage_per_second: 8, cycle_s: 4}}
   - {id: pit_soot, area: hound_pit, kind: trap, params: {status: soot, source: enemy_cloud}}
   - {id: postern_water, area: sunken_postern, kind: deep_mud, params: {speed_mult: 0.6}}
 checkpoints:
@@ -681,14 +674,14 @@ nodes:
   route:
     type: branch
     cases:
-      - {if: "has_item(item.choir_robe) and has_item(item.pale_feather)", next: disguised}
+      - {if: "equipped(item.choir_robe) and has_item(item.pale_feather)", next: disguised}
     else: intruder
   intruder:
     type: line
     speaker: npc.prior_ulric
     text: "A stranger in the house of the swan. Brothers. Here is the old order come to see us. Show it how we answer."
     direction: "On the altar step, a congregation of grey hoods turning in the torchlight."
-    effects: ["play_beat(alarm)"]
+    effects: ["raise_alarm()"]
     next: fight
   disguised:
     type: line
@@ -724,7 +717,7 @@ nodes:
     type: line
     speaker: npc.prior_ulric
     text: "No brother of mine. Take him!"
-    effects: ["play_beat(alarm)"]
+    effects: ["raise_alarm()"]
     next: fight
   fight:
     type: effect
@@ -861,7 +854,7 @@ nodes:
   greet:
     type: branch
     cases:
-      - {if: "has_item(item.choir_robe) and has_item(item.pale_feather)", next: greet_brother}
+      - {if: "equipped(item.choir_robe) and has_item(item.pale_feather)", next: greet_brother}
     else: greet_stranger
   greet_brother:
     type: line
@@ -884,7 +877,7 @@ nodes:
       - id: prior
         text: "[Persuade 6] The Prior wants her banked for the night. Close the damper."
         tag: persuade
-        condition: "has_item(item.choir_robe)"
+        condition: "equipped(item.choir_robe)"
         check: {skill: persuade, dc: 6, pass: banked, fail: suspicious}
       - id: threat
         text: "[Intimidate 6] Let go of the chain, close the damper, and walk up those stairs. Or I put you in the pit with her."
@@ -930,7 +923,7 @@ nodes:
     speaker: npc.houndwright_edrin
     text: "Wake up, girl!"
     direction: "He hauls on the alarm chain."
-    effects: ["play_beat(alarm)"]
+    effects: ["raise_alarm()"]
     next: bye
   grabbed:
     type: line
@@ -964,7 +957,7 @@ nodes:
       - id: prior
         text: "[Persuade 6] The Prior wants them whole. The Abbot means them as a gift for the mountain."
         tag: persuade
-        condition: "has_item(item.choir_robe)"
+        condition: "equipped(item.choir_robe)"
         check: {skill: persuade, dc: 6, pass: stopped_fooled, fail: cracks}
       - id: lily
         text: "You brewed the Queen's lily, didn't you, Cellarer?"
@@ -1001,7 +994,7 @@ nodes:
     next: bye
   fight:
     type: effect
-    effects: ["set_flag(flag.cellarer_dealt)", "play_beat(alarm)", "start_encounter(enc.va_reagent)"]
+    effects: ["set_flag(flag.cellarer_dealt)", "raise_alarm()", "start_encounter(enc.va_reagent)"]
     next: bye
   bye:
     type: end
@@ -1012,9 +1005,10 @@ nodes:
 ```yaml encounter
 id: enc.va_sentries
 zone: zone.vel_aram_outer
+posture: sentry
 enemies:
   - {enemy: enemy.choir_crossbowman, count: 1, spawn: tower_stump, variant: null}
-  - {enemy: enemy.choir_crossbowman, count: 1, spawn: wall_south, variant: null}
+  - {enemy: enemy.choir_crossbowman, count: 1, spawn: wall_south, variant: null, posture: patrol, route: [wall_walk], loop_s: 25}
 waves: []
 attack_tokens: null
 allow_yield: true
@@ -1030,8 +1024,9 @@ Design: S1 (tower stump, sentry posture, faces down the ravine; turns to face th
 ```yaml encounter
 id: enc.va_patrol_a
 zone: zone.vel_aram_outer
+posture: patrol
 enemies:
-  - {enemy: enemy.choir_zealot, count: 2, spawn: tents, variant: null}
+  - {enemy: enemy.choir_zealot, count: 2, spawn: tents, variant: null, route: [barbican, stable_ruin, well_house, inner_gatehouse, wall_walk], loop_s: 70}
 waves: []
 attack_tokens: null
 allow_yield: true
@@ -1047,6 +1042,7 @@ Design: patrol posture, clockwise round the ward perimeter: barbican → stable 
 ```yaml encounter
 id: enc.va_muster
 zone: zone.vel_aram_outer
+posture: dormant
 enemies:
   - {enemy: enemy.choir_zealot, count: 3, spawn: tents, variant: null}
   - {enemy: enemy.choir_crossbowman, count: 2, spawn: tents, variant: null}
@@ -1066,8 +1062,9 @@ Design: dormant in the tents (not placed as patrols); spawns on the outer alarm.
 ```yaml encounter
 id: enc.va_patrol_b
 zone: zone.vel_aram_sanctum
+posture: patrol
 enemies:
-  - {enemy: enemy.choir_zealot, count: 2, spawn: transept, variant: null}
+  - {enemy: enemy.choir_zealot, count: 2, spawn: transept, variant: null, route: [nave, bell_tower, nave], loop_s: 50}
 waves: []
 attack_tokens: null
 allow_yield: true
@@ -1335,7 +1332,7 @@ text: "Anselm does not need to break Ostrel's vaults. He needs a crowned child o
 
 ```yaml flags
 declare:
-  - {id: ms.a2_vel_aram_cleared, type: milestone, desc: "The player took the true fourth verse from Vel Aram's reliquary; the muster marches."}
+  - {id: ms.a2_vel_aram_cleared, type: milestone, xp: 200, desc: "The player took the true fourth verse from Vel Aram's reliquary; the muster marches."}
   - {id: flag.trip_line_cut, type: bool, desc: "The barbican bell-line is cut."}
   - {id: flag.yorek_freed, type: bool, desc: "Yorek the Strept scout was freed (Strept +10; naming rite). Read by a2.04 and act3 Dun Strept."}
   - {id: flag.postern_found, type: bool, desc: "The player found the capstone under the well (the sunken postern)."}
@@ -1425,7 +1422,7 @@ guarantees:
 
 ## 12. Open questions
 - **Prior Ulric's variant** (`enemy.choir_zealot`, `variant: prior`) and **Aumery's** (`enemy.choir_thug`, `variant: alchemist`) need variant rows in enemy data. Neither is a new archetype.
-- **Patrol schema:** patrol routes and loop times are given in prose and area descriptions. The `encounter` block has no `posture` or route field (see also a2.02). Proposed: `posture: patrol|sentry|dormant` and `route: [area ids]`.
-- **Hazard parameters** (`bell_line`, `powder`, `steam_vents`) use free-form `params`. The zone runtime needs to agree on the keys `on_trigger_beat`, `ignites_on`, `active_when_beat` and `disabled_by_flag`.
+- **Patrol schema (resolved by A08):** the encounters carry `posture`, `route` and `loop_s` (content-format §J.4).
+- **Hazard parameters (resolved by A08):** `bell_line` uses `active_when` and `on_tripped: ["raise_alarm()"]`, `steam_vents` uses `enabled_by` (content-format §J.3). `ignites_on` stays a physical param.
 - **Item scope:** `item.warden_maul`'s `bonus_vs: {undead: 1.25}` uses a tag (`undead`) that exists on revenants (gdd §6.7). It does not invent a new mechanic, but tuning should confirm it.
 - The journal says Anselm gave the false verse to "the Marshal's hireling" (the player) "from memory", matching story.md §5.4. If act1 delivers it differently, adjust that one line.

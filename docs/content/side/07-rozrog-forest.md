@@ -61,15 +61,8 @@ exits:
     to_spawn: from_camp
     condition: "true"
     effects: []
+  - {id: leave_road, area: cart_track, to_map: true, label: "Take the road back to Tigg", condition: "true", effects: []}
 interactables:
-  - id: leave_road
-    area: cart_track
-    kind: map_board
-    label: "Take the road back to Tigg"
-    condition: "true"
-    check: null
-    once: false
-    effects: []
   - id: tally_board
     area: burners_huts
     kind: search
@@ -115,14 +108,14 @@ interactables:
 triggers:
   - id: arrive
     area: cart_track
-    on: enter
+    "on": enter
     source: null
     condition: "not quest_active(quest.side_rozrog) and not quest_done(quest.side_rozrog)"
     once: true
     effects: ["start_quest(quest.side_rozrog)", "set_checkpoint(camp_track)"]
   - id: carters_turn
     area: cart_track
-    on: enter
+    "on": enter
     source: null
     condition: "stage() >= 3 and flag(flag.burners_stop_cutting) and not flag(flag.rozrog_carters_dealt)"
     once: true
@@ -220,14 +213,14 @@ interactables:
 triggers:
   - id: woodwose_territory
     area: oak_ring
-    on: enter
+    "on": enter
     source: null
     condition: "not flag(flag.burners_stop_cutting) and not flag(flag.woodwose_peace) and not flag(flag.woodwose_dead)"
     once: false
     effects: ["set_checkpoint(grove_edge_cp)", "play_beat(woodwose_charges)", "start_encounter(enc.rozrog_woodwose)"]
   - id: ottla_flees
     area: grove_edge
-    on: encounter_done
+    "on": encounter_done
     source: enc.rozrog_woodwose
     condition: "flag(flag.woodwose_dead)"
     once: true
@@ -630,7 +623,8 @@ enemies:
 waves: []
 attack_tokens: null
 allow_yield: true
-allies: [npc.wencel_burner]
+allies:
+  - {ally: npc.wencel_burner, condition: "flag(flag.wencel_turned)"}
 checkpoint: camp_track
 avoidable_by: []
 on_won: ["set_flag(flag.rozrog_carters_dealt)", "give_item(item.pale_feather, 1)"]
@@ -763,4 +757,4 @@ guarantees:
 ## 12. Open questions
 - `enemy.bandit` variant `charcoal_burner` (axe, no shield, low armor) is a new data variant. gdd §6.7 lists sword, spear and shield variants "by data", so this needs adding to the enemy data.
 - `npc.choir_carter` uses `enemy.choir_zealot` as its combat profile, while the encounter lists the zealot directly. The npc block exists only for barks and placement at stage 3.
-- `allies: [npc.wencel_burner]` in `enc.rozrog_choir_carters` should be conditional on `flag.wencel_turned`. The encounter schema has no condition per ally, so presentation must check the flag.
+- Wencel as an ally (resolved by A08): `{ally: npc.wencel_burner, condition: "flag(flag.wencel_turned)"}` (content-format §J.4).

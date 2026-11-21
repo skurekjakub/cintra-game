@@ -66,15 +66,8 @@ exits:
     to_spawn: rope_bottom
     condition: "quest_active(quest.side_morrow_gull)"
     effects: ["add_var(var.morrow_dive_trips, 1)"]
+  - {id: sail_back, area: harl_boat, to_map: true, label: "Sail back to Attre", condition: "true", effects: []}
 interactables:
-  - id: sail_back
-    area: harl_boat
-    kind: map_board
-    label: "Sail back to Attre"
-    condition: "true"
-    check: null
-    once: false
-    effects: []
   - id: drop_lure
     area: harl_boat
     kind: lever
@@ -102,14 +95,14 @@ interactables:
 triggers:
   - id: arrive
     area: harl_boat
-    on: enter
+    "on": enter
     source: null
     condition: "not quest_active(quest.side_morrow_gull) and not quest_done(quest.side_morrow_gull)"
     once: true
     effects: ["start_quest(quest.side_morrow_gull)", "set_checkpoint(reef_boat)"]
   - id: surfaced_with_tube
     area: marker_buoy
-    on: enter
+    "on": enter
     source: null
     condition: "has_item(item.taster_dispatch) and not flag(flag.taster_dispatch_read)"
     once: true
@@ -148,6 +141,11 @@ time_of_day: day
 cold_rate: 0
 disguise_tag: null
 music: underwater_dread
+underwater:
+  breath_s: 60
+  damage_per_second_when_empty: 6
+  air_pockets: [air_pocket_fore, air_pocket_aft]
+  ranged_allowed: false
 areas:
   - {id: rope_bottom, description: "Grey sand and kelp at the foot of the diving rope. Two boulders for cover. Exit back up."}
   - {id: hull_breach, description: "A split along the cog's keel; bars of sunlight; a cross-current pushing toward the lair."}
@@ -169,22 +167,6 @@ exits:
     condition: "true"
     effects: []
 interactables:
-  - id: refill_fore
-    area: air_pocket_fore
-    kind: rest
-    label: "Breathe"
-    condition: "true"
-    check: null
-    once: false
-    effects: []
-  - id: refill_aft
-    area: air_pocket_aft
-    kind: rest
-    label: "Breathe"
-    condition: "true"
-    check: null
-    once: false
-    effects: []
   - id: strongbox
     area: captain_cabin
     kind: container
@@ -224,29 +206,28 @@ interactables:
 triggers:
   - id: serpent_unlured
     area: hull_breach
-    on: enter
+    "on": enter
     source: null
     condition: "not flag(flag.serpent_lured) and not flag(flag.serpent_slain)"
     once: false
     effects: ["set_checkpoint(wreck_bottom)", "play_beat(serpent_rises)", "start_encounter(enc.morrow_gull_serpent)"]
   - id: serpent_returns
     area: rope_bottom
-    on: enter
+    "on": enter
     source: null
     condition: "flag(flag.serpent_lured) and var(var.morrow_dive_trips) >= 3 and not flag(flag.serpent_slain)"
     once: false
     effects: ["clear_flag(flag.serpent_lured)", "set_checkpoint(wreck_bottom)", "play_beat(serpent_returns)", "start_encounter(enc.morrow_gull_serpent)"]
   - id: hold_drowners
     area: cargo_hold
-    on: enter
+    "on": enter
     source: null
     condition: "true"
     once: true
     effects: ["start_encounter(enc.morrow_gull_hold)"]
 hazards:
-  - {id: no_air, area: rope_bottom, kind: tide, params: {breath_meter_s: 60, applies_zone_wide: true, damage_per_second_when_empty: 6}}
   - {id: breach_current, area: hull_breach, kind: tide, params: {push_toward: serpent_lair, strength: 0.6}}
-  - {id: soft_deck, area: rotten_deck, kind: collapse, params: {on: sprint_or_heavy_landing, drop_to: cargo_hold}}
+  - {id: soft_deck, area: rotten_deck, kind: collapse, params: {tripped_by: sprint_or_heavy_landing, drop_to: cargo_hold}}
 checkpoints:
   - {id: wreck_bottom, area: rope_bottom}
 beats:
@@ -257,7 +238,7 @@ beats:
 npcs: []
 encounters: [enc.morrow_gull_serpent, enc.morrow_gull_hold]
 loot:
-  - {container: hold_crates, items: [{item: item.fire_oil, count: 1}, {item: item.crossbow_bolts, count: 6}], condition: "true"}
+  - {container: hold_crates, items: [{item: item.fire_oil, count: 1}, {item: item.crossbow_bolt, count: 6}], condition: "true"}
 variants:
   - id: serpent_dead
     when: "flag(flag.serpent_slain)"
@@ -497,7 +478,7 @@ nodes:
         text: "Do it."
         effects: ["take_item(item.taster_dispatch, 1)", "set_flag(flag.taster_dispatch_sent)", "set_flag(flag.food_taster_exposed)", "add_rep(faction.crown, 10)"]
         next: sent
-      - id: no
+      - id: "no"
         text: "No. I'll keep it."
         next: carry_line
   sent:
@@ -708,7 +689,7 @@ guarantees:
 ```
 
 ## 12. Open questions
-- **Underwater rules.** The hazard kinds have no `drowning` entry, so I used `kind: tide` with `breath_meter_s: 60` and `applies_zone_wide: true`. The zone schema may want an explicit `underwater: {breath_s: 60, air_pocket_areas: [...]}` field. The air-pocket refills are `rest` interactables with no effects, standing in for "breath refilled". Also undecided: can the crossbow be used underwater? I suggest not (melee only, slowed).
+- **Underwater rules (resolved by A08).** The wreck zone has `underwater: {breath_s: 60, damage_per_second_when_empty: 6, air_pockets: [...], ranged_allowed: false}` (content-format §J.5).
 - **Coin split.** The strongbox gives 80 crowns at once, and `coin_harl` takes 80 back if no deal was struck. Cleaner alternative: the strongbox gives 0 and `dlg.harl_dispatch` hands out the share. This is left as written so the player sees the coin.
-- `item.fire_oil` and `item.crossbow_bolts` are assumed ids for gdd §6.9 consumables ("fire oil", "bolts"). Confirm the canonical ids.
+- `item.fire_oil` and `item.crossbow_bolt` are declared in act1 (checked by A08).
 - The rumor "The serpent's lair" and the escalation of the Choir lugger are flavor only. A lugger fight on the way back would be a natural add-on if Act II needs more naval content.

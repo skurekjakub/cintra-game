@@ -74,17 +74,9 @@ spawns:
   - {id: choir_cliff_2, area: north_cliff}
   - {id: choir_sapper, area: north_cliff}
   - {id: corra_post, area: stone_path}
-exits: []
+exits:
+  - {id: road_board, area: approach_road, to_map: true, label: "Take the road down", condition: "true", effects: []}
 interactables:
-  - id: road_board
-    area: approach_road
-    kind: map_board
-    label: "Take the road down"
-    condition: "true"
-    check: null
-    once: false
-    effects: []
-    fail_effects: []
   - id: hesk_fire
     area: hesk_hall
     kind: rest
@@ -160,21 +152,21 @@ interactables:
 triggers:
   - id: horns_on_crag
     area: approach_road
-    on: enter
+    "on": enter
     source: null
     condition: "act() == 3"
     once: true
     effects: ["play_beat(horns_on_crag)"]
   - id: raid_begins
     area: stone_ring
-    on: enter
+    "on": enter
     source: null
     condition: "flag(flag.strept_raid_called) and not flag(flag.strept_raid_done)"
     once: true
     effects: ["set_checkpoint(before_raid)", "play_beat(choir_on_cliff)", "start_encounter(enc.strept_stone_raid)"]
   - id: raid_abandoned
     area: approach_road
-    on: interact
+    "on": exit_attempt
     source: road_board
     condition: "flag(flag.strept_raid_called) and not flag(flag.strept_raid_done)"
     once: true
@@ -291,7 +283,7 @@ barks: ["State your business or turn round.", "That's a Marshal's lion on your c
 combat: null
 shop: null
 ```
-*Presentation note:* when the Marshal's writ is worn as a badge (`kosk_badge_worn`, gdd §6.9), Kellan plays his second bark and spits in the snow. The −2 to Intimidate against Strept speakers is applied by the check system (gdd §6.10). No content flag is involved.
+*Presentation note:* when the Marshal's badge is worn (`equipped(item.kosk_badge)`, gdd §6.9), Kellan plays his second bark and spits in the snow. The −2 to checks against Strept speakers comes from the badge's `trinket.mods` (gdd §6.10). No content flag is involved.
 
 ```yaml npc
 id: npc.ewin_trader
@@ -974,7 +966,7 @@ price: 180
 stack_max: 1
 equip_slot: armor
 weapon: null
-armor: {armor: 16, resist: {cold: 0.75}}
+armor: {armor: 16, resist: {cold: 0.75}, mods: [{mod: chill_rate_pct, value: -50}]}
 consumable: null
 readable_text: null
 ```
@@ -989,7 +981,7 @@ stack_max: 3
 equip_slot: null
 weapon: null
 armor: null
-consumable: null
+consumable: {effects: [], use_time: 0, quick_slot: false}
 readable_text: null
 ```
 
@@ -1142,7 +1134,7 @@ guarantees:
 ## 12. Open questions
 - **The champion's name and cairn-words.** I named the torc "Darrach Hall's torc" and wrote the cairn rite as "Home from the mud. Home from the iron. The hill holds you now." act2/04 (A05, Marnadal Field) owns the champion. Reconcile the hall name and the rite text with A05.
 - **Dun Edra.** A07's Grey Ferry has the chaplain claim prisoners were hanged at "Dun Edra". I treat Dun Edra as a place name only; the three burned halls are Darrach and two unnamed halls.
-- **Badge penalty mismatch (gdd).** §6.9 says the Kosk badge gives "−20 to Strept dialogue checks". §6.10 says "−2" to Intimidate against Strept. −20 cannot be right on a 4–10 scale. I followed §6.10 (−2, system-applied) and added no content flag for the badge.
-- **Strept furs.** The Chill-rate halving needs an item field (for example `armor.chill_rate_mult: 0.5`). The item schema has only `armor` and `resist`. I set a cold resist and described the effect in the description.
-- **Thrown bait.** `item.mutton_bait` is a consumable with no `consumable.effects`. Throwing it is a zone interaction in a3.04 (`take_item`), not a quick-slot use.
+- **Badge penalty (resolved by A08).** −2 to checks against Strept speakers, from `item.kosk_badge`'s `trinket.mods`; gdd §6.9 now says the same.
+- **Strept furs (resolved by A08).** `armor.mods: [{mod: chill_rate_pct, value: -50}]` (content-format §J.6).
+- **Thrown bait (resolved by A08).** `item.mutton_bait` has `consumable: {effects: [], use_time: 0, quick_slot: false}` (§J.6).
 - **Ally in `allies`.** Corra is listed as an encounter helper by npc id. When the war-band has left, the `warband_gone` variant removes her, so the raid (which can only happen before Hesk's decision) is unaffected.

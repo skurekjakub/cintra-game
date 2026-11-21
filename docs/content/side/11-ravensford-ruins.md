@@ -59,15 +59,8 @@ exits:
     to_spawn: ford_landing
     condition: "true"
     effects: []
+  - {id: track_board, area: west_track, to_map: true, label: "Take the road", condition: "true", effects: []}
 interactables:
-  - id: track_board
-    area: west_track
-    kind: map_board
-    label: "Take the road"
-    condition: "true"
-    check: null
-    once: false
-    effects: []
   - id: loft_drawings
     area: mill
     kind: readable
@@ -92,17 +85,26 @@ interactables:
     check: null
     once: true
     effects: ["take_item(item.mirek_remains, 1)", "set_flag(flag.mirek_freed)", "play_beat(burial)", "start_dialogue(dlg.assen_lady)"]
+  - id: mill_chest
+    area: mill
+    kind: container
+    label: "Open the chest in the mill"
+    condition: "true"
+    check: null
+    once: true
+    effects: []
+    fail_effects: []
 triggers:
   - id: first_song
     area: green
-    on: enter
+    "on": enter
     source: null
     condition: "not flag(flag.mirek_freed)"
     once: true
     effects: ["play_beat(song_on_wind)"]
   - id: silencers
     area: green
-    on: enter
+    "on": enter
     source: null
     condition: "stage() >= 3 and not flag(flag.mirek_freed) and not flag(flag.silencers_dealt)"
     once: true
@@ -236,24 +238,42 @@ interactables:
     check: null
     once: false
     effects: ["start_dialogue(dlg.assen_lady)"]
+  - id: nest_bones
+    area: nest
+    kind: container
+    label: "Search the bones in the nest"
+    condition: "true"
+    check: null
+    once: true
+    effects: []
+    fail_effects: []
+  - id: shrine_niche
+    area: reed_shrine
+    kind: container
+    label: "Look in the offering niche"
+    condition: "true"
+    check: null
+    once: true
+    effects: []
+    fail_effects: []
 triggers:
   - id: wake_nest
     area: nest
-    on: enter
+    "on": enter
     source: null
     condition: "flag(flag.nest_found) and not flag(flag.nest_cleared) and not flag(flag.drowners_lured) and stage() < 2"
     once: false
     effects: ["start_encounter(enc.ravensford_drowners)"]
   - id: wake_nest_dark
     area: nest
-    on: enter
+    "on": enter
     source: null
     condition: "flag(flag.nest_found) and not flag(flag.nest_cleared) and not flag(flag.drowners_lured) and stage() >= 2"
     once: false
     effects: ["start_encounter(enc.ravensford_drowners_dark)"]
   - id: wake_nest_lured
     area: nest
-    on: enter
+    "on": enter
     source: null
     condition: "flag(flag.nest_found) and flag(flag.drowners_lured) and not flag(flag.nest_cleared)"
     once: false
@@ -261,7 +281,7 @@ triggers:
 hazards:
   - {id: reed_mud, area: channels, kind: deep_mud, params: {speed_mult: 0.6}}
   - {id: deep_channel, area: channels, kind: tide, params: {pull_back_damage: 10}}
-  - {id: nest_fire, area: nest, kind: fire, params: {damage_per_second: 5, active_when: "flag(flag.reeds_burned)"}}
+  - {id: nest_fire, area: nest, kind: fire, active_when: "flag(flag.reeds_burned)", params: {damage_per_second: 5}}
 checkpoints:
   - {id: reeds_entry, area: ford_landing}
   - {id: before_nest, area: punt_post}
@@ -647,7 +667,7 @@ nodes:
       - id: brother
         text: "Peace, brother. The Abbot sent me to deal with this one. Go back up the track. [Persuade 6]"
         tag: persuade
-        condition: "has_item(item.choir_robe) and has_item(item.pale_feather)"
+        condition: "equipped(item.choir_robe) and has_item(item.pale_feather)"
         show_locked: true
         check: {skill: persuade, dc: 6, pass: sent_away, fail: fight}
       - id: fight_opt
@@ -714,13 +734,15 @@ waves:
 attack_tokens: null
 allow_yield: false
 allies: [npc.ina]
+variants:
+  - {when: "stage() >= 2", waves: [{after: wave_cleared, enemies: [{enemy: enemy.drowner, count: 3, spawn: nest_water, variant: null}]}]}
 checkpoint: before_nest
 avoidable_by: []
 on_won: ["set_flag(flag.nest_cleared)"]
 on_yielded: []
 on_player_fled: []
 ```
-Ina's song from the ford landing draws the drowners out in pairs instead of all at once. She stands on the dry bank and the drowners never reach her (she is not an escort target). At stage 2 and above, the second wave gets a third drowner (applied by the stage rule in the scene). Same result as the full nest fight.
+Ina's song from the ford landing draws the drowners out in pairs instead of all at once. She stands on the dry bank and the drowners never reach her (she is not an escort target). At stage 2 and above, the second wave gets a third drowner (the encounter's `variants`, content-format §J.4). Same result as the full nest fight.
 
 ```yaml encounter
 id: enc.ravensford_silencers
@@ -910,4 +932,4 @@ guarantees:
 ## 12. Open questions
 - `play_beat(lady_rises)` is listed in both zones, because `dlg.assen_lady` can start at the burial ground (ruins) or at the reed shrine (reeds). If beat ids must be unique per section, rename one.
 - `dlg.silencer_leader` has the enemy leader speaking only in barks, because enemies have no npc block. Participants list Ina only. That is fine if the dialogue system allows `player` lines with no NPC line answering.
-- Stage 2+ adds one drowner to the lure's second wave via a scene rule. The schema has no stage-conditional waves. Alternative: a separate `enc.ravensford_lure_dark`.
+- Stage 2+ adds one drowner to the lure's second wave (resolved by A08: encounter `variants`, content-format §J.4).

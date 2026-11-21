@@ -55,7 +55,7 @@ exits:
   - id: kitchen_door
     area: kitchen_step
     to_zone: zone.drowned_rat
-    to_spawn: back_door
+    to_spawn: from_yard
     condition: "true"
     effects: []
   - id: gutter_lane
@@ -101,17 +101,26 @@ interactables:
     once: false
     effects: []
     fail_effects: []
+  - id: lean_to_barrel
+    area: lean_to
+    kind: container
+    label: "Search the barrels"
+    condition: "true"
+    check: null
+    once: true
+    effects: []
+    fail_effects: []
 triggers:
   - id: collection_night
     area: kitchen_step
-    on: enter
+    "on": enter
     source: null
     condition: "ms(ms.a1_rat_survived) and act() <= 2 and not quest_active(quest.side_bertha_debt) and not quest_done(quest.side_bertha_debt) and not quest_failed(quest.side_bertha_debt)"
     once: true
     effects: ["play_beat(mott_shakes_bertha)", "start_dialogue(dlg.mott_collection)"]
   - id: jory_reprisal
     area: alley_gate
-    on: enter
+    "on": enter
     source: null
     condition: "flag(flag.mott_driven_off) and flag(flag.bertha_debt_cleared) and act() == 2 and not flag(flag.jory_reprisal_done) and not flag(flag.mott_skim_exposed) and rep_tier(faction.ferrymen) < friendly"
     once: true
@@ -179,7 +188,7 @@ exits:
   - id: back_stairs
     area: stair_head
     to_zone: zone.drowned_rat
-    to_spawn: loft_stairs
+    to_spawn: from_loft
     condition: "true"
     effects: []
   - id: cellar_drop
@@ -931,9 +940,9 @@ guarantees:
 ```
 
 ## 12. Open questions
-- **Rumor credibility rule:** rumors drawn from `npc.bertha` should show their credibility mark (as `perk.read_the_room` does) when `flag(flag.bertha_safehouse)` is set. `RumorPool.credibility_visible(id, facts)` must read this flag and the rumor's source. Needs a line in gdd §6.12/§6.8 or the rumors domain spec.
+- **Rumor credibility rule (resolved by A08):** Bertha's rumors carry `credibility_when` (content-format §J.7).
 - **Safehouse rest and the Maelis poisoning (gdd §6.2):** the `loft_bed` rest counts as a "safehouse rest". The poisoning trigger itself belongs to the companions/escalation domain, not this file.
 - **Rest interactable:** gdd says a safehouse rest heals fully; the `rest` kind is used with `heal_player(full)` and a checkpoint. If the engine applies rest effects automatically for `kind: rest`, the effects list is redundant but harmless.
 - **Ally Bertha:** `allies: [npc.bertha]` expects a scripted helper. Her one scripted throw is described in prose; the encounter system needs a hook for it (same as A04's Drowned Rat bottle throw).
-- `item.smoke_pot` and `item.poultice` are assumed as consumable ids from gdd §6.9 (the gdd names the consumables but not every id).
+- `item.smoke_pot` and `item.poultice` are declared in act1 (checked by A08).
 - `item.bertha_debt_tally` is not handed out by any effect yet. Keep as flavor or drop.

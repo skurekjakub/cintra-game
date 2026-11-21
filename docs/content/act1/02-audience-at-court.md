@@ -117,15 +117,8 @@ exits:
     to_spawn: road_in
     condition: "ms(ms.a1_audience_done)"
     effects: []
+  - {id: travel_gate, area: lion_gate, to_map: true, label: "Travel (gate stables)", condition: "ms(ms.a1_audience_done)", effects: []}
 interactables:
-  - id: map_board
-    area: lion_gate
-    kind: map_board
-    label: "Travel (gate stables)"
-    condition: "ms(ms.a1_audience_done)"
-    check: null
-    once: false
-    effects: []
   - id: notice_pillar
     area: market_square
     kind: readable
@@ -154,21 +147,21 @@ interactables:
 triggers:
   - id: t_first_hub
     area: fishmarket_arch
-    on: enter
+    "on": enter
     source: null
     condition: "not ms(ms.a1_audience_done)"
     once: true
     effects: ["play_beat(dawn_city)"]
   - id: t_varn_ambush
     area: market_square
-    on: enter
+    "on": enter
     source: null
     condition: "stage() >= 1 and rep_tier(faction.varn) == hostile and not flag(flag.varn_ambush_done)"
     once: true
     effects: ["set_flag(flag.varn_ambush_done)", "play_beat(varn_toughs)", "start_encounter(enc.hub_varn_ambush)"]
   - id: t_gull_news
     area: market_square
-    on: enter
+    "on": enter
     source: null
     condition: "ms(ms.a1_audience_done) and not ms(ms.a1_gull_done) and stage() <= 1"
     once: true
@@ -201,7 +194,8 @@ variants:
     description: "Act III: the hub is closed except for the Lion Steps (gdd §6.1). Shutters down, the market empty, Kosk's men at every corner."
     npcs_absent: [npc.marta_kell, npc.ballad_seller]
     encounters_disabled: []
-    interactables_disabled: [map_board]
+    interactables_disabled: []
+    exits_disabled: [travel_gate]
 ```
 
 ```yaml zone
@@ -276,42 +270,42 @@ interactables:
 triggers:
   - id: t_audience
     area: lion_hall
-    on: enter
+    "on": enter
     source: null
     condition: "not ms(ms.a1_audience_done)"
     once: true
     effects: ["set_checkpoint(before_audience)", "play_beat(council_sits)", "start_dialogue(dlg.audience_council)"]
   - id: t_varn_approach
     area: antechamber
-    on: enter
+    "on": enter
     source: null
     condition: "ms(ms.a1_audience_done) and not flag(flag.varn_approached)"
     once: true
     effects: ["start_dialogue(dlg.varn_antechamber)"]
   - id: t_aldric_garden
     area: cloister_garden
-    on: enter
+    "on": enter
     source: null
     condition: "ms(ms.a1_audience_done) and not flag(flag.met_aldric)"
     once: true
     effects: ["play_beat(aldric_at_pell)", "start_dialogue(dlg.aldric_garden)"]
   - id: t_fair_summons
     area: gatehouse
-    on: enter
+    "on": enter
     source: null
     condition: "ms(ms.a1_audience_done) and count_ms(ms.a1_sickroom_done, ms.a1_abbey_done, ms.a1_ring_done) >= 2 and not flag(flag.fair_announced)"
     once: true
     effects: ["play_beat(page_summons)", "goto_zone(zone.palace_hall, war_room)", "start_dialogue(dlg.kosk_fair_announce)"]
   - id: t_aldric_farewell
     area: tower_stair
-    on: enter
+    "on": enter
     source: null
     condition: "ms(ms.act1_complete) and act() >= 2 and not flag(flag.aldric_farewell_done)"
     once: true
     effects: ["start_dialogue(dlg.aldric_farewell)"]
   - id: t_maelis_gate
     area: gatehouse
-    on: enter
+    "on": enter
     source: null
     condition: "ms(ms.act1_complete) and act() >= 2 and rep_tier(faction.abbey) >= friendly and not flag(flag.maelis_accused) and flag(flag.maelis_showed_book) and not in_party(companion.maelis) and not flag(flag.maelis_joined_a1) and not flag(flag.maelis_stays_watch)"
     once: true
@@ -694,7 +688,7 @@ nodes:
     speaker: npc.kosk
     text: "Good. This is my writ. Show it to any guard in red and iron and they'll open for you. Show it to Varn's men and watch them sweat. Forty crowns on account. Don't drink it all at Bertha's."
     direction: "He hands back Dravin's letter with the writ: 'Keep that. Dravin will want to see his own seal one day.'"
-    effects: ["play_beat(hire_handshake)", "give_item(item.kosk_writ, 1)", "add_crowns(40)", "add_rep(faction.crown, 15)", "reach_milestone(ms.a1_audience_done)"]
+    effects: ["play_beat(hire_handshake)", "give_item(item.kosk_writ, 1)", "give_item(item.kosk_badge, 1)", "add_crowns(40)", "add_rep(faction.crown, 15)", "reach_milestone(ms.a1_audience_done)"]
     next: leads
   leads:
     type: line
@@ -808,6 +802,12 @@ nodes:
         text: "The Abbot gave me a false verse. The stone at the Ring proves it."
         condition: "ded(ded.anselm_lied)"
         next: anselm_lie
+      - id: taster_tube
+        text: "A dispatch tube from the Morrow Gull wreck. It names who paid your food-taster. [Item: Watertight dispatch tube]"
+        tag: item
+        condition: "has_item(item.taster_dispatch) and not flag(flag.taster_dispatch_sent)"
+        effects: ["start_dialogue(dlg.kosk_taster_dispatch)"]
+        next: bye
       - id: bye_opt
         text: "Nothing yet."
         next: bye
@@ -1349,14 +1349,32 @@ None. The Audience is a pure dialogue section. (A hostile `faction.varn` adds a 
 id: item.kosk_writ
 name: "Marshal's writ"
 category: key
-description: "A folded parchment under the Lord Marshal's red seal, an iron lion badge pinned through it. Opens palace doors and loosens officials' tongues. Strept clansmen spit at the badge."
+description: "A folded parchment under the Lord Marshal's red seal. Opens palace doors. It came with an iron lion badge."
+price: 0
+stack_max: 1
+equip_slot: null
+weapon: null
+armor: null
+consumable: null
+readable_text: "Let the bearer pass and be aided in all things, on the business of the Crown and by my order. Bertran Kosk, Lord Marshal of Cintra."
+```
+
+```yaml item
+id: item.kosk_badge
+name: "Marshal's badge"
+category: trinket
+description: "An iron lion badge on a pin, the Lord Marshal's mark. Worn, it loosens officials' tongues. Strept clansmen spit at it."
 price: 0
 stack_max: 1
 equip_slot: trinket
 weapon: null
 armor: null
+trinket:
+  mods:
+    - {mod: check_all, value: 2, vs_faction: faction.crown}
+    - {mod: check_all, value: -2, vs_faction: faction.strept}
 consumable: null
-readable_text: "Let the bearer pass and be aided in all things, on the business of the Crown and by my order. Bertran Kosk, Lord Marshal of Cintra."
+readable_text: null
 ```
 
 ```yaml item
@@ -1369,7 +1387,7 @@ stack_max: 5
 equip_slot: null
 weapon: null
 armor: null
-consumable: {effects: [], use_time: 1.0}
+consumable: {effects: ["cure_status(poison)", "status_immunity(poison, 30)"], use_time: 1.0}
 readable_text: null
 ```
 
@@ -1383,7 +1401,7 @@ stack_max: 5
 equip_slot: null
 weapon: null
 armor: null
-consumable: {effects: [], use_time: 1.0}
+consumable: {effects: ["imbue_weapon(fire, 60)"], use_time: 1.0}
 readable_text: null
 ```
 
@@ -1397,7 +1415,7 @@ stack_max: 5
 equip_slot: null
 weapon: null
 armor: null
-consumable: {effects: [], use_time: 0.5}
+consumable: {effects: ["break_enemy_sight(6)"], use_time: 0.5}
 readable_text: null
 ```
 
@@ -1442,7 +1460,7 @@ refutes: []
 
 ```yaml flags
 declare:
-  - {id: ms.a1_audience_done, type: milestone, desc: "Kosk hired the player and gave the Marshal's writ."}
+  - {id: ms.a1_audience_done, type: milestone, xp: 150, desc: "Kosk hired the player and gave the Marshal's writ."}
   - {id: flag.told_council_monk, type: bool, desc: "The player told the council the courier was poisoned by a monk (Anselm heard it)."}
   - {id: flag.varn_rattled, type: bool, desc: "The player rattled Varn in open council."}
   - {id: flag.passes_closed_known, type: bool, desc: "Kosk explained the closed passes and Ostrel's gate."}
@@ -1483,7 +1501,7 @@ stages:
   - id: audience
     journal: "Sergeant Brask brought me to the Lion Hall. The Queen read Dravin's letter and turned white. Lord Marshal Kosk has hired me to find out who poisoned his courier, and who is poisoning the Queen."
     objectives:
-      - {id: hired, text: "Present the letter at court", condition: "ms(ms.a1_audience_done)", optional: false, xp: 150}
+      - {id: hired, text: "Present the letter at court", condition: "ms(ms.a1_audience_done)", optional: false}
       - {id: chaplain, text: "Ask Kosk about the Abbot", condition: "has_clue(clue.marnadal_chaplain)", optional: true, xp: 20}
     on_complete: []
     next: []
@@ -1539,8 +1557,8 @@ guarantees:
 
 ## 12. Open questions
 
-1. **Shop and consumable behavior.** Antitoxin, fire oil and smoke pot need effect ops that §E does not have (`cure_status(poison)`, `status_immunity(poison, 30)`, `weapon_imbue(fire, 60)`, `break_enemy_sight(6)`). I left `consumable.effects: []` and described the behavior; the item id should drive it until the ops exist.
+1. **Shop and consumable behavior (resolved by A08).** The consumables use the §J.2 ops (`cure_status`, `status_immunity`, `imbue_weapon`, `break_enemy_sight`).
 2. **Night zones from a day hub.** `zone.chancellery_rooftops` is a night zone entered from a day hub. I assume the presentation shows a "nightfall" card on the transition; there is no clock.
-3. **`goto_zone` to the same zone.** `dlg.audience_council` and `t_fair_summons` use `goto_zone(zone.palace_hall, war_room)` while already in the palace hall, as a scene cut to a spawn. Confirm that a same-zone `goto_zone` is allowed (it should just move the player).
-4. **Kosk's writ "+2 with officials".** Items have no skill-bonus field. Dialogue that should benefit uses a `has_item(item.kosk_writ)` option instead.
-5. **Hair check DC 5** (gdd §6.2/§6.9 "Presence 5") is off the 4/6/8/10 scale in content-format §I. I followed the GDD.
+3. **`goto_zone` to the same zone (resolved by A08).** Valid: a scene cut to another spawn (content-format §J.2).
+4. **Kosk's writ "+2 with officials" (resolved by A08).** The writ comes with `item.kosk_badge`, a trinket whose `mods` give +2 with Crown officials and −2 with Strept speakers (§J.6, gdd §6.9). The `has_item(item.kosk_writ)` options stay: they show the writ.
+5. **Hair check DC 5 (resolved by A08).** Any DC from 4 to 10 is valid (content-format §I).

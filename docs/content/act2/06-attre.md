@@ -104,15 +104,8 @@ exits:
     to_spawn: sea_gate
     condition: "true"
     effects: []
+  - {id: quay_board, area: quay, to_map: true, label: "Harbour master's board (travel by land or sea)", condition: "true", effects: []}
 interactables:
-  - id: quay_board
-    area: quay
-    kind: map_board
-    label: "Harbour master's board (travel by land or sea)"
-    condition: "true"
-    check: null
-    once: false
-    effects: []
   - id: gull_bed
     area: gilded_gull
     kind: rest
@@ -132,7 +125,7 @@ interactables:
 triggers:
   - id: checkpoint
     area: land_gate
-    on: enter
+    "on": enter
     source: null
     condition: "stage() >= 3 and rep_tier(faction.attre) < allied and not flag(flag.raimund_allied) and not has_item(item.masquerade_invitation) and not flag(flag.skerra_cutter) and not flag(flag.attre_checkpoint_passed)"
     once: false
@@ -243,7 +236,7 @@ interactables:
     condition: "not has_item(item.study_key) and not has_item(item.raimund_ledger)"
     check: null
     once: true
-    effects: ["give_item(item.raimund_ledger, 1)", "add_clue(clue.raimund_ledger_silver)", "add_crowns(120)", "reach_milestone(ms.a2_attre_ledger)", "play_beat(alarm)"]
+    effects: ["give_item(item.raimund_ledger, 1)", "add_clue(clue.raimund_ledger_silver)", "add_crowns(120)", "reach_milestone(ms.a2_attre_ledger)", "raise_alarm()"]
   - id: aimeric_bed
     area: heirs_chamber
     kind: search
@@ -272,25 +265,25 @@ interactables:
 triggers:
   - id: raimund_greets
     area: ballroom
-    on: enter
+    "on": enter
     source: null
     condition: "flag(flag.masquerade_entered) and not flag(flag.raimund_greeted) and not flag(flag.masquerade_alarm)"
     once: true
     effects: ["set_flag(flag.raimund_greeted)", "start_dialogue(dlg.raimund_ball)"]
   - id: meeting_starts
     area: ballroom
-    on: enter
+    "on": enter
     source: null
     condition: "not flag(flag.raimund_meeting) and not flag(flag.masquerade_alarm)"
     once: true
     effects: ["set_flag(flag.raimund_meeting)", "play_beat(raimund_to_orangery)"]
   - id: masquerade_alarm
     area: gallery
-    on: beat_done
-    source: alarm
+    "on": alarm
+    source: null
     condition: "not flag(flag.masquerade_alarm)"
     once: true
-    effects: ["set_flag(flag.masquerade_alarm)", "add_rep(faction.attre, -20)", "start_encounter(enc.masquerade_alarm)"]
+    effects: ["play_beat(alarm)", "set_flag(flag.masquerade_alarm)", "add_rep(faction.attre, -20)", "start_encounter(enc.masquerade_alarm)"]
 hazards: []
 checkpoints:
   - {id: masquerade_entry, area: front_court}
@@ -435,35 +428,35 @@ interactables:
 triggers:
   - id: alarm_raised
     area: drying_loft
-    on: beat_done
-    source: alarm
+    "on": alarm
+    source: null
     condition: "not flag(flag.warehouse_alarm)"
     once: true
-    effects: ["set_flag(flag.warehouse_alarm)", "set_flag(flag.attre_loud_raid)", "add_rep(faction.attre, -30)", "start_encounter(enc.warehouse_alarm)"]
+    effects: ["play_beat(alarm)", "set_flag(flag.warehouse_alarm)", "set_flag(flag.attre_loud_raid)", "add_rep(faction.attre, -30)", "start_encounter(enc.warehouse_alarm)"]
   - id: gaspard_torches
     area: drying_loft
-    on: beat_done
-    source: alarm
+    "on": alarm
+    source: null
     condition: "not flag(flag.gaspard_down) and not flag(flag.warehouse_release) and (not flag(flag.crate_east_taken) or not flag(flag.crate_west_taken))"
     once: true
-    effects: ["play_beat(crates_torched)"]
+    effects: ["play_beat(alarm)", "play_beat(crates_torched)"]
   - id: burn_east
     area: drying_loft
-    on: beat_done
-    source: alarm
+    "on": alarm
+    source: null
     condition: "not flag(flag.gaspard_down) and not flag(flag.warehouse_release) and not flag(flag.crate_east_taken)"
     once: true
-    effects: ["set_flag(flag.crate_east_burned)"]
+    effects: ["play_beat(alarm)", "set_flag(flag.crate_east_burned)"]
   - id: burn_west
     area: drying_loft
-    on: beat_done
-    source: alarm
+    "on": alarm
+    source: null
     condition: "not flag(flag.gaspard_down) and not flag(flag.warehouse_release) and not flag(flag.crate_west_taken)"
     once: true
-    effects: ["set_flag(flag.crate_west_burned)"]
+    effects: ["play_beat(alarm)", "set_flag(flag.crate_west_burned)"]
 hazards:
   - {id: lily_dust, area: drying_loft, kind: trap, params: {status: poison, stacks_per_second_in_combat: 0.25}}
-  - {id: loft_fire, area: drying_loft, kind: fire, params: {active_after_beat: crates_torched, damage_per_second: 6}}
+  - {id: loft_fire, area: drying_loft, kind: fire, enabled_by: {"on": beat_done, source: crates_torched}, params: {damage_per_second: 6}}
 checkpoints:
   - {id: warehouse_entry, area: yard_gate}
   - {id: loft_cp, area: main_hall}
@@ -755,7 +748,7 @@ nodes:
         text: "[Persuade 6] Forty, and I don't mention your bindings to the harbour watch."
         tag: persuade
         check: {skill: persuade, dc: 6, pass: haggle_pass, fail: haggle_fail}
-      - id: no
+      - id: "no"
         text: "Too dear."
         next: hub
   haggle_pass:
@@ -766,7 +759,7 @@ nodes:
         tag: bribe
         bribe: 40
         next: sold
-      - id: no
+      - id: "no"
         text: "On second thought, no."
         next: hub
   haggle_fail:
@@ -1325,8 +1318,9 @@ Design: Corbin (assassin) and two Choir cutthroats posing as guests. Guests scat
 ```yaml encounter
 id: enc.warehouse_yard
 zone: zone.attre_warehouse
+posture: patrol
 enemies:
-  - {enemy: enemy.bandit, count: 2, spawn: yard_stacks, variant: spear}
+  - {enemy: enemy.bandit, count: 2, spawn: yard_stacks, variant: spear, route: [bonded_yard], loop_s: 40}
 waves: []
 attack_tokens: null
 allow_yield: true
@@ -1501,7 +1495,7 @@ refutes: []
 
 ```yaml flags
 declare:
-  - {id: ms.a2_attre_ledger, type: milestone, desc: "The player holds Raimund's private ledger (stolen or handed over)."}
+  - {id: ms.a2_attre_ledger, type: milestone, xp: 400, desc: "The player holds Raimund's private ledger (stolen or handed over)."}
   - {id: flag.raimund_allied, type: bool, desc: "Raimund made common cause with the Crown. Read by epilogues and act3."}
   - {id: flag.raimund_blackmailed, type: bool, desc: "The player blackmailed Raimund with his ledger."}
   - {id: flag.antidote_sold_raimund, type: bool, desc: "A dose went to Aimeric. Read by a2.08 and the endings."}
@@ -1598,5 +1592,5 @@ guarantees:
 - **Meeting Raimund after an alarm:** once `flag.masquerade_alarm` is set, Raimund is absent from this zone for good. A later audience could be a harbour variant (he receives the player at the Anchor House gate by day). This file does not add it; the terrace dialogue is therefore lost after an alarm unless the player is allied by other means. Recommend a day-time `dlg.raimund_terrace` entry point in the harbour for players with the ledger.
 - **Guard archetype:** Attre's ducal guards use `enemy.bandit` variants. A `enemy.ducal_guard` reskin would read better.
 - **Disguise rules:** the sea-stair and servants'-gate entries leave the player "not permitted" (no invitation). gdd §6.5 does not say whether a masquerade mask can be picked up inside; this file assumes not.
-- `item.masquerade_invitation` is declared here (gdd §6.9 key item). The side slice's Drowned Rat safehouse also gives it and should reference this id, not redeclare it.
+- `item.masquerade_invitation` is declared here (gdd §6.9 key item); the Drowned Rat safehouse references it (checked by A08).
 - `clue.aimeric_lily_sick` gives a check-free alliance route. That is deliberate: the leverage is moral, not a dice roll.

@@ -175,39 +175,39 @@ interactables:
 triggers:
   - id: t_abbey_enter
     area: almonry_steps
-    on: enter
+    "on": enter
     source: null
     condition: "not visited(zone.abbey_st_corwen)"
     once: true
     effects: ["set_checkpoint(abbey_in)", "play_beat(abbey_arrival)"]
   - id: t_library
     area: library
-    on: enter
+    "on": enter
     source: null
     condition: "not flag(flag.maelis_showed_book)"
     once: true
     effects: ["start_dialogue(dlg.maelis_book)"]
   - id: t_anselm_arrives
     area: library
-    on: beat_done
+    "on": beat_done
     source: anselm_enters
     condition: "not has_item(item.false_fourth_verse)"
     once: true
     effects: ["start_dialogue(dlg.anselm_false_verse)"]
   - id: t_whisper
     area: library
-    on: beat_done
+    "on": beat_done
     source: anselm_leaves
     condition: "not flag(flag.maelis_whispered) and not flag(flag.maelis_note_pending)"
     once: true
     effects: ["start_dialogue(dlg.maelis_whisper)"]
   - id: t_note_at_gate
     area: almonry_steps
-    on: enter
+    "on": enter
     source: null
     condition: "flag(flag.maelis_note_pending) and not has_item(item.maelis_note)"
     once: true
-    effects: ["play_beat(note_found)", "give_item(item.maelis_note, 1)", "add_clue(clue.only_anselm_key)", "reach_milestone(ms.a1_abbey_done)", "add_xp(200)"]
+    effects: ["play_beat(note_found)", "give_item(item.maelis_note, 1)", "add_clue(clue.only_anselm_key)", "reach_milestone(ms.a1_abbey_done)"]
 hazards: []
 checkpoints:
   - {id: abbey_in, area: almonry_steps}
@@ -486,7 +486,7 @@ nodes:
     type: line
     speaker: npc.maelis
     text: "The reliquary was never forced. There is one key. It never hangs in the sacristy, whatever he says. It hangs on his belt, day and night. Only Father Abbot holds that key."
-    effects: ["set_flag(flag.maelis_whispered)", "add_clue(clue.only_anselm_key)", "reach_milestone(ms.a1_abbey_done)", "add_xp(200)"]
+    effects: ["set_flag(flag.maelis_whispered)", "add_clue(clue.only_anselm_key)", "reach_milestone(ms.a1_abbey_done)"]
     next: sermons
   sermons:
     type: line
@@ -738,7 +738,7 @@ refutes: []
 
 ```yaml flags
 declare:
-  - {id: ms.a1_abbey_done, type: milestone, desc: "The player has seen the sliced Book, received the false verse, and learned that only Anselm holds the key."}
+  - {id: ms.a1_abbey_done, type: milestone, xp: 200, desc: "The player has seen the sliced Book, received the false verse, and learned that only Anselm holds the key."}
   - {id: flag.maelis_showed_book, type: bool, desc: "Maelis showed the sliced Book of the Lion."}
   - {id: flag.maelis_accused, type: bool, desc: "The player accused Maelis of cutting the Book (Abbey -15; blocks her trust route)."}
   - {id: flag.maelis_whispered, type: bool, desc: "Maelis said aloud that only Anselm holds the key."}
@@ -788,4 +788,4 @@ guarantees:
 ## 12. Open questions
 
 1. **Leaving the library mid-scene.** If the player walks out of the library before choosing `done`, Anselm's arrival is delayed until they return and talk to Maelis again. `dlg.maelis` (default) should then offer a line that cues `anselm_enters`. I left the default `first` node for the case before the book is shown; the level builder should keep the library door closed during `dlg.maelis_book` (dialogue pauses the game, so this only matters if the player escapes dialogue, which is not allowed).
-2. **`refutes: [vandals]`.** gdd §6.11 lists "vandals" as a suspect for the fourth-verse theory; I used the bare word `vandals` as the suspect id, matching the gdd list. The content-format F.6 comment lists only `varn | pell | anselm | raimund`.
+2. **`refutes: [vandals]` (resolved by A08).** `vandals` is a suspect id (content-format §F.6, §J.7).

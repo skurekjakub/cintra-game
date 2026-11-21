@@ -246,21 +246,21 @@ interactables:
 triggers:
   - id: plate_trap
     area: vestibule_traps
-    on: enter
+    "on": enter
     source: null
     condition: "not flag(flag.ko_gate_warden_resolved)"
     once: false
     effects: ["damage_player(20)", "play_beat(rune_overload)"]
   - id: warden_wakes
     area: vestibule_traps
-    on: beat_done
+    "on": beat_done
     source: rune_overload
     condition: "not flag(flag.ko_gate_warden_resolved)"
     once: true
     effects: ["set_flag(flag.ko_gate_warden_resolved)", "play_beat(warden_wakes)", "start_encounter(enc.ko_gate_warden)"]
   - id: dravin_reads_floor
     area: vestibule
-    on: enter
+    "on": enter
     source: null
     condition: "in_party(companion.dravin) or in_party(companion.maelis)"
     once: true
@@ -511,112 +511,112 @@ interactables:
 triggers:
   - id: choir_spot
     area: forge_floor
-    on: enter
+    "on": enter
     source: null
-    condition: "not flag(flag.ko_forge_choir_resolved) and not has_item(item.choir_robe)"
+    condition: "not flag(flag.ko_forge_choir_resolved) and not disguised()"
     once: true
     effects: ["set_checkpoint(forge_gallery)", "play_beat(looters_turn)", "start_encounter(enc.ko_forge_choir)"]
   - id: echo_iron
     area: plate_iron
-    on: enter
+    "on": enter
     source: null
     condition: "var(var.ko_echo_step) == 0"
     once: false
     effects: ["add_var(var.ko_echo_step, 1)", "play_beat(echo_true)"]
   - id: echo_mountain
     area: plate_mountain
-    on: enter
+    "on": enter
     source: null
     condition: "var(var.ko_echo_step) == 1"
     once: false
     effects: ["add_var(var.ko_echo_step, 1)", "play_beat(echo_true)"]
   - id: echo_mountain_wrong
     area: plate_mountain
-    on: enter
+    "on": enter
     source: null
     condition: "var(var.ko_echo_step) == 0"
     once: false
     effects: ["damage_player(30)", "play_beat(rune_overload)"]
   - id: echo_lion
     area: plate_lion
-    on: enter
+    "on": enter
     source: null
     condition: "var(var.ko_echo_step) == 2"
     once: false
     effects: ["add_var(var.ko_echo_step, 1)", "play_beat(echo_true)"]
   - id: echo_lion_wrong
     area: plate_lion
-    on: enter
+    "on": enter
     source: null
     condition: "var(var.ko_echo_step) <= 1"
     once: false
     effects: ["set_var(var.ko_echo_step, 0)", "damage_player(30)", "play_beat(rune_overload)"]
   - id: echo_watch
     area: plate_watch
-    on: enter
+    "on": enter
     source: null
     condition: "var(var.ko_echo_step) == 3"
     once: false
     effects: ["add_var(var.ko_echo_step, 1)", "set_flag(flag.ko_echo_solved)", "play_beat(reliquary_opens)", "add_xp(200)"]
   - id: echo_watch_wrong
     area: plate_watch
-    on: enter
+    "on": enter
     source: null
     condition: "var(var.ko_echo_step) <= 2"
     once: false
     effects: ["set_var(var.ko_echo_step, 0)", "damage_player(30)", "play_beat(rune_overload)"]
   - id: echo_ash
     area: plate_ash
-    on: enter
+    "on": enter
     source: null
     condition: "var(var.ko_echo_step) < 4"
     once: false
     effects: ["set_var(var.ko_echo_step, 0)", "damage_player(30)", "play_beat(rune_overload)"]
   - id: echo_burn
     area: plate_burn
-    on: enter
+    "on": enter
     source: null
     condition: "var(var.ko_echo_step) < 4"
     once: false
     effects: ["set_var(var.ko_echo_step, 0)", "damage_player(30)", "play_beat(rune_overload)"]
   - id: echo_unbind
     area: plate_unbind
-    on: enter
+    "on": enter
     source: null
     condition: "var(var.ko_echo_step) < 4"
     once: false
     effects: ["set_var(var.ko_echo_step, 0)", "damage_player(30)", "play_beat(rune_overload)"]
   - id: echo_wake
     area: plate_wake
-    on: enter
+    "on": enter
     source: null
     condition: "var(var.ko_echo_step) < 4"
     once: false
     effects: ["set_var(var.ko_echo_step, 0)", "damage_player(30)", "play_beat(rune_overload)"]
   - id: wardens_wake_echo
     area: echo_dome
-    on: beat_done
+    "on": beat_done
     source: rune_overload
     condition: "not flag(flag.ko_forge_wardens_resolved) and not flag(flag.ko_alcove_a_stilled) and not flag(flag.ko_alcove_b_stilled)"
     once: true
     effects: ["set_flag(flag.ko_forge_wardens_resolved)", "play_beat(alcoves_wake)", "start_encounter(enc.ko_forge_wardens)"]
   - id: wardens_wake_bellows_two
     area: gear_room
-    on: beat_done
+    "on": beat_done
     source: bellows_roar
     condition: "not flag(flag.ko_forge_wardens_resolved) and not flag(flag.ko_alcove_a_stilled) and not flag(flag.ko_alcove_b_stilled)"
     once: true
     effects: ["set_flag(flag.ko_forge_wardens_resolved)", "play_beat(alcoves_wake)", "start_encounter(enc.ko_forge_wardens)"]
   - id: wardens_wake_bellows_one
     area: gear_room
-    on: beat_done
+    "on": beat_done
     source: bellows_roar
     condition: "not flag(flag.ko_forge_wardens_resolved) and ((flag(flag.ko_alcove_a_stilled) and not flag(flag.ko_alcove_b_stilled)) or (flag(flag.ko_alcove_b_stilled) and not flag(flag.ko_alcove_a_stilled)))"
     once: true
     effects: ["set_flag(flag.ko_forge_wardens_resolved)", "play_beat(alcoves_wake)", "start_encounter(enc.ko_forge_warden_single)"]
   - id: first_visit_lore
     area: west_gallery
-    on: enter
+    "on": enter
     source: null
     condition: "true"
     once: true
@@ -669,7 +669,7 @@ variants:
     interactables_disabled: [still_alcove_a, still_alcove_b, read_alcove_a, read_alcove_b]
 ```
 
-**Disguise in the Forge.** `disguise_tag: choir`: a player wearing the Choir robe is "permitted". The looters do not engage on sight (the `choir_spot` trigger tests `has_item(item.choir_robe)` as a stand-in for "wearing"). They can still be fought, and stealth takedowns among the anvils work as in gdd §6.5. If combat breaks out anywhere in the hall, the presentation hook should start `enc.ko_forge_choir`.
+**Disguise in the Forge.** `disguise_tag: choir`: a player wearing the Choir robe is "permitted". The looters do not engage on sight (the `choir_spot` trigger tests `disguised()`, content-format §J.1). They can still be fought, and stealth takedowns among the anvils work as in gdd §6.5. If combat breaks out anywhere in the hall, the presentation hook should start `enc.ko_forge_choir`.
 
 ```yaml zone
 id: zone.ko_drowned_library
@@ -794,21 +794,21 @@ interactables:
 triggers:
   - id: scribes_spot
     area: choir_scriptorium
-    on: enter
+    "on": enter
     source: null
-    condition: "not flag(flag.ko_library_choir_resolved) and not has_item(item.choir_robe)"
+    condition: "not flag(flag.ko_library_choir_resolved) and not disguised()"
     once: true
     effects: ["set_checkpoint(library_gallery)", "play_beat(scribes_burning)", "start_encounter(enc.ko_library_choir)"]
   - id: scribes_disguised
     area: choir_scriptorium
-    on: enter
+    "on": enter
     source: null
-    condition: "not flag(flag.ko_library_choir_resolved) and has_item(item.choir_robe)"
+    condition: "not flag(flag.ko_library_choir_resolved) and disguised()"
     once: true
     effects: ["start_dialogue(dlg.ko_scribe)"]
   - id: archivists
     area: reading_hall
-    on: enter
+    "on": enter
     source: null
     condition: "flag(flag.ko_library_drained)"
     once: true
@@ -817,7 +817,9 @@ hazards:
   - {id: cold_water, area: mid_stacks, kind: cold, params: {chill_per_second: 9, note: "Wading; x3 Chill. Drains as sluices open."}}
   - {id: blight_leak, area: blight_aisle, kind: trap, params: {status: poison, stacks_per_s: 1, note: "Green water; antitoxin gives 30 s immunity."}}
   - {id: shelf_lids, area: mid_stacks, kind: collapse, params: {sink_after_s: 2.0, note: "Floating walkways sink if stood on; dunk = 30 Chill."}}
-  - {id: drain_pull, area: drain_shaft, kind: tide, params: {pull_m_per_s: 2, active: "for 10 s after each sluice opens"}}
+  - {id: drain_pull_1, area: drain_shaft, kind: tide, enabled_by: {"on": beat_done, source: sluice_one}, params: {pull_m_per_s: 2, duration_s: 10}}
+  - {id: drain_pull_2, area: drain_shaft, kind: tide, enabled_by: {"on": beat_done, source: sluice_two}, params: {pull_m_per_s: 2, duration_s: 10}}
+  - {id: drain_pull_3, area: drain_shaft, kind: tide, enabled_by: {"on": beat_done, source: library_drains}, params: {pull_m_per_s: 2, duration_s: 10}}
 checkpoints:
   - {id: library_gallery, area: upper_gallery}
   - {id: library_drained, area: reading_hall}
@@ -1063,49 +1065,49 @@ interactables:
 triggers:
   - id: gatehouse_fire
     area: platform_0
-    on: enter
+    "on": enter
     source: null
     condition: "not flag(flag.ko_bridge_gatehouse_resolved)"
     once: true
     effects: ["set_checkpoint(bridge_p0)", "play_beat(gatehouse_opens_fire)", "start_encounter(enc.ko_bridge_gatehouse)"]
   - id: zealots_cross
     area: platform_1
-    on: interact
+    "on": interact
     source: anvil_bolt
     condition: "not flag(flag.ko_bridge_zealots_resolved)"
     once: true
     effects: ["play_beat(zealots_cross)", "start_encounter(enc.ko_bridge_zealots)"]
   - id: guard_p0_wakes
     area: platform_0
-    on: beat_done
+    "on": beat_done
     source: anvil_discord_p0
     condition: "not flag(flag.ko_anvil_guard_0)"
     once: true
     effects: ["set_flag(flag.ko_anvil_guard_0)", "play_beat(anvil_guard_rises)", "start_encounter(enc.ko_anvil_guard_0)"]
   - id: guard_p1_wakes
     area: platform_1
-    on: beat_done
+    "on": beat_done
     source: anvil_discord_p1
     condition: "not flag(flag.ko_anvil_guard_1)"
     once: true
     effects: ["set_flag(flag.ko_anvil_guard_1)", "play_beat(anvil_guard_rises)", "start_encounter(enc.ko_anvil_guard_1)"]
   - id: guard_p2_wakes
     area: platform_2
-    on: beat_done
+    "on": beat_done
     source: anvil_discord_p2
     condition: "not flag(flag.ko_anvil_guard_2)"
     once: true
     effects: ["set_flag(flag.ko_anvil_guard_2)", "play_beat(anvil_guard_rises)", "start_encounter(enc.ko_anvil_guard_2)"]
   - id: lock_guards_wake
     area: east_gatehouse
-    on: enter
+    "on": enter
     source: null
     condition: "not flag(flag.ko_lock_guards_resolved) and not (has_item(item.iron_key) and in_party(companion.dravin))"
     once: true
     effects: ["set_flag(flag.ko_lock_guards_resolved)", "play_beat(lock_guards_wake)", "start_encounter(enc.ko_lock_guards)"]
   - id: lock_reached
     area: antechamber
-    on: enter
+    "on": enter
     source: null
     condition: "true"
     once: true
@@ -1248,21 +1250,21 @@ interactables:
 triggers:
   - id: enter_ostrel
     area: mine_breach
-    on: enter
+    "on": enter
     source: null
     condition: "true"
     once: true
     effects: ["reach_milestone(ms.a3_ostrel_entered)", "verify_rumor(rumor.r05_dwarves_inside)", "set_checkpoint(lower_breach)", "play_beat(hammers_heard)"]
   - id: tender_fight
     area: hammer_gallery
-    on: beat_done
+    "on": beat_done
     source: tender_turns
     condition: "not flag(flag.ko_tender_killed)"
     once: true
     effects: ["start_encounter(enc.ko_hammer_tender)"]
   - id: racks_wake
     area: warden_racks
-    on: enter
+    "on": enter
     source: null
     condition: "not flag(flag.ko_racks_resolved)"
     once: true
@@ -1945,8 +1947,8 @@ guarantees:
 
 ## 12. Open questions
 - **Companion swap.** Rest points at the gate hearth, the Forge furnace, the Lower Halls shrine and the Hall of Mirrors should offer "change companion" (gdd §6.13, one active). The effect list has `recruit` and `dismiss` but no "swap to waiting". The companions domain should own this.
-- **Disguise as a condition.** Several triggers use `has_item(item.choir_robe)` to mean "wearing the Choir disguise". A condition call such as `equipped(item.x)` or `disguised()` would be more accurate.
+- **Disguise as a condition (resolved by A08).** Zone triggers test `disguised()`; dialogue tests `equipped(item.choir_robe)` (content-format §J.1).
 - **Interactables by position.** Pairs like `lever_middle`/`lever_middle_early` share one physical lever with mutually exclusive conditions. The presentation should map both to the same prop.
-- **Exit to the Silver Mine.** `back_to_mine` targets `zone.silver_mine_breach` spawn `from_ostrel` (expected from A07). A07's breach exit into `zone.ko_lower_halls` / `mine_breach` should carry the condition `act() == 3`. The inner bulkhead also checks `act() == 3`.
+- **Exit to the Silver Mine (resolved by A08).** `zone.silver_mine_breach` has the `from_ostrel` spawn, and A07's exit into `zone.ko_lower_halls` requires `act() == 3`.
 - **Mane-Cleaver payoff.** The gdd §6.7/§6.9 tag bonus applies automatically. The 11 warden encounters in this section and the finale make it the "concrete payoff" of the Barrows side quest.
 - **Knocking alignment.** A07's `clue.vault_knocking` says the knocking is "Ostrel's pressure-hammers labouring". The Lower Halls show exactly that: six pressure-hammers, tended by the Hammer-Tender warden.

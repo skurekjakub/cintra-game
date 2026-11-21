@@ -110,7 +110,7 @@ interactables:
     condition: "flag(flag.ring_hounds_done) and not ms(ms.a1_ring_done)"
     check: null
     once: true
-    effects: ["add_clue(clue.ring_true_chisel)", "add_clue(clue.ring_tar)", "play_beat(read_split_stone)", "reach_milestone(ms.a1_ring_done)", "add_xp(200)"]
+    effects: ["add_clue(clue.ring_true_chisel)", "add_clue(clue.ring_tar)", "play_beat(read_split_stone)", "reach_milestone(ms.a1_ring_done)"]
   - id: verse_stones
     area: ring_circle
     kind: readable
@@ -147,42 +147,42 @@ interactables:
 triggers:
   - id: t_ring_enter
     area: barrow_road
-    on: enter
+    "on": enter
     source: null
     condition: "not visited(zone.ring_of_nine)"
     once: true
     effects: ["set_checkpoint(ring_road)", "play_beat(eyes_in_ditch)"]
   - id: t_sorrel
     area: sorrel_camp
-    on: enter
+    "on": enter
     source: null
     condition: "not flag(flag.sorrel_met)"
     once: true
     effects: ["start_dialogue(dlg.sorrel)"]
   - id: t_hounds_full
     area: ring_circle
-    on: enter
+    "on": enter
     source: null
     condition: "not flag(flag.ring_hounds_done) and not flag(flag.ring_hounds_engaged) and not flag(flag.hounds_lured) and not flag(flag.tar_ring_lit)"
     once: false
     effects: ["set_checkpoint(ring_top)", "set_flag(flag.ring_hounds_engaged)", "play_beat(pack_rises)", "start_encounter(enc.ring_hounds)"]
   - id: t_hounds_half
     area: ring_circle
-    on: enter
+    "on": enter
     source: null
     condition: "not flag(flag.ring_hounds_done) and not flag(flag.ring_hounds_engaged) and ((flag(flag.hounds_lured) and not flag(flag.tar_ring_lit)) or (flag(flag.tar_ring_lit) and not flag(flag.hounds_lured)))"
     once: false
     effects: ["set_checkpoint(ring_top)", "set_flag(flag.ring_hounds_engaged)", "play_beat(pack_rises)", "start_encounter(enc.ring_hounds_small)"]
   - id: t_hounds_avoided
     area: ring_circle
-    on: enter
+    "on": enter
     source: null
     condition: "not flag(flag.ring_hounds_done) and flag(flag.hounds_lured) and flag(flag.tar_ring_lit)"
     once: true
     effects: ["set_flag(flag.ring_hounds_done)", "set_flag(flag.ring_hounds_avoided)", "play_beat(pack_held_off)", "add_xp(60)"]
 hazards:
-  - {id: tar_pool, area: split_stone, kind: deep_mud, params: {speed_mult: 0.6, root_pockets: 0, flammable: true, ignited_damage_per_second: 8, applies_status_when_burning: burning}}
-  - {id: tar_ditch_fire, area: ring_slope, kind: fire, params: {damage_per_second: 5, starts_on_beat: tar_ring_burns, duration_s: 120, blocks: [beast]}}
+  - {id: tar_pool, area: split_stone, kind: tar, params: {speed_mult: 0.6, root_pockets: 0, ignited_damage_per_second: 8, applies_status_when_burning: burning}}
+  - {id: tar_ditch_fire, area: ring_slope, kind: fire, enabled_by: {"on": beat_done, source: tar_ring_burns}, params: {damage_per_second: 5, duration_s: 120, blocks: [beast]}}
 checkpoints:
   - {id: ring_road, area: barrow_road}
   - {id: ring_top, area: ring_slope}
@@ -422,7 +422,7 @@ text: "The Abbot wrote the fourth verse 'from memory'. The stone his own Oath wa
 
 ```yaml flags
 declare:
-  - {id: ms.a1_ring_done, type: milestone, desc: "The player read the split stone at the Ring of Nine."}
+  - {id: ms.a1_ring_done, type: milestone, xp: 200, desc: "The player read the split stone at the Ring of Nine."}
   - {id: flag.sorrel_met, type: bool, desc: "Grandmother Sorrel's conversation has played."}
   - {id: flag.sorrel_lantern, type: bool, desc: "Sorrel lent her lantern (lights the tar ditch without fire oil)."}
   - {id: flag.sorrel_helped, type: bool, desc: "Sorrel gave the lantern freely; her spare pots (fire oil) open."}
@@ -479,5 +479,5 @@ guarantees:
 ## 12. Open questions
 
 1. **Hazard blocking beasts.** `tar_ditch_fire` uses `params.blocks: [beast]` so hound AI will not path through fire. Confirm with the AI implementer that a fire hazard can act as a navigation blocker for the `beast` tag.
-2. **Fire-on-tar.** The tar pool ignites if any fire touches it (fire oil, a burning hound, a thrown lantern). Proposed as a `deep_mud` hazard with `flammable: true`; may deserve its own hazard kind (`tar`).
+2. **Fire-on-tar (resolved by A08).** `tar_pool` is a `tar` hazard (a flammable deep mud, content-format §J.3).
 3. **Wave spawn.** The second wave comes over the hill from `ditch_south` (behind the player), to punish fighting with your back to the slope.

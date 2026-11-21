@@ -276,7 +276,7 @@ nodes:
     options:
       - id: yes_come
         text: "Come. I could use someone who reads dwarven."
-        effects: ["recruit(companion.maelis)", "set_flag(flag.maelis_joined_a1)", "add_rep(faction.abbey, 5)"]
+        effects: ["recruit(companion.maelis)", "set_flag(flag.maelis_recruited)", "set_flag(flag.maelis_joined_a1)", "add_rep(faction.abbey, 5)"]
         next: joined
       - id: why
         text: "Can you fight?"
@@ -347,6 +347,7 @@ readable_text: "Let the bearer pass all tolls of the Yaruga and the Marnadal roa
 
 ```yaml flags
 declare:
+  - {id: flag.maelis_recruited, type: bool, desc: "Maelis has joined as a companion at least once (set with every recruit(companion.maelis): a1.08, side.abbey_ledgers)."}
   - {id: flag.aldric_guard_doubled, type: bool, desc: "Kosk ordered a guard present whenever Anselm sees Aldric (A05: the twist must explain how the guard was bribed or drugged)."}
   - {id: flag.varn_toll_pass, type: bool, desc: "Varn (Friendly) sent 150 crowns and a toll pass (gdd §6.12: Act II pass on the toll road)."}
   - {id: flag.aldric_farewell_done, type: bool, desc: "Aldric's farewell scene has played."}
@@ -396,7 +397,7 @@ paths:
   - id: maelis_joins
     when: "Abbey Friendly, Maelis not accused, she has shown the book, and she is not already a companion; the player accepts."
     outcome: "companion.maelis recruited."
-    sets: ["recruit(companion.maelis)"]
+    sets: ["recruit(companion.maelis)", "set_flag(flag.maelis_recruited)"]
   - id: maelis_watches
     when: "The player asks her to stay."
     outcome: "Maelis stays in the Abbey (A05: she is in danger there; A07's scriptorium quest still available)."
@@ -415,5 +416,5 @@ guarantees:
 
 ## 12. Open questions
 
-1. **Map unlocks.** gdd §7.1 says "the map unlocks the valley nodes and Attre". I unlocked `map.tigg`, `map.attre` and `map.ferrymen_camp` and pinned `map.witchs_mere` and `map.hanged_mans_oak`. A05 should confirm the Act II starting set.
+1. **Map unlocks (A08).** The map nodes and their `unlock` conditions are in `world/01-travel-map.md`; this section's unlocks and pins stay.
 2. **Stage-1 courier.** gdd §6.1 says a courier brings the stage-1 news "to wherever the player is". Here the player is already in the war room, so Brask's report plays that role.

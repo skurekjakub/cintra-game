@@ -32,6 +32,7 @@ Thumbs.db
 # Style reference screenshots from other games: local only, never published
 /image.png
 /docs/art-direction/reference/
+/docs/art-direction/spike/compare-*.png
 
 # Local Claude Code settings. godot-ai is registered at local scope; its launch
 # command contains machine paths, so never commit a .mcp.json.

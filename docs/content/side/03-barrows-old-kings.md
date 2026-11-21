@@ -60,28 +60,14 @@ spawns:
   - {id: breach_top, area: corvan_mound}
   - {id: camp_edge, area: robbers_camp}
 exits:
-  - id: leave_downs
-    area: drove_road
-    to_zone: zone.barrows_field
-    to_spawn: drove_road_in
-    condition: "false"
-    effects: []
   - id: into_breach
     area: corvan_mound
     to_zone: zone.barrows_tomb
     to_spawn: breach_bottom
     condition: "true"
     effects: []
+  - {id: map_board_road, area: drove_road, to_map: true, label: "Leave the downs (travel)", condition: "true", effects: []}
 interactables:
-  - id: map_board_road
-    area: drove_road
-    kind: map_board
-    label: "Leave the downs (travel)"
-    condition: "true"
-    check: null
-    once: false
-    effects: []
-    fail_effects: []
   - id: loot_tent_back
     area: loot_tent
     kind: search
@@ -109,31 +95,40 @@ interactables:
     once: true
     effects: []
     fail_effects: []
+  - id: handcart
+    area: robbers_camp
+    kind: container
+    label: "Search the handcart"
+    condition: "true"
+    check: null
+    once: true
+    effects: []
+    fail_effects: []
 triggers:
   - id: arrive
     area: drove_road
-    on: enter
+    "on": enter
     source: null
     condition: "not quest_active(quest.side_barrows) and not quest_done(quest.side_barrows)"
     once: true
     effects: ["start_quest(quest.side_barrows)", "set_checkpoint(downs_arrival)"]
   - id: lookout
     area: standing_stones
-    on: enter
+    "on": enter
     source: null
     condition: "not flag(flag.barrows_robbers_dealt) and act() <= 1"
     once: true
     effects: ["play_beat(lookout_whistle)"]
   - id: shade_bars_road
     area: drove_road
-    on: interact
+    "on": exit_attempt
     source: map_board_road
     condition: "has_item(item.corvan_grave_goods) and not flag(flag.grave_goods_returned)"
     once: false
     effects: ["play_beat(shade_rises_field)", "goto_zone(zone.barrows_tomb, bier)", "start_dialogue(dlg.corvan_shade)"]
   - id: robbers_turn
     area: loot_tent
-    on: beat_done
+    "on": beat_done
     source: robbers_discover_theft
     condition: "act() <= 1"
     once: true
@@ -182,7 +177,7 @@ variants:
     interactables_disabled: [loot_tent_back]
 ```
 
-Travel note: the field's exit is the map board at the drove road (`map_board_road`). The `leave_downs` exit is a placeholder with condition `"false"` so the field always has a declared exit; departure uses the map. Trying to leave with the grave goods still unreturned fires `shade_bars_road`.
+Travel note: the field leaves to the travel map through the `map_board_road` exit at the drove road (`to_map: true`, content-format §J.5). Trying to leave with the grave goods still unreturned fires `shade_bars_road`.
 
 ```yaml zone
 id: zone.barrows_tomb
@@ -276,21 +271,21 @@ interactables:
 triggers:
   - id: shade_wakes
     area: burial_chamber
-    on: enter
+    "on": enter
     source: null
     condition: "not flag(flag.corvan_appeased) and not flag(flag.corvan_duel_won) and not flag(flag.grave_goods_returned)"
     once: false
     effects: ["play_beat(shade_rises)", "start_dialogue(dlg.corvan_shade)"]
   - id: tomb_entry
     area: breach_tunnel
-    on: enter
+    "on": enter
     source: null
     condition: "true"
     once: true
     effects: ["set_checkpoint(tomb_entry)"]
 hazards:
-  - {id: lintel_collapse, area: antechamber, kind: collapse, params: {damage: 35, disabled_by_beat: beam_shored}}
-  - {id: spear_plates, area: hall_of_shields, kind: trap, params: {damage: 25, type: pierce, disabled_by_beat: traps_locked}}
+  - {id: lintel_collapse, area: antechamber, kind: collapse, disabled_by: {"on": beat_done, source: beam_shored}, params: {damage: 35}}
+  - {id: spear_plates, area: hall_of_shields, kind: trap, disabled_by: {"on": beat_done, source: traps_locked}, params: {damage: 25, type: pierce}}
   - {id: grave_cold, area: burial_chamber, kind: cold, params: {chill_per_second: 3}}
 checkpoints:
   - {id: tomb_entry, area: breach_tunnel}
@@ -920,9 +915,9 @@ guarantees:
 ```
 
 ## 12. Open questions
-- **Leaving the field:** the downs use a `map_board` interactable as the way out, plus a placeholder exit with condition `"false"`. If every zone must have a real exit, the converter or zone schema needs an explicit "travel exit" kind.
+- **Leaving the field (resolved by A08):** the downs leave to the map through an exit with `to_map: true` (content-format §J.5); the placeholder exit is gone, and `shade_bars_road` watches that exit (`exit_attempt`).
 - **Forced teleport into the duel:** `shade_bars_road` uses `goto_zone` then `start_dialogue`. The dialogue must start after the zone load; confirm effect ordering across a zone change.
 - **Duplicate key-item grant:** if the theft triggers the robbers' fight, `on_won` gives the sack again. The inventory should treat a second grant of a `stack_max: 1` key item as a no-op.
-- **Hazard disabling:** hazards use `params.disabled_by_beat`, which is not in the zone schema. Proposed: hazards may list a beat id that turns them off. Otherwise model the collapse and plates as triggers.
+- **Hazard disabling (resolved by A08):** hazards use `disabled_by: {"on": beat_done, ...}` (content-format §J.3).
 - **Mane-Cleaver armor_pen 20:** gdd gives base 30, block 80%, ×2.0 vs construct, but no armor penetration. 20 was chosen so it bites through iron-warden armor (80) even before the tag bonus. Designer to confirm.
-- `item.poultice` assumed as the gdd consumable id.
+- `item.poultice` is declared in act1 (checked by A08).

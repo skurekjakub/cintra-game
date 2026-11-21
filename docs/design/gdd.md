@@ -156,7 +156,7 @@ queen_condition = clamp(base_condition - mitigations, 0, 3)  while antidote not 
 ```
 chance  = 0.35 + 0.10 * (edges_on_route - 1)        capped at 0.75
 chance -= 0.15 if perk.pathfinder
-chance -= 0.15 if companion.forest_guide and route has a valley edge
+chance -= 0.15 if ally.forest_guide and route has a valley edge
 chance  = max(chance, 0.05)
 terrain = terrain shared by most edges on the route (ties: terrain of the last edge)
 ```
@@ -358,7 +358,7 @@ Level 12 is the cap. XP above the cap is discarded.
 | id | Name | Source | Use |
 |---|---|---|---|
 | `item.dravin_letter` | Dravin's iron-wax dispatch | The courier, Drowned Rat | Shown at Audience (Kosk hires you). Proves the Ostrel threat to Dravin and Hesk |
-| `item.kosk_writ` | Marshal's writ | Audience | Opens palace areas. +2 to checks with officials. Equipped as a badge, it gives −20 to Strept dialogue checks (`kosk_badge_worn`) |
+| `item.kosk_writ` | Marshal's writ | Audience | Opens palace areas. Comes with the Marshal's badge (`item.kosk_badge`, a trinket): worn, it gives +2 to checks with Crown officials and −2 to checks against Strept speakers (§6.10; condition `equipped(item.kosk_badge)`) |
 | `item.false_fourth_verse` | Anselm's "copy" | Abbey | Compared at the Ring of Nine, it gives `ded.anselm_lied` |
 | `item.pale_feather` | Pale gull feather | Fair assassin, Choir bodies | Clue. Part of the Choir disguise (with `item.choir_robe`) |
 | `item.route_map_oak` | Route map to Hanged Man's Oak | Fair assassin | Unlocks the Hanged Man's Oak node |

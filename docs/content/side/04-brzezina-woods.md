@@ -84,16 +84,8 @@ exits:
     to_spawn: solar_window
     condition: "true"
     effects: []
+  - {id: road_board, area: gate_post, to_map: true, label: "Back to the King's Road (travel)", condition: "true", effects: []}
 interactables:
-  - id: road_board
-    area: gate_post
-    kind: map_board
-    label: "Back to the King's Road (travel)"
-    condition: "true"
-    check: null
-    once: false
-    effects: []
-    fail_effects: []
   - id: solar_listen
     area: ivy_wall
     kind: readable
@@ -121,21 +113,30 @@ interactables:
     once: true
     effects: ["play_beat(hounds_loose)"]
     fail_effects: []
+  - id: woodpile
+    area: kitchen_yard
+    kind: container
+    label: "Search the woodpile"
+    condition: "true"
+    check: null
+    once: true
+    effects: []
+    fail_effects: []
 triggers:
   - id: arrive
     area: gate_post
-    on: enter
+    "on": enter
     source: null
     condition: "not quest_active(quest.side_brzezina) and not quest_done(quest.side_brzezina) and not quest_failed(quest.side_brzezina)"
     once: true
     effects: ["start_quest(quest.side_brzezina)", "set_checkpoint(woods_arrival)"]
   - id: woods_alarm
     area: lodge_clearing
-    on: beat_done
-    source: alarm_raised
+    "on": alarm
+    source: null
     condition: "not flag(flag.lodge_alarm)"
     once: true
-    effects: ["set_flag(flag.lodge_alarm)", "start_encounter(enc.brzezina_clearing)"]
+    effects: ["play_beat(alarm_raised)", "set_flag(flag.lodge_alarm)", "start_encounter(enc.brzezina_clearing)"]
 hazards:
   - {id: peat_bog, area: birch_stand, kind: deep_mud, params: {speed_mult: 0.7}}
   - {id: gate_brazier, area: gate_post, kind: fire, params: {damage_per_second: 5}}
@@ -233,7 +234,7 @@ interactables:
     check: {skill: investigate, dc: 6}
     once: false
     effects: ["give_item(item.hollec_letters, 1)", "add_crowns(60)"]
-    fail_effects: ["play_beat(alarm_raised)"]
+    fail_effects: ["raise_alarm()"]
   - id: ford_map
     area: solar
     kind: readable
@@ -270,17 +271,26 @@ interactables:
     once: true
     effects: ["play_beat(overheard_plot_stair)", "set_flag(flag.brzezina_plot_overheard)"]
     fail_effects: []
+  - id: desk_drawer
+    area: solar
+    kind: container
+    label: "Open the desk drawer"
+    condition: "true"
+    check: null
+    once: true
+    effects: []
+    fail_effects: []
 triggers:
   - id: lodge_alarm
     area: great_hall
-    on: beat_done
-    source: alarm_raised
+    "on": alarm
+    source: null
     condition: "not flag(flag.lodge_alarm)"
     once: true
-    effects: ["set_flag(flag.lodge_alarm)", "start_encounter(enc.brzezina_retainers)"]
+    effects: ["play_beat(alarm_raised)", "set_flag(flag.lodge_alarm)", "start_encounter(enc.brzezina_retainers)"]
   - id: hall_entry
     area: great_hall
-    on: enter
+    "on": enter
     source: null
     condition: "true"
     once: true
@@ -817,7 +827,7 @@ enemies:
   - {enemy: enemy.bandit, count: 3, spawn: hall_door, variant: sodden_retainer}
   - {enemy: enemy.choir_crossbowman, count: 1, spawn: hall_door, variant: sodden}
   - {enemy: enemy.bandit, count: 1, spawn: hall_door, variant: baron}
-  - {enemy: enemy.choir_assassin, count: 1, spawn: hall_door, variant: drozd}
+  - {enemy: enemy.choir_assassin, count: 1, spawn: hall_door, variant: drozd, condition: "not flag(flag.drozd_rival) and not flag(flag.drozd_bought)", flees_at_hp_pct: 20}
 waves:
   - {after: wave_cleared, enemies: [{enemy: enemy.bandit, count: 2, spawn: kitchen_in, variant: sodden_retainer}]}
 attack_tokens: null
@@ -835,8 +845,9 @@ Notes: three Sodden retainers (bandit sword-and-buckler variant) and a Sodden bo
 ```yaml encounter
 id: enc.brzezina_clearing
 zone: zone.brzezina_woods
+posture: patrol
 enemies:
-  - {enemy: enemy.bandit, count: 2, spawn: lodge_door, variant: sodden_retainer}
+  - {enemy: enemy.bandit, count: 2, spawn: lodge_door, variant: sodden_retainer, route: [lodge_clearing], loop_s: 40}
   - {enemy: enemy.choir_crossbowman, count: 1, spawn: lodge_door, variant: sodden}
 waves: []
 attack_tokens: null
@@ -995,10 +1006,10 @@ guarantees:
 ```
 
 ## 12. Open questions
-- **Drozd's scripted escape:** the encounter needs a per-enemy "escape at N% HP or after T seconds" rule (`variant: drozd`). Proposed as a data field on the variant. She must also be skipped at spawn when `flag.drozd_rival` or `flag.drozd_bought` is set: the encounter schema has no per-enemy spawn condition.
+- **Drozd's scripted escape (resolved by A08):** her entry has `condition` and `flees_at_hp_pct: 20` (content-format §J.4). The 30 s timer stays in her variant data.
 - **Repeat alarm:** after `flag.lodge_alarm` is set, a lodge re-entry should restart the household fight. Needs a variant with an `on: enter` trigger that is not `once`, or a zone-wide "hostile" state.
 - **Hounds released:** the effect that pulls the clearing patrol away is prose only (no AI command effect exists). Implement as part of the `hounds_loose` beat.
 - **Drozd as a recurring rival:** this file only sets `flag.drozd_rival`. The recurring appearances (a lowlands card variant, an epilogue slide) live in `13-travel-events.md` and A06's endings. gdd §8.3 lists the recurring rival as a cut candidate; the flag costs nothing if cut.
 - **Crown payoff:** gdd §6.15 names `flag.brzezina_plot_exposed` for the epilogue only. No Act III combat effect is added.
-- `item.field_draught` is assumed as the gdd consumable id ("field draught").
-- Map edge `cintra—brzezina_woods` opens on "quest hook": suggest its condition be `flag(flag.brzezina_hook) or rumor_heard(rumor.r18_brzezina_lodge)`.
+- `item.field_draught` is declared in act2/01 (checked by A08).
+- Map node `map.brzezina_woods` (resolved by A08) unlocks when pinned or when the quest is active (`world/01-travel-map.md`).

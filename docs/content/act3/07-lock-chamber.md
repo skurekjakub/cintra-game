@@ -20,7 +20,7 @@ Solstice dawn. The great door opens on a round vault under the mountain: a floor
 - Stage 4. This is the only real-time timer in the game. It is a combat mechanic, not a clock (gdd change log, §6.14).
 - **Entry:** from the Hall of Mirrors (a3.06) through the great door. Checkpoint `pre_finale` is set as the door opens. Death anywhere in the finale reloads `pre_finale` (gdd §6.14 rule 10).
 - `ms.a3_finale_done` is set by the finale encounter's `on_won`, which fires on **any** `FinaleResolved` (true oath, reversed oath after the aftermath, or vault seized). See the Open questions.
-- The finale record (`oath`, `anselm`, `vault_seized`, `coerced`) is produced by the `finale` domain (`architecture.md` §4.9). Content cannot set it with effects. The content hooks are beats (`play_beat`) that the scene implements by calling the matching use case (table in §3.3).
+- The finale record (`oath`, `anselm`, `vault_seized`, `coerced`) is produced by the `finale` domain (`architecture.md` §4.9). Content drives it with `finale_event(...)` (content-format §J.2), placed next to the beat that shows the moment (table in §3.3).
 
 ## 3. Location layout
 
@@ -128,16 +128,16 @@ What each reduction means in the fiction: the war-band is holding the main porta
 - **Zealot alive:** he fights on. At 25% HP he breaks off and runs for the breach rift (beat `anselm_flees`), and `dlg.a3_aftermath_choice` opens. **Pursue Anselm:** a 20 s chase into the rift, ending in a scripted kill at the rift's lip (`anselm = dead`, beat `anselm_falls`). The vent collapse comes down behind the player. Aldric survives it: Maelis drags him clear if she is present, and otherwise he scrambles out of the fall line himself. **Shield Aldric:** the player throws themselves over the boy as the vent collapse comes down (beat `shield_aldric`), and Anselm escapes up the rift (`anselm = fled`).
 - **Anselm already dead:** a 60 s **escape sequence** (beat `escape_collapse`). The great door unseals, and the player must get Aldric up the south ramps and out through the Hall of Mirrors while debris falls (collapse hazards with 1 s shadows) and vents blast. Aldric follows at the player's pace, with the same downed rules. Reaching the Hall of Mirrors resolves the finale. If the 60 s run out, the collapse is fatal and the game reloads `pre_finale`.
 
-### 3.3 Beat → use-case contract (for the scene)
+### 3.3 Finale events (content-format §J.2)
 
-| Beat | The scene calls | Notes |
+| Beat | Effect, and the use case it calls | Notes |
 |---|---|---|
-| `first_ray` | `StartFinaleUseCase()` | Starts the meter with difficulty `T_rev`/`T_true` and modifiers |
-| `brake_engaged` | `RitualMeter.apply_modifier(gear_brake, 1.25)` | Only if Dravin is recruited and the Key is held |
-| `free_and_crown` | `FreeAldricUseCase()` | Fired by the Free Aldric prompt |
-| `vault_commanded` | `FinaleChoiceUseCase(command)` | Plus `coerced` if `flag.aldric_coerced` |
-| `pursue_anselm` | `FinaleChoiceUseCase(pursue)` | |
-| `shield_aldric` | `FinaleChoiceUseCase(shield)` | |
+| `first_ray` | `finale_event(start)`: `StartFinaleUseCase()` | Starts the meter with difficulty `T_rev`/`T_true` and modifiers |
+| `brake_engaged` | `finale_event(gear_brake)`: `RitualMeter.apply_modifier(gear_brake, 1.25)` | Only if Dravin is recruited and the Key is held |
+| `free_and_crown` | `finale_event(free_aldric)`: `FreeAldricUseCase()` | Fired by the Free Aldric prompt |
+| `vault_commanded` | `finale_event(command)`: `FinaleChoiceUseCase(command)` | Plus `coerced` if `flag.aldric_coerced` |
+| `pursue_anselm` | `finale_event(pursue)`: `FinaleChoiceUseCase(pursue)` | |
+| `shield_aldric` | `finale_event(shield)`: `FinaleChoiceUseCase(shield)` | |
 
 ```yaml zone
 id: zone.ko_lock_chamber
@@ -226,33 +226,51 @@ interactables:
     once: false
     effects: ["play_beat(valve_vent_w)"]
     fail_effects: []
+  - id: command_vault                                 # the finale domain shows it only in the rule 8 window (§3.2)
+    area: dais
+    kind: lever
+    label: "Command the Vault"
+    condition: "has_clue(clue.vault_command_rite) and flag(flag.dravin_recruited)"
+    check: null
+    once: true
+    effects: ["start_dialogue(dlg.a3_command_vault)"]
+    fail_effects: []
 triggers:
   - id: door_seals
     area: great_door
-    on: enter
+    "on": enter
     source: null
     condition: "true"
     once: true
     effects: ["set_checkpoint(pre_finale)", "play_beat(door_seals)"]
   - id: confrontation
     area: south_ramps
-    on: enter
+    "on": enter
     source: null
     condition: "not flag(flag.finale_begun)"
     once: true
     effects: ["set_flag(flag.finale_begun)", "play_beat(anselm_knife)", "start_dialogue(dlg.a3_anselm_knife)"]
   - id: closing
     area: floor_ring
-    on: encounter_done
+    "on": encounter_done
     source: enc.lock_chamber_finale
     condition: "true"
     once: true
     effects: ["start_dialogue(dlg.a3_closing)"]
+  - id: t_aftermath_choice
+    area: breach_rift
+    "on": beat_done
+    source: anselm_flees
+    condition: "true"
+    once: true
+    effects: ["start_dialogue(dlg.a3_aftermath_choice)"]
 hazards:
-  - {id: steam_vents, area: vent_ring, kind: steam, params: {damage_per_second: 12, cycle_on_s: 4, cycle_off_s: 4, tell_s: 1.0, blocks_sight: true, activation: "V1,V5 at reversed 1; +V3,V7 at 2; all at 3; permanent at 4"}}
+  - {id: vents_ns, area: vent_ring, kind: steam, enabled_by: {"on": combat_event, source: reversed_verse, threshold: 1}, params: {vents: [V1, V5], damage_per_second: 12, cycle_on_s: 4, cycle_off_s: 4, tell_s: 1.0, blocks_sight: true, permanent_from_reversed: 4}}
+  - {id: vents_ew, area: vent_ring, kind: steam, enabled_by: {"on": combat_event, source: reversed_verse, threshold: 2}, params: {vents: [V3, V7], damage_per_second: 12, cycle_on_s: 4, cycle_off_s: 4, tell_s: 1.0, blocks_sight: true, permanent_from_reversed: 4}}
+  - {id: vents_diag, area: vent_ring, kind: steam, enabled_by: {"on": combat_event, source: reversed_verse, threshold: 3}, params: {vents: [V2, V4, V6, V8], damage_per_second: 12, cycle_on_s: 4, cycle_off_s: 4, tell_s: 1.0, blocks_sight: true, permanent_from_reversed: 4}}
   - {id: gear_pits, area: gear_pits, kind: trap, params: {damage: 40, eject: true, crush_humans_kicked_in: true}}
   - {id: valve_cones, area: rune_pillars, kind: steam, params: {damage_per_second: 20, duration_s: 6, cooldown_s: 20, note: "Player-triggered by valve_*; vents the two nearest vents into a 6 m cone; blocks sight."}}
-  - {id: collapse_debris, area: escape_route, kind: collapse, params: {damage: 35, shadow_telegraph_s: 1.0, active: "aftermath only"}}
+  - {id: collapse_debris, area: escape_route, kind: collapse, enabled_by: {"on": beat_done, source: escape_collapse}, params: {damage: 35, shadow_telegraph_s: 1.0}}
   - {id: soot_aura, area: dais, kind: trap, params: {status: soot, note: "Carried by the Ash-Bound Zealot (4 m); listed for flash-reduction settings."}}
 checkpoints:
   - {id: pre_finale, area: great_door}
@@ -530,7 +548,7 @@ nodes:
     next: begin_fx
   begin_fx:
     type: effect
-    effects: ["play_beat(first_ray)", "start_encounter(enc.lock_chamber_finale)"]
+    effects: ["finale_event(start)", "play_beat(first_ray)", "start_encounter(enc.lock_chamber_finale)"]
     next: bye
   bye:
     type: end
@@ -584,7 +602,7 @@ nodes:
     type: line
     speaker: npc.aldric
     text: "Wake and answer."
-    effects: ["play_beat(vault_commanded)"]
+    effects: ["finale_event(command)", "play_beat(vault_commanded)"]
     next: bye
   refused:
     type: line
@@ -623,11 +641,11 @@ nodes:
         next: shield
   pursue:
     type: effect
-    effects: ["play_beat(pursue_anselm)"]
+    effects: ["finale_event(pursue)", "play_beat(pursue_anselm)"]
     next: bye
   shield:
     type: effect
-    effects: ["play_beat(shield_aldric)"]
+    effects: ["finale_event(shield)", "play_beat(shield_aldric)"]
     next: bye
   bye:
     type: end
@@ -668,12 +686,16 @@ waves:
   - {after: reversed_verse_4, enemies: [{enemy: enemy.iron_warden, count: 2, spawn: breach, variant: null}]}
 attack_tokens: null
 allow_yield: true
-allies: [ally.aldric, ally.kosk_cavalry]
+allies:
+  - ally.aldric
+  - {ally: ally.kosk_cavalry, condition: "in_party(ally.kosk_cavalry)"}
 checkpoint: pre_finale
 avoidable_by: []
 on_won: ["reach_milestone(ms.a3_finale_done)"]
 on_yielded: []
 on_player_fled: []
+escorts:
+  - {ally: ally.aldric, game_over: escort_aldric}
 ```
 
 Encounter notes:
@@ -771,10 +793,10 @@ guarantees:
 
 ## 12. Open questions
 - **Companions in the finale (gdd tension).** gdd §6.13 allows one active combat companion. §6.14 uses Dravin at the brake and Maelis on the channel at the same time. I made Dravin a **station** actor (present if recruited, never fighting) and let Maelis fight if recruited and alive, whatever the active slot. This is a finale-only exception. Please confirm.
-- **Finale record from content.** The effect list (§E) has no op to set `finale.*`. I route the choices through `play_beat` and a beat → use-case table (§3.3). A dedicated effect such as `finale_choice(command|pursue|shield)` would be cleaner.
+- **Finale record from content (resolved by A08).** `finale_event(start | gear_brake | free_aldric | command | pursue | shield)` (content-format §J.2) sits beside each beat (§3.3).
 - **`on_won` for every resolution.** The finale encounter's `on_won` must fire on any `FinaleResolved`, including the loss branches. Otherwise `ms.a3_finale_done` and the closing scene never trigger after a lost race.
-- **Wave `after:` values.** I used `reversed_verse_1..4`, which content-format §F.4 shows as an example. The encounter runner must accept them from the finale meter's events.
+- **Wave `after:` values (resolved by A08).** `reversed_verse_1..4` are valid (content-format §J.4); the vents use `combat_event` / `reversed_verse` (§J.3).
 - **Bodyguard slot data.** The schema has no "max N, fill in order" field. I listed all six slots and described the fill rule. The finale domain should own N.
 - **Weak-point numbers.** gdd §6.7 names the bellows-lung weak point but gives no multiplier. I specified ×1.5 damage and ×2 poise, and the pull interrupt. Tune in playtest.
-- **Ash-Bound Zealot and Anselm XP** are missing from gdd §6.8's XP list. Suggest 0 for `enemy.anselm_human` and 800 for the Zealot.
+- **Ash-Bound Zealot and Anselm XP** are missing from gdd §6.8's XP list. Suggest 0 for `enemy.anselm_human` and 800 for the Zealot (A08 uses these values in `docs/content/_registry.md` balance notes).
 - **Anselm's fate on a True Oath win.** gdd rule 6 says remaining enemies "collapse or flee". I made the human Anselm surrender (`alive`) and the Zealot collapse and die (`dead`). Neither affects the resolver (only reversed outcomes test `anselm`), but the epilogues use it.

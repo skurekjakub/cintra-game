@@ -59,16 +59,9 @@ spawns:
   - {id: cliff_top, area: cliff_path, default: false}
   - {id: platform, area: beacon_platform, default: false}
   - {id: village_fire, area: village, default: false}
-exits: []
+exits:
+  - {id: road_board, area: road_gate, to_map: true, label: "Take the road", condition: "true", effects: []}
 interactables:
-  - id: road_board
-    area: road_gate
-    kind: map_board
-    label: "Take the road"
-    condition: "true"
-    check: null
-    once: false
-    effects: []
   - id: muster_board
     area: barracks
     kind: readable
@@ -160,38 +153,56 @@ interactables:
     check: null
     once: true
     effects: []
+  - id: barracks_locker
+    area: barracks
+    kind: container
+    label: "Open the locker"
+    condition: "true"
+    check: null
+    once: true
+    effects: []
+    fail_effects: []
+  - id: captain_chest
+    area: tower_stair
+    kind: container
+    label: "Open the captain's chest"
+    condition: "true"
+    check: null
+    once: true
+    effects: []
+    fail_effects: []
 triggers:
   - id: tobin_warning_shot
     area: gatehouse
-    on: enter
+    "on": enter
     source: null
     condition: "not flag(flag.tobin_trusts)"
     once: true
     effects: ["play_beat(warning_bolt)"]
   - id: deserters_notice_store
     area: pitch_store
-    on: interact
+    "on": interact
     source: pitch_store_door
     condition: "not flag(flag.watch_deserters_dealt)"
     once: true
     effects: ["start_dialogue(dlg.rask_caught_thief)"]
   - id: choir_raid_alone
     area: yard
-    on: enter
+    "on": enter
     source: null
     condition: "stage() >= 3 and flag(flag.watch_beacon_restored) and not flag(flag.watch_raid_repelled) and not flag(flag.rask_returned)"
     once: false
     effects: ["play_beat(raid_horns)", "start_encounter(enc.watch_choir_raid)"]
   - id: choir_raid_garrisoned
     area: yard
-    on: enter
+    "on": enter
     source: null
     condition: "stage() >= 3 and flag(flag.watch_beacon_restored) and not flag(flag.watch_raid_repelled) and flag(flag.rask_returned)"
     once: false
     effects: ["play_beat(raid_horns)", "start_encounter(enc.watch_choir_raid_garrisoned)"]
   - id: tobin_lit_it
     area: road_gate
-    on: enter
+    "on": enter
     source: null
     condition: "ms(ms.act2_twist) and flag(flag.tobin_ordered_to_light) and flag(flag.watch_beacon_restored) and not flag(flag.watch_signal_lit)"
     once: true
@@ -929,7 +940,7 @@ guarantees:
 ```
 
 ## 12. Open questions
-- Travel exits: the content format has no "to map" exit. This zone leaves via a `map_board` interactable (`road_board`). Confirm that `map_board` opens the travel map.
+- Travel exits (resolved by A08): the zone leaves to the map through an exit with `to_map: true` (content-format §J.5).
 - `tobin_lit_it` sets the flag on the player's arrival, not at the moment of the twist. A player who never passes the Watch in Act III does not get the cavalry. Acceptable because `map.marnadal_watch` sits on a mountain edge to `stairs_foot`; flag for A06 that the Race South route choice should surface this node.
 - Hazard `kind: cold` is used on the beacon platform with a stage parameter; zone `cold_rate` itself cannot change per variant in the schema. Proposal: allow `cold_rate` in variants.
-- `item.field_draught` is referenced in the captain's chest loot. gdd §6.9 names the field draught but no id. Assumed `item.field_draught` (the same goes for `item.poultice`).
+- `item.field_draught` is declared in act2/01 (checked by A08).

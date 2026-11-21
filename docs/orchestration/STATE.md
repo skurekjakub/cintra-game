@@ -22,6 +22,8 @@ Update after every decision, dispatch, and report.
 | D2 | Engine: Godot 4.7.2 (installed). | user (asked to set up Godot project) |
 | D3 | Art direction: choose from 5 options presented in an artifact with visual mockups. | user — PENDING choice |
 | D3a | **Art style = HD-2D like the user's reference screenshot** (`image.png`, a commercial game frame; style only, gitignored, never publish). Pixel-art sprite characters in a detailed, lit 3D world; high 3/4 top-down camera; purple ambient + warm torch pools; bloom, DOF, vignette; ornate gothic HUD. All 5 canvas options were rejected ("all of those look like crap"). Proof via a real Godot render spike (A09) + `docs/design/art-bible.md`. | user, 2026-11-21 |
+| D6 | **STOP at the first vertical slice** (the Drowned Rat playable end to end) so the user can refine the visuals before the rest of the game is built. Build only what the slice needs; no full-game P2/P3 execution before the user signs off on the slice. | user, 2026-11-21 |
+| D3b | Reference game identified: **The Adventures of Elliot: The Millennium Tales** (Square Enix 2025, HD-2D, UE). Technique: fully 3D world + pixel characters, "rolling cylinder" world curve, character/VFX lights, DOF. Refs saved locally in docs/art-direction/reference/ (gitignored). | orchestrator research, 2026-11-21 |
 | D5 | **Implementation runs SEQUENTIALLY**: one implementer subagent at a time (plus its reviewer), no parallel fan-out of implementers. Plan "waves" are just ordering. | user, 2026-11-21 |
 | D4 | **No time mechanic.** No calendar, day counter, or deadlines. Escalation is driven by story milestones; travel has no time cost; endings depend on choices and outcomes. A real-time ritual meter inside the finale boss fight is allowed (combat, not calendar). A02 told by message. | user, 2026-11-21 |
 
@@ -53,19 +55,38 @@ Update after every decision, dispatch, and report.
 
 | P1-plan-core-state | Plan: rules, world_state, escalation, actors, inventory, progression, factions, rumors (+FactsChanged, ScriptedRandom) | DONE c68afe8 | agents/P1-plan-core-state/brief.md | agents/P1-plan-core-state/report.md |
 | P2-plan-narrative | Plan: quests, investigation, dialogue, companions, travel, finale, endings | DONE 0a40369 (gated on P1 tasks 1,2,5,6,13,14) | agents/P2-plan-narrative/brief.md | agents/P2-plan-narrative/report.md |
-| P3-plan-app-infra | Plan: save, application layer, infra, composer/Services/Main.tscn, md→JSON converter, content validation tests | dispatched | agents/P3-plan-app-infra/brief.md | (in final msg → save) |
+| P3-plan-app-infra | Plan: save, application layer, infra, composer/Services/Main.tscn, md→JSON converter, content validation tests | DONE 27620bf (58 tasks, 15 waves; W1–3 independent of P1/P2) | agents/P3-plan-app-infra/brief.md | agents/P3-plan-app-infra/report.md |
 
 Common planner brief: agents/_planner-common.md. Plans → docs/superpowers/plans/2026-11-21-*.md. Execution: subagent-driven-development, ONE task at a time (D5): implementer → reviewer → orchestrator commits → next task.
-| A09-art-spike | HD-2D Godot render spike (Drowned Rat + Karak Ostrel shots, 3+ iterations) + art-bible.md | dispatched | agents/A09-art-spike/brief.md | (final msg → save) |
+| A09-art-spike | HD-2D Godot render spike (Drowned Rat + Karak Ostrel shots, 3+ iterations) + art-bible.md | running; the user saw r1 and was unhappy → detailed critique sent (too dark, tiny unreadable chars → CC0 KayKit/Quaternius rigs at 96–128 px, invisible floor ornament, camera too far, blown bloom, blob props, crude portrait). Quality over speed; compare-*.png side by side (gitignored). 2nd ref (forest combat) saved at docs/art-direction/reference/ref-02-forest-combat.png (gitignored; image.png was overwritten, so ref-01 survives only in A09's notes). USER CORRECTION: the world is FULLY 3D rendered (smooth, detailed materials); ONLY characters are pixel sprites (my "pixel textures on the world" read was wrong and was retracted). Also: strong tilt-shift DOF, volumetric fog and particles. A09 may download web HD-2D refs into reference/ for local study | agents/A09-art-spike/brief.md | (final msg → save) |
+
+## Visual quality gate (user, 2026-11-21): "I refuse to accept any other prototype than something that looks just as production triple-A quality"
+- The orchestrator reviews every render against the Elliot and Aldermere refs before the user sees anything. Anything below a shipped-HD-2D level is rejected and sent back with a written critique. No "work in progress" shows to the user.
+- If A09 stalls or its context degrades, split the art into fresh specialist agents run in sequence: (1) character sprite artist, (2) environment modeller (Blender), (3) lighting and post TD (Godot), each with a focused brief and the reference set.
+
+## Sprite pipeline (user: sprites are "trash", "absolute disaster", 2026-11-21)
+- Stopped primitive/hand-coded sprites.
+- Path A (running in A09): CC0 rigged models (KayKit Adventurers/Skeletons, Quaternius) → Blender ortho render at the target pixel size with closest filtering, toon bands + rim, fixed-palette quantization, 1-px outline, 8 directions → sheets + JSON. First deliverable: `docs/art-direction/spike/char-player-test.png`.
+- **Path C, now PRIMARY:** hand-authored palette-indexed pixel maps in code, compiled to PNG sheets. Proof: "Lanterns of Aldermere" (Claude Code, one prompt, all sprites generated in code; refs at docs/art-direction/reference/ref-aldermere-*.png). Craft rules sent: chibi proportions, hue-shifted ramps, selective coloured outlines, top-left light, distinct silhouettes, manual anti-aliasing, idle/walk/attack/hurt sets. Iterate the player idle ≥3× before anything else.
+- Path A is now the fallback.
+- Path B (pending the user's key): PixelLab MCP (`npm i -g pixellab-mcp`, `PIXELLAB_SECRET`, tools pixflux/bitforge/rotate/animate_with_text). Paid credits (pixellab.ai). Asked the user for a key.
 
 ## Implementation runs
 | Plan | Worktree / branch | Ledger | Status |
 |---|---|---|---|
-| core-state-domains (P1, 21 tasks) | `.worktrees/core-state` / `feat/core-state` (base e141bef) | `.worktrees/core-state/.superpowers/sdd/2026-11-21-core-state-domains/progress.md` | pre-flight scan running |
+| core-state-domains (P1, 21 tasks) | `.worktrees/core-state` / `feat/core-state` (base e141bef) | `.worktrees/core-state/.superpowers/sdd/2026-11-21-core-state-domains/progress.md` | pre-flight done (21 rulings, all accepted); Task 1 running |
+
+P1 pre-flight rulings that change names P2/P3 consume: `ExperienceTrack.attribute_points_earned()` (not unspent_attribute_points), `FakeFactProvider.reputations` field, `ConditionValue.VALUE_INT/VALUE_TIER/VALUE_WORD`, `EscalationStageChanged(old_stage, new_stage)`, `FactsChanged` in `shared/events/`, the `JsonRoundTrip` test helper. Carry these into the P2/P3 dispatches.
 
 Note: the harness moved the orchestrator's working directory into the worktree. Main-checkout commits (content, art, plans) use `git -C C:\Users\skure\repositories\cintra-game ...`.
 
-## Roadmap
+## Roadmap (revised for D6 — stop at vertical slice)
+1. P1 core-state: Tasks 1–15, 17, 18 (16, 19, 20, 21 deferred).
+2. P4 vertical-slice plan (write after A09 delivers the art bible): the slice subset of P2 (dialogue, quests) and P3 (converter + loader for act1/01, session, save), plus the combat domain and the HD-2D presentation of the Drowned Rat (taproom, yard/mudflats).
+3. Execute P4 sequentially → playable slice → **STOP and hand to the user for visual refinement.**
+4. Only after sign-off: the rest of P1/P2/P3 and the acts.
+
+## Old roadmap (superseded)
 - M1 Foundations: P1 → P2 → P3 plans executed (P3 waves gated on P1/P2 classes). Content reconciliation (A08) in parallel.
 - M2 Vertical slice: (needs art pick) art bible + asset pipeline, combat domain + presentation, the Drowned Rat playable end to end.
 - M3 Act I complete → M4 Act II → M5 Act III + endings → M6 side quests, polish, export.
