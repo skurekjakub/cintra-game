@@ -227,3 +227,14 @@ The next lever is a **second critic round**. Within the skill, use it on every h
 3. Objective gates after every render.
 4. **2 independent-critic rounds**, run by the orchestrator, each critic a fresh agent.
 5. A final blind check against the scene.
+
+## Critic round 2: finding
+The second critic was a fresh agent and gave sharp, pixel-located flaws:
+- the mug arm is stiff and oversized;
+- the values put the focus on the belly;
+- she looks seated;
+- the cap is a checker pattern and the fringe a barcode.
+
+But it **partly reversed critic 1 on width.** Critic 1 said "make the body wider than the head"; critic 2 said "the body is 1.8× the head, a beanbag".
+
+Independent critics without a shared, fixed spec can oscillate. **The fix:** the orchestrator rules on conflicts and writes a numeric target (head 16 px, torso 21–23 px), which goes into the spec every later critic receives. The spec is the anchor; critics find flaws against it.

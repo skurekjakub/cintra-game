@@ -33,6 +33,7 @@ Run `python -I <this skill dir>/audit_sprite.py sprite_1x.png --max-colours N --
 - **Your own critique is not a stopping condition.**
 - **If you can dispatch agents:** give a fresh agent the 1× sprite pasted on the real in-game backdrop, the 8× view and the reference, and ask for the 5 worst flaws. Fix them and repeat until the critic's worst flaw is minor at 1×. Every hero asset gets at least 2 rounds. In the blind test, one critic round added +6/50 and was the single largest gain; the gates alone gave a clean but lifeless sprite.
 - **If you cannot dispatch agents:** finish, run the audit, and hand back with the render paths. The orchestrator runs the critic.
+- Give every critic the written spec (section 1), and add each ruling to it. Fresh critics without a shared spec can reverse each other: in the test, one said "widen the body" and the next "the body is too wide". The person running the loop rules on conflicts with a number.
 - Every critique names a specific gap ("the white cap and sleeves form one mass"), never "make it better".
 
 ## 6. One step at a time
