@@ -25,6 +25,10 @@ Thumbs.db
 *.blend1
 *.blend2
 
+# Implementation worktrees and plan-execution scratch (ledgers live in docs/orchestration/ledgers/)
+/.worktrees/
+/.superpowers/
+
 # Style reference screenshots from other games: local only, never published
 /image.png
 /docs/art-direction/reference/
