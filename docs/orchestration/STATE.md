@@ -135,3 +135,26 @@ Subagents cannot write report .md files (harness block). They return the report 
 3. After A04–A07: A08 id reconciliation + content review; A09 markdown→JSON converter (TDD) + content validation tests.
 4. After A03: writing-plans → implementation plan per domain (docs/plans/), then subagent-driven TDD by domain, starting with the vertical slice (01-drowned-rat).
 4. After the art pick: art bible + asset pipeline agent (Blender MCP), presentation layer.
+
+## P1 final review (opus, 2026-11-21): READY AFTER FIXES. Carry-forwards for P2/P3
+Rulings FR-1 to FR-8 are in the core-state ledger. The fix wave is running, then task R1-restore (`restore()` returns Result, reject policy), then J6-items, then merge.
+
+**P2:**
+- Correct the `Party.skill_bonus` note: CheckTotals cannot reference companions, so P3 SessionFactProvider owns it.
+- CheckResolver must not add rep_mod to attribute checks (§J.1). Use `RepTiers.rep_mod`.
+- New aggregates use the R1 `restore() -> Result` contract.
+- EndingFactProvider covers all 27 FactProvider methods.
+
+**P3:**
+- SessionFactProvider and OptimisticFactProvider map the five §J.1 methods. `is_disguised` needs `ZoneDefinition.disguise_tag` plus equipment and inventory, and is not designed yet. ReachableFacts needs a key scheme for the two-argument `heard_from`.
+- Effect handlers:
+  - `give_item` hitting `stack_full` is a no-op;
+  - `take_item` of an item not held is a no-op, and a partial take is `remove(id, mini(n, count), true)`;
+  - unequip before the last copy leaves;
+  - `add_crowns(-N)` calls `spend(N)`, pre-checked or rolled back by snapshot.
+- `start_encounter` takes two arguments (needs FR-2), so the composer test expects the changed spec.
+- Load copies aggregates as a group: Equipment and QuickSlots hold their Inventory, and ActorSheet holds the XP callable.
+- The fingerprint must sort keys, because snapshot dictionaries keep insertion order.
+- `IdRules.KINDS` gets `theory` and `epilogue`.
+- QuickSlots has no outbox (M8).
+- `quest_stage` words are not cross-referenced (M7).
