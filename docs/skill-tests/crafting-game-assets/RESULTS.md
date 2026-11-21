@@ -142,3 +142,51 @@ Output: an upright barrel. 18 jittered staves, 4 hoops with riveted laps, 3-boar
 - The in-game-scale check is the decisive habit.
 - Baking plus GLB re-import verification belongs in every asset's definition of done.
 - Weathering needs its own explicit pass: edge wear, grime, stains, all scaled to be visible at game size.
+
+## P5: full skill after the refactor (opus, 45 tool calls, 14 min)
+Output: a 27×32 figure, 50 colours. 5 variants, 6 critique rounds, and 1× checks on wood and moonlight crops taken from env-r6.
+
+**Effect of the refactor:**
+- **M1:** both lists were written. The craft floor was applied above the reference: tinted outlines lightened on the lit edges, a cool 1 px moon rim, hue-shifted ramps.
+- **M4:** the variants differed in silhouette (pear, stocky square, apple, tall-broad, chibi-round), judged in solid black next to the reference's silhouette. This time the choice was real.
+- **M3:** it checked against the backdrop. It removed bodice lacing because the lacing merged with the foam at 1×, and it stopped under the stop rule (no gap visible at 1× on either backdrop).
+- **Initiative:** it took Bertha's mob cap and green bodice from the HUD portrait in env-r6, so the sprite stays consistent with existing art.
+
+**Orchestrator's view:**
+- The most *designed* sprite: it has a costume, a character and the right game palette.
+- But it is busier: the white cap and white sleeves form one mass, the tankard is a grey block, and 50 colours is a lot for this scale.
+
+The blind judge decides.
+
+## Blind judge, round 1 (opus; names shuffled, key in scratchpad `judge_key.json`)
+
+| Rank | Sprite | Arm | Total /50 | Size (fig h) | Colours | Isolated px |
+|---|---|---|---|---|---|---|
+| 1 | N | **P0** (no guidance) | 32 | 43 | 28 | 7.7% |
+| 2 | L | P4 (M1–M4) | 31 | 27 | 29 | 11.5% |
+| 3 | M | P3 (M1–M3) | 31 | 28 | 25 | 11.6% |
+| 4 | R | P2 (M1+M2) | 25 | 28 | 30 | 8.8% |
+| 5 | K | P1 (M1) | 22 | 26 | 26 | 6.7% |
+| 6 | Q | **P5** (full skill) | 21 | 32 | 50 | 20.8% |
+
+### Verdict: the skill as written FAILED its test
+No arm beat the baseline. The full skill came last.
+
+**Why P0 won:** the cleanest clusters, a consistent outline and the most appeal (closed-eye smile). It was drawn on a **bigger canvas** (43 px tall), and the extra pixels make clean craft easier. It is the wrong scale for the game (1.35× the scene's sprites), but it still won on craft, readability and appeal.
+
+**Why the guided arms lost:**
+1. **M1 shrank the sprite** to the reference's 26–28 px, and every guided arm then had too few pixels for the detail it tried to add.
+2. **M2 and M6 added *things*:** rim light, tinted and lightened outlines, hue shifts, props, lacing. At 27–32 px, each addition became noise. P5 ended with 50 colours and 21% isolated pixels.
+3. **M3 self-critique is unreliable.** Every agent "could not name a gap" or accepted one and stopped, while a blind judge named 4–6 obvious flaws in each sprite. An artist cannot see its own noise.
+4. **The noise measure tracks the judge's craft scores better than any method does.** P0 and P1 were the only arms under 8%.
+
+### Caveats
+- n = 1 per arm. The spread between the 2nd and 4th places is within run-to-run variance.
+- The test gave the reference's scale, not the game's. The scene's sprites are about 32 px tall.
+
+### Changes for round 2 (the skill refactor)
+- **Objective gates replace self-assessment:** `audit_sprite.py` checks colour count, isolated-pixel % (≤ 8%) and figure height after every render. It agrees with the judge's own measurements.
+- **Independent critic:** the critique comes from a fresh agent that did not draw the sprite, so the artist never grades its own work. In this repo, the orchestrator runs the artist → critic → artist loop.
+- **Restraint rule:** at ≤ 32 px every added colour and detail must pass the noise gate. Prefer fewer, larger clusters. The colour budget is ≤ the reference's count.
+- **Scale comes from the game,** not the reference: the target figure height is set by the scene the sprite stands in.
+- **Variance:** run the baseline twice (P0b) to see run-to-run spread before crediting any method.
