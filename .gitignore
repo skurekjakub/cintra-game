@@ -25,6 +25,10 @@ Thumbs.db
 *.blend1
 *.blend2
 
+# Style reference screenshots from other games: local only, never published
+/image.png
+/docs/art-direction/reference/
+
 # Local Claude Code settings. godot-ai is registered at local scope; its launch
 # command contains machine paths, so never commit a .mcp.json.
 .claude/settings.local.json

@@ -21,6 +21,8 @@ Update after every decision, dispatch, and report.
 | D1 | Genre: real-time RPG. Ignore tabletop framing (d20, sessions, table mechanics). | user, 2026-11-21 |
 | D2 | Engine: Godot 4.7.2 (installed). | user (asked to set up Godot project) |
 | D3 | Art direction: choose from 5 options presented in an artifact with visual mockups. | user — PENDING choice |
+| D3a | **Art style = HD-2D like the user's reference screenshot** (`image.png`, a commercial game frame; style only, gitignored, never publish). Pixel-art sprite characters in a detailed, lit 3D world; high 3/4 top-down camera; purple ambient + warm torch pools; bloom, DOF, vignette; ornate gothic HUD. All 5 canvas options were rejected ("all of those look like crap"). Proof via a real Godot render spike (A09) + `docs/design/art-bible.md`. | user, 2026-11-21 |
+| D5 | **Implementation runs SEQUENTIALLY**: one implementer subagent at a time (plus its reviewer), no parallel fan-out of implementers. Plan "waves" are just ordering. | user, 2026-11-21 |
 | D4 | **No time mechanic.** No calendar, day counter, or deadlines. Escalation is driven by story milestones; travel has no time cost; endings depend on choices and outcomes. A real-time ritual meter inside the finale boss fight is allowed (combat, not calendar). A02 told by message. | user, 2026-11-21 |
 
 ## Open questions
@@ -42,11 +44,23 @@ Update after every decision, dispatch, and report.
 |---|---|---|---|---|
 | A01-art-options | Build 5 art-direction mockup artifact | DONE, committed 8812c02. Awaiting user pick | agents/A01-art-options/brief.md | agents/A01-art-options/report.md |
 | A02-design-architecture | GDD + architecture + content template | DONE (report saved by orchestrator; agent's write was blocked) | agents/A02-design-architecture/brief.md | agents/A02-design-architecture/report.md |
-| A03-project-setup | Godot project in game/, GUT, tools/test.ps1, shared kernel + event bus (TDD), architecture test, Godot AI plugin, CLAUDE.md, README | dispatched | agents/A03-project-setup/brief.md | agents/A03-project-setup/report.md |
+| A03-project-setup | Godot project in game/, GUT, tools/test.ps1, shared kernel + event bus (TDD), architecture test, Godot AI plugin, CLAUDE.md, README | DONE 8f426ef (53 tests green, re-verified). godot-ai moved to LOCAL scope by orch (no .mcp.json in public repo) | agents/A03-project-setup/brief.md | agents/A03-project-setup/report.md |
 | A04-content-act1 | Act I sections (01-drowned-rat = vertical slice) | dispatched | agents/A04-content-act1/brief.md | agents/A04-content-act1/report.md |
 | A05-content-act2 | Act II sandbox sections + twist | dispatched | agents/A05-content-act2/brief.md | agents/A05-content-act2/report.md |
 | A06-content-act3 | Act III + finale + endings | dispatched | agents/A06-content-act3/brief.md | agents/A06-content-act3/report.md |
-| A07-content-side | 12 side quests, travel events, rumors | dispatched | agents/A07-content-side/brief.md | agents/A07-content-side/report.md |
+| A07-content-side | 12 side quests, travel events, rumors | DONE f246017 (format issues listed in report → A08) | agents/A07-content-side/brief.md | agents/A07-content-side/report.md |
+
+| P1-plan-core-state | Plan: rules, world_state, escalation, actors, inventory, progression, factions, rumors (+FactsChanged, ScriptedRandom) | dispatched | agents/P1-plan-core-state/brief.md | (in final msg → save) |
+| P2-plan-narrative | Plan: quests, investigation, dialogue, companions, travel, finale, endings | dispatched | agents/P2-plan-narrative/brief.md | (in final msg → save) |
+| P3-plan-app-infra | Plan: save, application layer, infra, composer/Services/Main.tscn, md→JSON converter, content validation tests | dispatched | agents/P3-plan-app-infra/brief.md | (in final msg → save) |
+
+Common planner brief: agents/_planner-common.md. Plans → docs/superpowers/plans/2026-11-21-*.md. Execution: subagent-driven-development, ONE task at a time (D5): implementer → reviewer → orchestrator commits → next task.
+| A09-art-spike | HD-2D Godot render spike (Drowned Rat + Karak Ostrel shots, 3+ iterations) + art-bible.md | dispatched | agents/A09-art-spike/brief.md | (final msg → save) |
+
+## Roadmap
+- M1 Foundations: P1 → P2 → P3 plans executed (P3 waves gated on P1/P2 classes). Content reconciliation (A08) in parallel.
+- M2 Vertical slice: (needs art pick) art bible + asset pipeline, combat domain + presentation, the Drowned Rat playable end to end.
+- M3 Act I complete → M4 Act II → M5 Act III + endings → M6 side quests, polish, export.
 
 Common content-writer brief: agents/_content-writer-common.md. Writers log new cross-slice ids in docs/content/<slice>/_ids.md → needs a reconciliation agent after all four finish.
 
