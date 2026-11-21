@@ -76,3 +76,25 @@ Output: 29×28 px, 30 colours, 5 renders. It wrote a measured spec, then applied
 - the bottom of the skirt is a straight edge.
 
 **Contamination:** the finished skill was visible in the subagent's skill list partway through the run. The agent did not invoke it. Every later arm is told not to.
+
+## P3: M1 + M2 + M3 (opus, 33 tool calls, 12 min)
+Output: 32×32 canvas, 28 px tall, 25 colours. 6 written critique rounds, each with a side-by-side image of the reference crop, the 8× sprite, the silhouette and the 1× sprite.
+
+**Effect of M3:** real, specific critiques: 5, 6, 3, 3, 1 and 1 gaps per round. Fixes they produced:
+- a rounded head instead of a helmet;
+- a bell skirt and sloped shoulders;
+- a 2 px mouth, matching the reference;
+- a notch so the mug separates in silhouette;
+- the apron darkened so the face is the brightest area, matching the reference's focal hierarchy;
+- anti-aliasing at the crown.
+
+**Stopping:** it stopped when the remaining gaps were minor. That is weaker than the skill's "stop only when you cannot name a gap" rule: it named a gap and stopped anyway.
+
+**Orchestrator's view:**
+- The form is the best so far: a soft heavy-set body, a bell skirt, a convincing hand on the hip, a wooden tankard with a brass band.
+- The outline went back to uniform near-black, because the agent chose the reference over M2 for the outside line. So M1's "reference wins" still overrides M2 on the outline.
+- Overall about the same as or slightly above P2. The blind judge decides.
+
+**Skill fixes indicated so far:**
+- M1 must split *style to copy* from *craft to beat*.
+- M3's stop rule needs teeth: name the next gap, or justify in one line why it is invisible at game scale.
