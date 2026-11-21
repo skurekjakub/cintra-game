@@ -98,3 +98,27 @@ Output: 32×32 canvas, 28 px tall, 25 colours. 6 written critique rounds, each w
 **Skill fixes indicated so far:**
 - M1 must split *style to copy* from *craft to beat*.
 - M3's stop rule needs teeth: name the next gap, or justify in one line why it is invisible at game scale.
+
+## P4: M1–M4 (opus, 34 tool calls, 12 min)
+Output: 29×27 px, 29 colours. 4 variants, then 4 critique rounds.
+
+**Effect of M4:** weak.
+- The 4 variants share the same head, face and proportions; only the arms and the dress colour change. That is not real divergence in silhouette or proportion.
+- The choice was well argued: D was the only variant whose tankard survives in silhouette. The agent then grafted A's hip arm onto it.
+
+**Craft:**
+- The face follows the reference: no mouth, a peach nose patch.
+- The belly is shaded as a sphere.
+- The tankard has staves and bands.
+- The belt breaks up the stripe.
+
+**Stopping:** it stopped once the only gap it could still name was the colour count. That is the "name the next gap" rule obeyed in letter only.
+
+**Orchestrator's view:**
+- About level with P3. Cleaner face, comparable body. The outline is still uniform near-black.
+- M4 as written does not buy much, because the variants are too similar. To be worth its cost, the variants must differ in **silhouette and proportion**, e.g. a heavy pear shape, a stocky square, a tall broad build; each one is judged in solid black.
+
+## Skill refactor after P0–P4 (before P5)
+1. **M1** splits the spec into *style to copy* (scale, proportions, palette mood, light direction, face language) and *craft floor to beat* (outline treatment, ramps, anti-aliasing, rim). The craft floor never drops below M2, even when the reference does.
+2. **M3 stop rule:** stop only after a round where you cannot name a gap visible **at 1× game scale against the target backdrop**. Wins at 8× only don't count. You must also render on the real backdrop: a warm wood floor and a cold blue pool.
+3. **M4:** the variants must differ in silhouette and proportion (judged in solid black), not in palette or arm pose alone.

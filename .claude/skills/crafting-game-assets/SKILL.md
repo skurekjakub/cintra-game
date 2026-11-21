@@ -16,7 +16,9 @@ Open the reference, crop the part that matches your asset, and write these down 
 - **Outline:** colour, whether it is selective (dropped or lightened on lit edges), and whether interior lines are used.
 - **Shading:** how many values per material, whether dithering is used, and whether anti-aliasing is applied by hand.
 
-Then build to those numbers. When a number differs from what you would have chosen, the reference wins.
+Split the spec into two lists, and write both down:
+- **Style to copy:** scale, proportions, palette mood, light direction, face language (how eyes, mouth and nose are drawn). When you would have chosen differently, the reference wins.
+- **Craft floor to beat:** outline treatment, ramps, anti-aliasing, rim or bounce light. The M2 rules are the minimum here, even when the reference does less. A reference with a flat black outline still gets a material-tinted outline from you.
 
 ## M2. Craft rules (pixel art)
 - **Hue-shifted ramps:** shadows shift toward cool or purple and drop saturation a little; highlights shift toward warm or yellow. Never just darken the same hue.
@@ -33,10 +35,14 @@ Each round:
 2. Look at it.
 3. Write a numbered critique that compares it to the reference: "the shadow ramp is grey where the reference is purple", not "make it better". Then fix only those points.
 
-Stop only when you cannot name a concrete gap. "Looks good" is not a stopping condition; name the next gap.
+Every round also renders the asset at 1× on its **real in-game backdrop** (e.g. a warm wood floor and a cold blue light pool), because a sprite that reads on flat grey can vanish in the game.
+
+**Stop rule:** stop only after a round in which you cannot name a gap that is visible **at 1× on the real backdrop**. Accepting a gap you can still name is not stopping, it is quitting. Bookkeeping gaps (colour count, a pixel of height) do not count as reaching the bar.
 
 ## M4. Diverge, then converge
-Before refining, make **3–5 quick, different variants** that differ in silhouette, proportions or palette. Put them in one sheet, choose one against the reference, and say in one line why. Then refine only that one.
+Before refining, make **3–5 quick variants that differ in silhouette and proportion**, e.g. a pear shape, a stocky square, a tall broad build, a different head-to-body ratio. Variants that differ only in palette or arm pose do not count.
+
+Render them all in **solid black** on one sheet next to the reference's silhouette. Choose the one whose silhouette alone says who this is, and give the reason in one line. Then refine only that one.
 
 ## M5. One thing at a time
 - Do one asset, frame or stage at a time, and check it before moving on.
