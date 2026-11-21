@@ -238,3 +238,13 @@ The second critic was a fresh agent and gave sharp, pixel-located flaws:
 But it **partly reversed critic 1 on width.** Critic 1 said "make the body wider than the head"; critic 2 said "the body is 1.8× the head, a beanbag".
 
 Independent critics without a shared, fixed spec can oscillate. **The fix:** the orchestrator rules on conflicts and writes a numeric target (head 16 px, torso 21–23 px), which goes into the spec every later critic receives. The spec is the anchor; critics find flaws against it.
+
+## Critic round 2 result
+Revision 2 is 30×32 px, 21 colours, 6.5% isolated pixels: PASS. The progression is in `docs/art-direction/spike/bertha-progression.png` and `bertha-progression-scene.png`.
+
+**Orchestrator's view:**
+- Revision 2 sits best in the scene (right width, standing, the face is the focal point) and is the most on-model.
+- But the heavy-set read is weaker than after round 1.
+- The face is still the weakest part: small dot eyes and a flat expression. Baseline B's face (coloured eyes, highlights, smile) has more appeal.
+
+**Diminishing returns:** each round now trades one flaw for another. The next round should be **targeted** (face and expression only) rather than "5 worst flaws".
