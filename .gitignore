@@ -1,0 +1,27 @@
+# Godot 4
+.godot/
+.import/
+export.cfg
+export_presets.cfg
+*.translation
+/android/
+/build/
+/exports/
+
+# Test output
+/reports/
+/test-results/
+
+# Editor / OS
+.vscode/
+.idea/
+*.tmp
+Thumbs.db
+.DS_Store
+
+# Blender autosaves
+*.blend1
+*.blend2
+
+# Local Claude Code settings (project .mcp.json IS committed)
+.claude/settings.local.json
