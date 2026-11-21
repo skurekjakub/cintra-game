@@ -1,9 +1,11 @@
 # The Lion's Shadow — Game Design Document
 
-Status: v1 (A02, 2026-11-21). Binding inputs: `story.md`, `docs/orchestration/STATE.md` (D1–D3, C1–C4, C6–C8).
-Companion documents: `architecture.md` (software structure), `content-format.md` (per-section content template).
+Status: v2 (A02 v1, A13 witcher revision, 2026-11-21). Binding inputs: `story.md`, `docs/orchestration/STATE.md` (D1–D3, D8, C1–C4, C6–C8).
+Companion documents: `architecture.md` (software structure), `content-format.md` (per-section content template), `story-witcher.md` (the story spine around the witcher, and the content rewrite order).
 
 > **Change log.** v1 has **no time mechanic**: no calendar, no day counter, no travel or rest cost in days, and no deadlines. Orchestrator call C5 was revoked by the user. Escalation (the Queen's condition, unrest in the realm, signs from the vaults) is driven by **story progress**: act transitions and main-quest milestones. The only real-time timer in the game is the finale's four-stage ritual meter, which is a combat mechanic (§6.14).
+
+> **Change log v2 (A13, 2026-11-21, decision D8).** The protagonist is a **witcher**, and the story is about how the realm treats him for it. §1–§3 and §5 are rewritten (identity, kit: steel and silver, medallion, three signs, elixirs). A new system, **§6.19 Witcher stigma** (infamy, heat, regard, blame), is added, with its grammar in `content-format.md` §K. Small hooks are added to §6.1, §6.4, §6.7–§6.12, §6.14, §6.15 and §8.1. The story spine and the per-section rewrite order are in `story-witcher.md`.
 
 > **Art direction (D3) is not chosen yet.** This document does not depend on the camera or the art style. Places where the art pick plugs in are marked **[ART]**. See §9.
 
@@ -19,7 +21,7 @@ Companion documents: `architecture.md` (software structure), `content-format.md`
 | Platform | Windows PC, keyboard+mouse and gamepad (C8) |
 | Engine | Godot 4.7.2, statically typed GDScript (D2, C6) |
 | Structure | A hub and discrete zones, reached from a travel map (C4) |
-| Protagonist | One controllable hired sword, named by the player (default name **Hale**) (C2) |
+| Protagonist | One controllable **witcher**, Hale of the Matron: a mutated monster-hunter for hire, feared and despised by the people he ends up saving (C2, D8). The name can be changed; the identity cannot (§5) |
 | Followers | Story companions who fight under AI control for stretches of the game (C2) |
 | Combat | Real-time: light and heavy attacks, block and parry, dodge, stamina, crossbow (C3). The game pauses only for menus and dialogue |
 | Length target | 12–18 hours for the main path, 25+ hours with all side quests |
@@ -31,10 +33,11 @@ Companion documents: `architecture.md` (software structure), `content-format.md`
 2. **Mud and iron.** Combat is weighty and grounded. Stamina decides every swing, groups are small but dangerous, and monsters are either animals or weapons. Magic is low: alchemy, old dwarven engineering, ghosts at the edges.
 3. **The realm reacts to what you do.** Each milestone you reach visibly worsens the kingdom. Factions remember you. Your choices decide which of five endings you get.
 4. **Every road leads to Ostrel.** Side quests are never filler. Each one pays off concretely in Act III (an ally, a route, a weapon, a weaker finale guard).
+5. **Spat on, and needed.** He is a witcher, and almost nobody forgives him for it. They charge him double, serve him in a chipped cup, hassle him at gates and blame him for the Choir's crimes. That is a system with numbers (§6.19), not flavor. Every act asks the same thing: do you save people who would watch you drown?
 
 ## 3. Player Fantasy
 
-You are a sellsword who happened to be in the wrong tavern. A dying courier hands you a letter that half the kingdom would kill for. You become the one blade the Lord Marshal can trust. You read liars, chase thieves across rooftops, and bargain with river bandits and hedge-witches. In the end you climb into a frozen dwarven fortress to drag a twelve-year-old king-to-be away from a knife while the mountain's old weapons stir.
+You are a witcher: cat-eyed, pale, two swords on your back, and the thing mothers point at to frighten children. You are drinking on a tab you cannot pay, because the eel-men you cleared a channel for will not pay a witcher. Then a poisoned royal courier dies in your arms, and the whole tavern decides you killed him. The letter he gave you is one half the kingdom would kill for. Lord Marshal Kosk hires you because no one at court has bothered to bribe a witcher, since no one at court would sit at a table with one. You read liars, chase thieves across rooftops, and bargain with river bandits and hedge-witches, while the Pale Choir pins its murders on you and the crowd reaches for stones. In the end you climb into a frozen dwarven fortress, the place your own mutations came from, to drag a twelve-year-old king-to-be away from a knife. Then you find out whether the kingdom you saved will let you in through the front gate.
 
 ## 4. Core Loops
 
@@ -50,7 +53,63 @@ You are a sellsword who happened to be in the wrong tavern. A dying courier hand
 
 ## 5. Protagonist and Controls
 
-The player creates Hale (name, a portrait preset **[ART]**, 4 bonus attribute points). Hale has no fixed backstory beyond being "a hired sword between contracts". Dialogue options give Hale an attitude: dutiful, mercenary, or cynical. Attitude is flavor only and is not tracked.
+### 5.1 Hale of the Matron
+
+The player is **Hale**, a witcher: a monster-hunter for hire, mutated as a boy and trained in **Hollow Matron**, a dwarf-cut watch-hold on the south shoulder of the Old Grey Matron peak in the Góry Amell. He is an original character with a fixed identity and history. Nothing of him comes from any other witcher fiction: not his name, his school, his signs or his elixirs.
+
+At the start the player may change his name (default **Hale**; content always writes `{player}`), pick one of four face presets **[ART]** (scars, hair and build, never the eyes, skin or kit), and spend 4 bonus attribute points (§6.6). Dialogue still offers an attitude (dutiful, mercenary, cynical). It is flavor and is not tracked. The one thing the player can never choose is how the world sees him.
+
+**Why "Hale".** The Matron's masters named the boys who came through the Trial alive. *Hale* means whole. He was the one boy in his year who came out of the vats in one piece. The name is short and reads well in a shouted bark. It keeps every existing `{player}` line working. And the irony is the point: the soundest body in Cintra belongs to the man everyone treats as a disease.
+
+| | |
+|---|---|
+| Age | Took the Trial in 1251, aged fourteen. Now about forty, and looks thirty |
+| Look **[ART]** | Tall and lean. Skin pale as tallow. **Amber eyes with slit pupils** that catch lamplight like a cat's. Black hair cropped close, a notch out of the left ear, clean-shaven. Steel-blue coat and a **crimson hooded mantle** (the player's identifying color, art bible §3.2). **Two swords on his back**, steel and silver. A black-iron **medallion** on a thong: a closed door with an open eye above it. With the hood up he passes for a tall man in a red mantle. With the hood down, nobody mistakes him |
+| Voice | Few words, dry and exact. He corrects facts, not insults ("Grey lily. Not drink."). Polite in a way that unnerves people. He never begs, and never explains himself twice |
+| Wants | To be paid. He has not been paid in three months |
+| The Matron's rule | "Take the coin, kill the beast, stay out of crowns' business." The story makes him break all three |
+
+**Binding backstory** (writers use it; `story-witcher.md` §2 has the detail):
+1. **The craft is Ostrel's.** After Corvan's Pact, the last alchemists of Karak Ostrel took a small, gentler fraction of the craft that had made Corvan's blood-sworn shock troops. They used it to make hunters for the things the war left behind. The common folk do not know this. They only know that the mountain sends down cat-eyed men. Hollow Matron has stood empty since the 1250s, and perhaps four Matron witchers still walk.
+2. **Marnadal, 1263.** After the battle, Kosk's army hired him to clear the carrion-beasts from the ditch where the clan dead were left. He did. Against orders, he also spoke the clans' naming rite over the ditch, which a dying clansman taught him. The Strept remember only a cat-eyed thing walking among their dead on Cintran coin: "the grave-eater". The army's chaplain that year was Anselm.
+3. **Autumn 1268.** The Eel Row eel-men's guild hired him to clear drowners from the pilots' channel. He cleared it, and they refused to pay a witcher. He has been drinking on Bertha's slate for three nights, waiting for a guild-master who will not come. That is why he is in the Drowned Rat when the courier falls through the door.
+
+### 5.2 The witcher's kit
+
+**Two swords.** Swap takes 0.6 s and cannot be done mid-attack. Swapping drops a block. Both swords use the sword moveset (§6.4). The tag rule is in §6.4.
+
+| Sword | id | Base | Block | `bonus_vs` | Use |
+|---|---|---|---|---|---|
+| Steel (Matron steel) | `item.arming_sword` | 12 slash | 70% | `monster` 0.6, `undead` 0.6, `construct` 0.8 | Men and ordinary beasts (wolves, hounds) |
+| Silver | `item.silver_sword` | 11 slash | 60% | `monster` 1.6, `undead` 1.6, `beast` 0.8, `human` 0.6, `construct` 0.5 | Monsters and the dead. Soft metal: poor on men and useless on dwarven iron |
+
+Dwarven constructs resist both swords. Mane-Cleaver, fire and blunt weapons are the answer there (§6.7). Silver drawn in a town is a statement (heat, §6.19.6). A bark teaches the rule the first time he draws silver on men: "Silver's for monsters. These are only men."
+
+**The medallion** (`item.matron_medallion`, a key item that is always worn and takes no slot). It trembles when he is within a source's `magic` range (12 m by default; content may shorten it). The HUD shows a small shiver icon and the controller rumbles, more strongly within 4 m. In a low-magic world it senses few things: ghosts and revenants, the Lady of the Reeds, the selkie's pelt, the Ring of Nine and every Pact rune-lock, rune-wax, a dwarven construct's rune core (a dormant iron-warden in an alcove sets it humming), and another witcher's medallion. It does not sense alchemy, poison or ordinary beasts. Content reacts to it with `"on": medallion` triggers (content-format §K.3).
+
+**Signs.** Three small, reliable tricks. They cost stamina, not a new resource. They do not scale, and they cannot be cast while exhausted. Each has its own 6 s cooldown, with a 1 s global cooldown between signs. **Every sign cast in sight of a crowd is witchcraft to them: +25 heat (§6.19.6).**
+
+| Sign | Stamina | Effect | Out of combat |
+|---|---|---|---|
+| **Knock** | 35 | A 3 m, 60° cone: 45 poise damage, a 2.5 m push, knockdown on non-`heavy` targets. Puts out Burning on the player | Breaks flimsy doors, crates and shutters (`activate_by: knock`) |
+| **Ember** | 30 | A 6 m spark: 6 fire damage and Burning for 2 s. Ignites tar, oil, grease and fire-pots | Lights braziers, beacons and tar (`activate_by: ember`) |
+| **Hush** | 40 | One non-boss, non-`heavy` beast or monster within 4 m stops attacking for 6 s. Damage breaks it | `[Hush]` dialogue option on `hushable` people: it always works, the crowd sees it, and the person remembers |
+
+**Elixirs.** Mutagenic draughts that only a witcher's body survives. They go in quick slots (1.0 s to drink). **At most two can be active.** Drinking a third wastes it and applies Poison ×2. While one is active its **tell** shows: black veins and black eyes, which crowds react to (§6.19.6). Given to an ordinary person, an elixir kills them. Content uses that, because it is what lets the Choir call his medicine poison.
+
+| Elixir | id | Price | Effect | Tell |
+|---|---|---|---|---|
+| Marrow | `item.elixir_marrow` | 40 | `heal_over_time(4, 15)`: 60 HP over 15 s, and it keeps working while he fights (a poultice heals 40 at once) | 30 s |
+| Gloam | `item.elixir_gloam` | 40 | `night_sight(120)`: darkness hides nothing from him, and hidden clues glint | 120 s |
+| Stoneblood | `item.elixir_stoneblood` | 50 | `buff(poise, 40, 45)` and `buff(armor, 15, 45)` | 45 s |
+
+Elixirs stack to 3. They are sold only by `pragmatic` or `kindred` herb-sellers (Wenna, the Attre apothecary, the Assengard forge), and found as loot.
+
+**A witcher's body.** +25% poison resistance on top of Grit (§6.6), and Poison deals half damage to him. Grey lily does not kill him. The Matron fed it to its boys until it stopped killing them, which is exactly why a frightened room will believe he is the poisoner. He sees in dim light as well as in daylight, so dark zones never hide an enemy's outline from him. Gloam goes further and reveals hidden things.
+
+The crossbow (§6.4) stays. Witchers use what works.
+
+### 5.3 Controls
 
 | Action | Keyboard + mouse | Gamepad (Xbox layout) |
 |---|---|---|
@@ -61,7 +120,10 @@ The player creates Hale (name, a portrait preset **[ART]**, 4 bonus attribute po
 | Block / parry | RMB | LB |
 | Dodge | Space | B |
 | Sprint | Hold Space while moving | Click left stick |
-| Kick | F | Y + direction |
+| Kick | F | Y (tap) |
+| Swap sword (steel / silver) | G | Y (hold 0.4 s) |
+| Cast sign | R | X (tap) |
+| Choose sign (Knock / Ember / Hush), hood | X cycles signs, H toggles the hood | Hold X: radial (three signs and the hood) |
 | Crossbow (aim / fire) | Hold Q, then LMB | Hold LT, then RT |
 | Quick slots 1–4 | 1–4 | D-pad |
 | Interact / talk | E | A |
@@ -70,7 +132,7 @@ The player creates Hale (name, a portrait preset **[ART]**, 4 bonus attribute po
 | Journal / map / inventory | J / M / I | View button, then tabs |
 | Pause | Esc | Menu |
 
-All bindings can be rebound (§6.17).
+All bindings can be rebound (§6.17). The radial slows the game to 20% while it is held (it does not pause it).
 
 ---
 
@@ -104,6 +166,8 @@ There is **no clock**. The world worsens only when the player advances the story
 | 2 | The Marnadal river runs dark with mineral silt. Heavy snow closes the high passes | **Escalation encounter rule** turns on (§6.3). Mountain edges need guides or trigger a forced cold hazard (§6.3). Drowner encounters ×2 weight on valley tables. Grey Ferry zone gets its dark-river variant |
 | 3 | Choir agents operate openly. Duke Raimund fortifies Attre's borders unless Attre reputation ≥ Allied | Choir encounter groups +1 member. Attre land entry needs `item.masquerade_invitation`, the smuggler's cutter (Skerra), or a checkpoint fight. Rider interception risk (§6.2). Prices +20% realm-wide |
 | 4 | Solstice dawn approaches. Prince Aldric has been abducted | Act III begins. Cintra hub closes except for the palace. Mountain encounter tables only |
+
+Every stage-up also adds **+5 infamy** (§6.19.2): when the cattle die and the river runs black, people look for a witcher to blame.
 
 Each stage-up shows a short **Escalation card** (an illustration **[ART]** plus two lines of text) and adds a journal entry. The *Signs* tab of the codex records all stage changes.
 
@@ -235,6 +299,8 @@ final     = max(1, round(offense * mitigate * resist * crit * tag_bonus * block 
 
 The governing attribute is Might for melee and Agility for the crossbow. Only the highest crit multiplier applies.
 
+**Tag rule for `tag_bonus`:** look up every tag of the defender in the weapon's `bonus_vs`. If any match is above 1.0, the highest applies. Otherwise the lowest match applies (a penalty). With no match it is 1.0. Examples: silver against a drowner (`beast`, `monster`) gives 1.6. Silver against a Choir thug (`human`) gives 0.6. Steel against a frost troll gives 0.6.
+
 **Damage types:** `slash`, `pierce`, `blunt`, `fire`, `cold`, `poison`.
 
 **Poise:** every combatant has a poise meter (the player has 40). Hits subtract poise damage. At 0 the target staggers for 1.5 s (player: 0.8 s). Poise regenerates fully 2.0 s after the last hit. Enemies tagged `heavy` ignore stagger from hits below 25 poise damage.
@@ -286,29 +352,32 @@ Stat blocks are at Normal difficulty. `L` is the design level band. `R` marks re
 
 | id | Name | L | HP | Dmg | Armor | Poise | R | Tags | Behavior |
 |---|---|---|---|---|---|---|---|---|---|
+| `enemy.townsfolk` | Angry townsman | 1 | 30 | 5 blunt | 0 | 10 | — | human, civilian, can_yield | Joins a crowd that has turned (§6.19.6). Uses at most 1 attack token. Flees at 70% HP. Killing one is a civilian kill (§6.19.8) |
 | `enemy.choir_thug` | Choir thug | 1 | 45 | 8 blunt | 5 | 20 | — | human, can_yield | Approaches, 2-hit combo, flanks in pairs |
 | `enemy.choir_cutthroat` | Dockside cutthroat | 2 | 35 | 7 slash + bleed 20 | 0 | 15 | — | human, can_yield | Fast. Dodges back after attacking |
 | `enemy.choir_crossbowman` | Choir crossbowman | 2 | 35 | 14 pierce (ranged) | 5 | 15 | — | human, can_yield | Keeps 8–14 m away. Retreats when the player is within 4 m |
 | `enemy.bandit` | Bandit / smuggler / highwayman | 3–6 | 55–90 | 10–16 | 10–20 | 25 | — | human, can_yield | Variants (sword, spear, shield) by data `variant` |
 | `enemy.feral_hound` | Tar-maddened hound | 2 | 30 | 7 slash | 0 | 10 | f:w | beast, pack | Circles, then lunges in turns. Does not flee |
 | `enemy.choir_assassin` | Choir assassin | 3 | 55 | 16 slash + poison | 5 | 25 | — | human, elite | Smoke vanish (cooldown 12 s), backstabs, throws knives, starts grease fires |
-| `enemy.drowner` | Drowner | 5 | 70 | 12 slash | 5 | 30 | f:w, c:r | beast, aquatic | Ambushes from water, drag grab (break it by mashing or a kick) |
+| `enemy.drowner` | Drowner | 5 | 70 | 12 slash | 5 | 30 | f:w, c:r | beast, aquatic, monster | Ambushes from water, drag grab (break it by mashing or a kick) |
 | `enemy.wolf` | Starving wolf | 5 | 50 | 10 slash | 0 | 20 | c:r | beast, pack | A howl calls +1 wolf (once per pack) |
 | `enemy.revenant_footman` | Marnadal revenant | 6 | 80 | 15 slash | 20 | 35 | p:r, b:w, f:w | undead | Rises again after 6 s unless the last hit was blunt or fire, or `flag.torc_rite_known` |
 | `enemy.revenant_rider` | Revenant cavalier | 7 | 140 | 24 pierce (charge) | 25 | 60 | p:r, b:w, f:w | undead, heavy | Charges in a line. Dodge sideways. Same rising rule |
 | `enemy.choir_zealot` | Choir zealot | 7 | 90 | 18 slash | 15 | 35 | f:r | human | Fervor buff (+25% dmg at < 50% HP). Self-immolates at 0 HP (fire burst 2 m) |
 | `enemy.choir_sharpshooter` | Choir sharpshooter | 9 | 70 | 28 pierce (ranged) | 10 | 25 | — | human | Shoots from ledges. A laser-sight tell 0.8 s before firing **[ART]** |
-| `enemy.frost_troll` | Frost troll | 10 | 420 | 35 blunt | 30 | 90 | c:i, f:w | beast, heavy | Slow. Grabs and throws. Regenerates 5 HP / s in Chill zones unless it took fire in the last 5 s |
+| `enemy.frost_troll` | Frost troll | 10 | 420 | 35 blunt | 30 | 90 | c:i, f:w | beast, heavy, monster | Slow. Grabs and throws. Regenerates 5 HP / s in Chill zones unless it took fire in the last 5 s |
 | `enemy.iron_warden` | Dwarven iron-warden | 11 | 320 | 30 blunt | 80 | 100 | s:r, p:r, b:w, po:i | construct, heavy | Shield bash, rune overload (an AOE after a 1.5 s glow). Its rune core is exposed 3 s after a stagger |
-| `enemy.wyvern` | Mountain wyvern (Act II drive-off) | 7 | 600 | 26 slash, tail 18 + poison | 20 | 120 | p:w (wings) | beast, boss, flying | Ground and air phases. A crossbow weak-point hit on a wing during the air phase grounds her for 4 s. Flees at 50% HP |
-| `enemy.wyvern_roost` | Wyvern at her roost | 10 | 900 | 34 / tail 24 + poison | 25 | 140 | p:w (wings) | beast, boss, flying | Same moveset plus nest-guard rage. Fought only if the eggs are not returned |
+| `enemy.wyvern` | Mountain wyvern (Act II drive-off) | 7 | 600 | 26 slash, tail 18 + poison | 20 | 120 | p:w (wings) | beast, boss, flying, monster | Ground and air phases. A crossbow weak-point hit on a wing during the air phase grounds her for 4 s. Flees at 50% HP |
+| `enemy.wyvern_roost` | Wyvern at her roost | 10 | 900 | 34 / tail 24 + poison | 25 | 140 | p:w (wings) | beast, boss, flying, monster | Same moveset plus nest-guard rage. Fought only if the eggs are not returned |
 | `enemy.soot_hound` | Chained soot-hound (war-construct) | 8 | 1100 | 32 blunt + soot | 60 | 150 | po:i, f:r | construct, boss | Chain-lunge, soot cloud, and a vent weak point (×2 damage) after a stagger. Mane-Cleaver ×2 |
-| `enemy.ash_bound_zealot` | Ash-Bound Zealot (Anselm) | 12 | 2000 | 30 fire / 26 slash slag | 40 | 200 | f:i, po:i | human, boss | Phase 1: soot aura and slag shards. Phase 2 (< 50%): ritual pull toward the throne mechanism. A bellows-lung weak point on his back |
+| `enemy.ash_bound_zealot` | Ash-Bound Zealot (Anselm) | 12 | 2000 | 30 fire / 26 slash slag | 40 | 200 | f:i, po:i | human, boss, monster | Phase 1: soot aura and slag shards. Phase 2 (< 50%): ritual pull toward the throne mechanism. A bellows-lung weak point on his back |
 | `enemy.corvan_shade` | Shade of King Corvan (side) | 8 | 700 | 28 slash | 30 | 120 | s:r, f:w | undead, boss | A duel. Respects parries: each parry deals 5% of his max HP |
-| `enemy.sea_serpent` | Morrow Gull serpent (side) | 7 | 650 | 30 | 20 | 150 | c:r | beast, boss, aquatic | An underwater arena. Breath meter: 60 s, refilled by air pockets |
-| `enemy.woodwose` | Woodwose (side) | 6 | 400 | 28 blunt | 20 | 100 | f:w | beast, heavy | Becomes peaceful if `flag.woodwose_peace` |
+| `enemy.sea_serpent` | Morrow Gull serpent (side) | 7 | 650 | 30 | 20 | 150 | c:r | beast, boss, aquatic, monster | An underwater arena. Breath meter: 60 s, refilled by air pockets |
+| `enemy.woodwose` | Woodwose (side) | 6 | 400 | 28 blunt | 20 | 100 | f:w | beast, heavy, monster | Becomes peaceful if `flag.woodwose_peace` |
 
 Anselm before he transforms (finale) is the NPC `npc.anselm`, combat profile `enemy.anselm_human` (HP 150, armor 5, no melee, smoke and shove).
+
+**The `monster` tag** marks what silver is for (§5.2): drowners, frost trolls, both wyverns, the sea serpent, the woodwose, and the Ash-Bound Zealot. The man who preached that the witcher was the monster ends the game as one, and silver is what cuts him. Undead take silver through the `undead` tag. Dwarven constructs carry neither tag: silver does nothing to iron.
 
 ### 6.8 Progression
 
@@ -330,7 +399,7 @@ Level 12 is the cap. XP above the cap is discarded.
 | Deduction unlocked | 60 / 90 / 120 by act |
 | Dialogue check passed | 15 × act number |
 | First visit to a zone | 30 |
-| Enemy defeated or yielded | per enemy (`enemy.*.xp`: thug 10, cutthroat 10, crossbowman 12, hound 8, bandit 15–30, assassin 25, drowner 20, wolf 15, revenant 35/60, zealot 40, sharpshooter 45, troll 120, warden 150, wyvern 400/800, soot-hound 600, corvan shade 500, serpent 500, woodwose 300) |
+| Enemy defeated or yielded | per enemy (`enemy.*.xp`: townsfolk 0 (there is no XP for beating commoners), thug 10, cutthroat 10, crossbowman 12, hound 8, bandit 15–30, assassin 25, drowner 20, wolf 15, revenant 35/60, zealot 40, sharpshooter 45, troll 120, warden 150, wyvern 400/800, soot-hound 600, corvan shade 500, serpent 500, woodwose 300) |
 | Travel combat | ×0.5 of the enemy XP |
 
 **Budget check (content test):** the XP available in Act I content must be ≥ 1350, in Acts I+II ≥ 5250, and in all content ≥ 11550 × 1.15.
@@ -349,9 +418,9 @@ Level 12 is the cap. XP above the cap is discarded.
 
 **Categories:** weapons, armor, trinkets, consumables, ammo, key items, documents, crowns (currency).
 
-**Equipment slots:** `main_hand`, `ranged` (crossbow), `armor`, `trinket_1`, `trinket_2`. There is no weight limit. Consumables stack (poultice 10, draught 5, bolts 20). Key items and documents cannot be dropped, sold or destroyed except by scripted effects. **Shops:** Cintra Market, Tigg inn, Attre harbor, Assengard forge, Dun Strept. Selling pays 25% of the buy price.
+**Equipment slots:** `main_hand`, `silver` (the second sword, §5.2), `ranged` (crossbow), `armor`, `trinket_1`, `trinket_2`. There is no weight limit. Consumables stack (poultice 10, draught 5, bolts 20). Key items and documents cannot be dropped, sold or destroyed except by scripted effects. **Shops:** Cintra Market, Tigg inn, Attre harbor, Assengard forge, Dun Strept. Selling pays 25% of the buy price.
 
-**Starting gear:** an arming sword (`item.arming_sword`: 12 slash, block 70%), a gambeson (armor 10), a crossbow with 8 bolts, 2 poultices (heal 40 over 2 s), 30 crowns.
+**Starting gear (the witcher's kit, §5.2):** the steel sword (`item.arming_sword`, "Matron steel": 12 slash, block 70%), the silver sword (`item.silver_sword`: 11 slash, block 60%, ×1.6 vs `monster` and `undead`), the school jack (`item.gambeson`, armor 10), the medallion (`item.matron_medallion`), a crossbow with 8 bolts, 2 poultices (heal 40 over 2 s), 1 Marrow elixir, and 30 crowns. The steel sword sits in `main_hand`. The silver sword has its own **sheath slot** (`silver`), which only swords tagged silver fit, so carrying it never costs a trinket.
 
 **Key items and documents:**
 
@@ -381,6 +450,8 @@ Level 12 is the cap. XP above the cap is discarded.
 | `item.mane_cleaver` | Mane-Cleaver | Barrows (side) | Greatsword: 30 slash, block 80%, ×2.0 vs `construct` |
 | `item.choir_robe` | Choir robe | Vel Aram, Hanged Man's Oak courier | Disguise for Choir zones |
 
+**Witcher items:** `item.matron_medallion` (key, always worn, §5.2), `item.silver_sword` (weapon, the `silver` sheath slot), and the three elixirs `item.elixir_marrow`, `item.elixir_gloam`, `item.elixir_stoneblood` (consumables, §5.2). `item.corrick_medallion` is a dead witcher's medallion, which Bertha keeps over her bottles (act1/01). It is a key item with no stats, and it pays off in Act III (`story-witcher.md`).
+
 **Consumables:** poultice (heal 40), field draught (heal 80, Act II+ shops), antitoxin (cures poison, grants immunity for 30 s), fire oil (weapon deals fire for 60 s), frost-tallow (Chill rate −50% for one zone visit), smoke pot (breaks enemy sight for 6 s).
 
 ### 6.10 Dialogue
@@ -389,11 +460,11 @@ Dialogue is a directed graph authored in content (`content-format.md` §D). Game
 
 **Node types:** `line` (speaker, text, next), `choice` (a list of options), `check` (attribute check with pass/fail branches), `branch` (the first true condition wins), `effect` (applies effects, then moves on), `end`.
 
-**Option tags** shown to the player: `[Persuade 6]`, `[Intimidate 5]`, `[Investigate 5]`, `[Lore 6]`, `[Bribe 50]`, `[Item: Iron-Key]`, `[Clue: Chalice pollen]`, `[Sway]`.
+**Option tags** shown to the player: `[Persuade 6]`, `[Intimidate 5]`, `[Investigate 5]`, `[Lore 6]`, `[Bribe 50]`, `[Item: Iron-Key]`, `[Clue: Chalice pollen]`, `[Sway]`, and the witcher's tags `[Witcher]`, `[Hush]` and `[Hood]` (§6.19.4).
 
 **Check rules** (deterministic; there are no dice):
-- Persuade: Presence + perk bonuses + item bonuses + `rep_mod`.
-- Intimidate: max(Might, Presence) + perk bonuses + `rep_mod`. −2 against Strept when `kosk_badge_worn`.
+- Persuade: Presence + perk bonuses + item bonuses + `rep_mod` + `stigma_mod` (§6.19.4, usually negative).
+- Intimidate: max(Might, Presence) + perk bonuses + `rep_mod` + `stigma_mod` (usually positive: people fear a witcher). −2 against Strept when `kosk_badge_worn`.
 - Investigate: Wits + bonuses. Lore: Wits + 2 if Maelis is in the party.
 - `rep_mod`: +1 if the speaker's faction is Friendly, +2 if Allied, −1 Wary, −2 Hostile.
 - Pass if total ≥ DC. DC scale: 4 easy, 6 medium, 8 hard, 10 legendary.
@@ -414,7 +485,7 @@ Dialogue is a directed graph authored in content (`content-format.md` §D). Game
 
 **Side quests (12)** are listed in §7.4 with their availability and payoffs.
 
-**Journal tabs:** Quests, Investigation (the board), People, Places, Rumors, Signs (escalation history), Bestiary.
+**Journal tabs:** Quests, Investigation (the board), People, Places, Rumors, Signs (escalation history), Bestiary, **Accusations** (every active and cleared `blame`, §6.19.7, with the current infamy tier at the top).
 
 **Investigation board:** `clue.*` entries are pinned to **theories**. A clue can `support` or `refute` a suspect in a theory. A **deduction** (`ded.*`) unlocks automatically when its clue condition holds. It gives XP, a journal line and a flag that dialogue can test.
 
@@ -442,6 +513,8 @@ Reputation per faction ranges from −100 to +100. **Tiers:** Hostile ≤ −50,
 
 Reputation changes come only through effects (`add_rep(faction.x, n)`). The UI shows a +/− toast. Tier crossings emit `ReputationTierChanged`.
 
+**Reputation is not acceptance.** A faction can be Allied and still despise witchers. Reputation measures what the faction's leader thinks of this player's usefulness. What its people think of a witcher is **regard** (§6.19.3), which every faction also carries as a default for its members. Both modifiers apply to the same check.
+
 ### 6.13 Companions
 
 Only one **combat companion** is active at a time. **Scripted allies** join specific encounters.
@@ -467,7 +540,7 @@ The Lock Chamber fight is the only place where real time drives an outcome.
 **Rules:**
 1. When the fight begins, Anselm holds Aldric at the throne. The **reversed timer** starts: one reversed verse completes every `T_rev` seconds (Normal 50 s; Story 70 s; Hard 40 s). The gears grind, steam vents erupt (hazards), and the vault door opens a step **[ART]**.
 2. The reversed timer keeps running for the whole fight, whatever happens to Anselm. The machinery has momentum. Modifiers: **Dravin's gear-brake** (Dravin present and the player holds `item.iron_key`) multiplies `T_rev` by 1.25.
-3. **Freeing Aldric:** once the bodyguards within 5 m of the throne are down (base 6 bodyguards: zealots and sharpshooters; −2 for the war-band, −2 for `flag.choir_list_exposed`, −2 for Kingmaker, minimum 2), the player can **Free Aldric** (hold Interact 1.5 s). Anselm is shoved away and becomes a combatant.
+3. **Freeing Aldric:** once the bodyguards within 5 m of the throne are down (base 6 bodyguards: zealots and sharpshooters; −2 for the war-band, −2 for `flag.choir_list_exposed`, −2 for Kingmaker, minimum 2), the player can **Free Aldric** (hold Interact 1.5 s; **3.0 s** if `not flag.aldric_trusts_player`, because the boy fights the witcher's hands, as Anselm taught him to). Anselm is shoved away and becomes a combatant.
 4. **True verses:** a freed Aldric channels one true verse at a time, taking `T_true` seconds each (Normal 20 s; −20% if Maelis is present and Abbey is Allied). If Aldric is hit, the current verse's progress resets to 0. Verse 4 needs `item.true_fourth_verse`. Without it, Aldric cannot finish (the game prevents this case with the Act II gate).
 5. **Transformation:** when `reversed_verses` reaches 3 and Anselm is alive, he inhales the vented fumes and becomes the **Ash-Bound Zealot** (full HP boss).
 6. **Win (True Oath):** `true_verses` reaches 4 before `reversed_verses` reaches 4. The vault locks, the reversed timer stops, and any remaining enemies collapse or flee.
@@ -499,7 +572,7 @@ The meter is shown as four candles in the HUD **[ART]** (the four candles of the
 - Ashes & Iron: the ritual is lost, and the player shields Aldric while Anselm escapes.
 - Bitter Bargain: the player finds the command rite in the Drowned Library, brings Dravin, and chooses to command the vault.
 
-**Epilogue variants** (slides **[ART]**) are chosen by extra flags: Strept peace (`faction.strept ≥ Friendly`), Attre independence (`faction.attre < Allied` and not `flag.raimund_allied`), Varn's fate, Maelis alive, `flag.aldric_coerced`, Sodden flank (`flag.brzezina_plot_exposed`).
+**Epilogue variants** (slides **[ART]**) are chosen by extra flags: Strept peace (`faction.strept ≥ Friendly`), Attre independence (`faction.attre < Allied` and not `flag.raimund_allied`), Varn's fate, Maelis alive, `flag.aldric_coerced`, Sodden flank (`flag.brzezina_plot_exposed`). The **witcher's own fate** is chosen by `stigma()` at the end (§6.19.2), by `flag.warden_clause_restored` (Aldric restores the Pact's forgotten clause for witchers; `story-witcher.md` §4), and by `flag.corrick_laid_to_rest`. The ending decides whether the realm survives. Stigma decides whether he is paid in the hall or at the back gate.
 
 ### 6.16 Save and load
 
@@ -529,6 +602,192 @@ Difficulty can be changed at any time from the pause menu.
 - **Escort death** (Aldric at the Fair or in the finale): game over, reload.
 - **Soft failures** never block progress. They close branches: an Attre alarm makes the raid loud (bulbs may burn), a lost Varn chase means no blackmail (`clue.varn_ledgers` can still be found later through Rumor 2 and a Wits 6 search of his solar), a failed Hanged Man's Oak ambush means the courier escapes and the cipher must be bought from Jory (Ferrymen ≥ Neutral, 120 crowns).
 - **Hard gates** always have at least one path that can't be failed. A content test checks this (`architecture.md` §7.3).
+
+### 6.19 Witcher stigma
+
+The world hates what Hale is. This system turns that hatred into numbers that content can read and write. It has four parts:
+
+| Part | Scope | What it is | Read with | Written with |
+|---|---|---|---|---|
+| **Infamy** | Realm-wide, saved, slow | What common folk believe about the witcher. Its tier sets check modifiers, prices and refusals | `infamy()`, `stigma()` | `add_infamy`, `add_blame`, `clear_blame` |
+| **Heat** | Per zone, real time, fast | The crowd in this street right now: mutters, then a guard, then stones, then a mob | `heat()` | `add_heat`, `set_heat`, `raise_mob`, and the automatic rules in §6.19.6 |
+| **Regard** | Per NPC | How this person sees witchers: `bigot`, `wary`, `pragmatic`, `kindred` | `regard(npc.x)`, `seen_eyes(npc.x)` | `set_regard`, `show_eyes` |
+| **Blame** | Per accusation | A crime the Choir, or plain fear, has pinned on him. It adds infamy until it is cleared | `blamed(blame.x)`, `cleared(blame.x)` | `add_blame`, `clear_blame` |
+
+The grammar is in `content-format.md` §K. The rule throughout: **stigma makes paths harder, dearer or uglier, and never closes a required milestone.** Heat and mobs close only optional branches (§6.18 still holds).
+
+#### 6.19.1 Design intent
+
+- People do not have to be villains to hurt him. Most are `wary`: they charge double, look away and say nothing. The few `bigot`s do the shouting. The Choir's agents know exactly how to use both.
+- The witcher's strengths cut both ways. **Fear makes Intimidate easier and Persuade harder.** Knowing poisons, using signs and drinking elixirs all help him and all confirm what the crowd suspects.
+- Good deeds move the needle a little. Proof moves it more. Nothing moves it to zero: infamy never drops below 10. At the very best, a witcher is *tolerated*.
+
+#### 6.19.2 Infamy and the stigma tier
+
+`infamy` is an int from 10 to 100. It starts at **30**, and every change is clamped to that range. The tier is derived from it:
+
+| Tier (`stigma()`) | Infamy | In one line |
+|---|---|---|
+| `tolerated` | 10–24 | "That's the witcher who saved the boy." People still lower their voices |
+| `shunned` | 25–49 | The new-game state. Double prices, chipped cups, mothers pulling children indoors |
+| `loathed` | 50–74 | Shops close as he walks up. Guards stop him at every gate. Children throw things |
+| `hunted` | 75–100 | Wanted. Only pragmatists and outcasts deal with him. Crowds turn fast |
+
+Infamy changes through blames (§6.19.7), deeds (§6.19.8), and **+5 at every escalation stage-up** (§6.1).
+
+**Intended curve** (a tuning target for the balancing pass, §8.2 step 5): Act I ends at 40–55 (shunned or loathed). Act II peaks around 55–65. The Act II twist (`blame.prince_taken`, +25) takes most players into `hunted` (75–90) for the start of Act III. Clearing blames and public deeds in Act III bring an attentive player back to 30–50 by the finale, and below 25 only with every blame cleared and most deeds done.
+
+#### 6.19.3 Regard
+
+Every NPC has a `regard` (content-format §K.5). It defaults to the faction's default below, or `wary` for NPCs with no faction. Regard is about witchers. It is separate from `disposition` (how this NPC feels about this player) and from reputation (§6.12).
+
+| Regard | Who | Meaning |
+|---|---|---|
+| `bigot` | Faction defaults: `faction.varn` (Chancellery men), `faction.abbey` brothers (Anselm's sermons), `faction.strept` clansmen ("the grave-eater", until the truth of the ditch comes out), `faction.choir`. Plus named loudmouths | Believes every story. Stigma counts double. Refuses service early |
+| `wary` | Everyone else by default: commoners, `faction.crown` officials and servants | Charges double, keeps a distance, believes the last thing they heard |
+| `pragmatic` | `faction.ferrymen`, `faction.attre`, and these people: Kosk, Brask, Cobb, smugglers, sellswords | Doesn't care what he is, only what he costs and what he can do |
+| `kindred` | `faction.wenna`, and these people: Wick, Ottla, Dravin ("Ostrel craft"), Maelis once she joins, Bertha if she turns | Outcasts and people who have looked past it. A small bonus, and never a refusal |
+
+Regard changes only through content (`set_regard`), and it does so rarely. A person who turns is a story beat, not a slider.
+
+#### 6.19.4 Checks: `stigma_mod`
+
+`stigma_mod` is added to every **Persuade** and **Intimidate** check against an NPC or against `crowd` (content-format §K.7). It is never added to Investigate, Lore, attribute checks or Bribes. It comes from the tier and the target's regard:
+
+| Regard \ tier | `tolerated` | `shunned` | `loathed` | `hunted` |
+|---|---|---|---|---|
+| `bigot` | Persuade −1 / Intimidate +1 | −2 / +2 | −3 / +3 | −4 / +3 |
+| `wary` | 0 / 0 | −1 / +1 | −2 / +2 | −3 / +2 |
+| `pragmatic` | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 |
+| `kindred` | +1 / 0 | +1 / 0 | +1 / 0 | +1 / 0 |
+
+**The hood.** If he is `hooded()` and the target has not `seen_eyes` him, the target is talking to a stranger. The Persuade penalty is halved, rounded toward zero (−1 → 0, −2 → −1, −3 → −1, −4 → −2), and the Intimidate bonus drops to 0. A `[Hood]` option (lowering the hood on purpose, which runs `show_eyes`) brings the full Intimidate bonus back. That is a deliberate trade: the threat works, and now they know.
+
+**Witcher options.**
+- `[Witcher]` lines are things only a witcher knows or would say: a poison by its smell, a monster by its spoor, a sign of rune-wax. They are usually Lore checks or no check. They often cost heat, because knowing such things is suspicious.
+- `[Hush]` uses the sign on a `hushable` person. It always works, adds +25 heat in a crowd zone, and the content records that they were witched.
+
+**Worked example (the slice).** Infamy 30 (`shunned`). Bertha is `wary` and has seen his eyes. Persuading her to charge 3 instead of 7 is DC 5: Presence 5 + 0 − 1 = 4, a fail. Presence 6 passes. Intimidating her is DC 4: Might 3 + 1 = 4, a pass. The scene teaches the system in its first minute: threats are easy and decency is hard.
+
+#### 6.19.5 Services: prices and refusals
+
+The **price factor** multiplies shop prices, beds and paid services (ferries, tolls, the antidote rider's fee, hired boats). It applies after `price_mod` and before Haggler's −20%. Dialogue **Bribes** are authored prices and are never marked up.
+
+| Regard \ tier | `tolerated` | `shunned` | `loathed` | `hunted` |
+|---|---|---|---|---|
+| `bigot` | ×1.25 | ×1.5 | refuses | refuses |
+| `wary` | ×1.0 | ×1.25 | ×1.5 | refuses |
+| `pragmatic` | ×1.0 | ×1.0 | ×1.25 | ×1.5 |
+| `kindred` | ×0.9 | ×0.9 | ×0.9 | ×0.9 |
+
+- **Hood:** a seller who has not seen his eyes prices him one tier lower.
+- **Heat:** +0.25 to the factor at heat ≥ 25 in the zone. At heat ≥ 75, `wary` sellers refuse too.
+- A shop's `stigma.refuse_at` (content-format §K.8) overrides the table. A refusing seller has a refusal line, and the shop UI stays closed.
+- **Beds:** a rest that costs money follows the same table. Free rests (the safehouse, camps) never refuse.
+
+#### 6.19.6 Heat: the crowd meter
+
+Heat exists only in zones with a `crowd` block (towns, markets, the Fair, busy taprooms). It runs from 0 to 100 in real time, and it is saved with the zone visit (a reload restores it).
+
+**Floor:** heat never drops below the higher of the zone's `heat_floor` and the tier floor (`tolerated` 0, `shunned` 10, `loathed` 20, `hunted` 35). On entering a zone, heat starts at its floor. The exception is a zone where the last visit ended in a mob: it starts at 60 until the next milestone.
+
+**Gains** (per second while the condition holds, or once per event):
+
+| Source | Heat | Notes |
+|---|---|---|
+| He lowers his own hood in sight of onlookers | +10 once per zone visit | A scripted `set_hood` adds nothing. Content adds its own heat |
+| Eyes visible: hood down within 8 m of an onlooker area | +1 / s | |
+| Silver sword drawn | +4 / s | Steel drawn outside combat: +2 / s |
+| Elixir tell showing | +3 / s (hood down), +1 / s (hood up) | |
+| A sign cast in sight of onlookers | +25 | Includes `[Hush]` in dialogue |
+| A human enemy downed in sight | +5 | Killed: +15. A civilian hurt: +20 |
+| A Choir agitator within 15 m with line of sight | +1 / s | Stage ≥ 1. See below |
+| Content | `add_heat(N)` | Accusations, frames, scenes |
+
+With the hood up, every per-second gain is halved. Signs, kills and content heat are not. Companions change the gains: ×0.75 with Maelis (a nun at his side), ×1.25 with Dravin (a dwarf and a witcher together).
+
+**Drain:** −2 / s while hooded and not causing any gain. −1 / s with the hood down when no onlooker area is within 8 m. Heat never drops below the floor, and it does not drain during combat or dialogue.
+
+**Thresholds** fire once per zone visit as heat rises through them (content-format §K.3, `"on": heat`). They re-arm when heat falls 15 below the threshold.
+
+| Heat | Name | Default consequence (content may add more) |
+|---|---|---|
+| 25 | **Mutters** | Onlookers step out of his path and bark (`barks_by_stigma`). +0.25 price factor in the zone |
+| 50 | **Watched** | The zone's `crowd.guards` NPC walks over and **hassles** him (below). `bigot` sellers refuse |
+| 75 | **Stones** | Children and drunks throw things: 1 damage every 5 s, which cannot kill and is not combat. `wary` sellers refuse. Guards follow him |
+| 100 | **Mob** | `"on": mob` triggers fire. With none, the **default mob rule** applies (below) |
+
+**The hassle** (generic dialogue `dlg.guard_hassle`, authored with the Cintra streets in act1/02; zones may replace it). A guard blocks his way: "Hood down. Where are you going, witcher?" The options:
+- **Show the Marshal's writ** (`has_item(item.kosk_writ)`): the guard backs off. Heat −15.
+- **Pay the gate toll:** 10 crowns × the price factor.
+- **Submit to a search:** always available, with no check. Heat −20. A line of humiliation. At `stigma() >= loathed`, one random elixir is confiscated (`take_random_consumable(1)` limited to elixirs).
+- **Intimidate 6:** heat +10. On a fail, two more guards arrive and heat +15.
+- **Walk on:** heat +10. The guard follows him, and the hassle repeats at the next threshold.
+
+While `equipped(item.kosk_badge)`, guards of `faction.crown` and `faction.varn` salute instead of hassling. Mutters and stones still happen: a badge buys authority, not acceptance.
+
+**The default mob rule** (used when a zone has no `"on": mob` trigger). If `crowd.mob_encounter` is set, it starts. Otherwise the onlookers flee and every shop in the zone shuts until he leaves. If guards are present, they try to arrest him. He can **submit** (a fine of 25 × the tier index, where `shunned` is 1, `loathed` 2 and `hunted` 3, or all his crowns if he has less; heat set to the floor; moved to the zone's default spawn) or **leave** by any exit within 20 s. A fight with the watch happens only where content provides an encounter for it.
+
+**Choir agitators.** From stage 1, crowd zones may hold an agitator: a named `npc.*_agitator`, `faction.choir`, `bigot`, a pale feather in his hem. He adds +1 heat / s while near and in sight, and his barks are the frame songs ("Witcher poisons the Queen's rider!"). From stage 3, every crowd zone has one. **Expose him** by interacting with an Investigate 5 check (or Wits 5 as an attribute check): heat −30, the agitator flees, and +20 XP. This is how the Choir uses the hatred in play, and how the player hits back.
+
+#### 6.19.7 Blame: the frames
+
+The Pale Choir needs a culprit the realm will believe, and a witcher is the easiest one in Cintra. Each frame is a `blame` (content-format §K.10). It adds its weight to infamy while active and appears in the Accusations tab. Clearing it needs **proof shown to someone the realm listens to**, never just his word, and it removes the weight plus 5.
+
+| id | What they say he did | Weight | Added in | Cleared by |
+|---|---|---|---|---|
+| `blame.courier_murder` | Poisoned the royal courier with his own hands | 15 | a1.01 (the room decides) | a1.08: Kosk's proclamation, given `clue.courier_foam` and `clue.thug_silver`. Or a1.03: Pell exposed (`flag.food_taster_exposed`) and shown to Kosk |
+| `blame.palace_vial` | Brought witcher poison into the Queen's wing | 10 | a1.03 (a vial planted at the sword-check) | a1.03 on the spot: Investigate 6 or `[Witcher]` Lore 5 shows the vial is an elixir sealed with Abbey wax. Or `ded.taster_is_bought` |
+| `blame.gull_keeper` | Murdered the Gull Tower keeper | 5 | a1.06 (the smugglers' story to the widow) | a1.06: Nessa saved and the beacon relit |
+| `blame.fair_fire` | Set the "witch-fire" at the Harvest Fair | 15 | a1.07 (the Choir's cry in the smoke) | a1.07: the Wren taken alive and made to confess in front of the crowd. Or a1.08: `ded.choir_exists` laid before the council |
+| `blame.tigg_cattle` | Brought the beast down on Tigg | 5 | a2.01 (the mob's new target) | a2.01: the wyvern turned away by the tar beacons in sight of the village, or `clue.wyvern_eggs_stolen` shown to the reeve |
+| `blame.prince_taken` | Took the Prince | 25 | a2.08 (the twist: a silver-dusted knife and cat-eye marks in Aldric's room) | a3.01: Kosk stands with him in council (Crown ≥ Friendly, or `item.anselm_journal` read aloud). Or a3.08: Aldric's own word |
+
+Total possible weight: 75. Every `add_blame` has a check-free `clear_blame` path somewhere (content-format §K.11). Content must not stack accusations beyond this list without a gdd change.
+
+#### 6.19.8 Deeds
+
+Deeds are `add_infamy` effects. Most are authored by content. The rules marked **auto** are applied by the system.
+
+| Deed | Infamy | Notes |
+|---|---|---|
+| **Auto:** killing a `civilian` (for example `enemy.townsfolk`) | +10 | And Crown −5. In any zone |
+| **Auto:** executing a yielded human in a crowd zone | +5 | Plus the +15 kill heat. Dialogue executions author the same through effects |
+| **Auto:** an escalation stage-up | +5 | §6.1 |
+| Fleeing a scene just after a blame lands | +5 | "Ran like the guilty." The slice's mudflats flight |
+| Using a sign or `[Hush]` on a person where it will be talked about | +2 | Authored |
+| Sparing a yielded human in front of a crowd | −2 | Authored |
+| A public monster contract done: Tigg's wyvern, the Rozrog woodwose (peace), the Ravensford drowners, Skerra's fog | −5 each | "Witnessed" means a crowd zone or a named local who will talk |
+| Relighting the Gull Tower beacon | −5 | |
+| Saving Ned from the gibbet in Tigg | −10 | |
+| Saving Aldric at the Fair in front of the crowd | −15 | The largest single deed |
+| Defending Dun Strept's standing stone | −5 | And Strept reputation as in a3.02 |
+| Clearing a blame | −(weight + 5) | §6.19.7 |
+
+#### 6.19.9 The hood and disguises
+
+- **The hood** (H, or the radial) is always available and free. Hooded: per-second heat gains are halved, strangers get the softened modifiers (§6.19.4), and sellers who have not seen his eyes price him one tier lower. It does **not** fool anyone who has seen his eyes (`seen_eyes`), and it is suspicious in places that forbid hoods. Content forces the hood down there with `set_hood(down)`: the Lion Hall, the Abbey nave, and the Attre masquerade door unless masked.
+- **Disguises** (§6.5): in a zone whose `disguise_tag` matches (`disguised()`), his eyes count as hidden for heat, the stigma tier counts as `tolerated` for strangers, and the hood rule applies on top. The masquerade mask in Attre gives the **one night in the game he is treated as a man**. Unmasking, or being recognised, is that zone's `"on": mob` (plus the stealth alarm).
+
+#### 6.19.10 Hooks into other systems
+
+- **Escalation** (§6.1): +5 infamy per stage-up. From stage 3, every crowd zone has an agitator.
+- **Companions** (§6.13): heat gain ×0.75 with Maelis and ×1.25 with Dravin. Maelis in the party gives +1 to Persuade vs `faction.abbey` speakers (a sister vouches for him), on top of stigma.
+- **The Kosk badge** (§6.9): no hassles from Crown or Chancellery guards. It does not change stigma checks.
+- **Combat** (§6.4): silver and steel (§5.2). Signs and elixirs feed heat. `enemy.townsfolk` and the civilian-kill rule.
+- **Investigation** (§6.11): the Accusations tab. `[Witcher]` options can add clues, at a heat cost.
+- **The finale** (§6.14): freeing an untrusting Aldric takes 3.0 s instead of 1.5 s.
+- **Endings** (§6.15): the witcher's epilogue slides read `stigma()`, `flag.warden_clause_restored` and `flag.corrick_laid_to_rest`.
+- **Save** (§6.16): infamy, the blame set, regard overrides, `seen_eyes`, the hood state, and per-zone heat (current visit only) are saved in a `stigma` section.
+
+#### 6.19.11 Tests
+
+- The tier is a pure function of infamy. Infamy always stays within 10–100.
+- `stigma_mod` and the price factor are pure functions of (tier, regard, hooded, seen_eyes, heat), checked by table-driven tests that cover every cell above.
+- `add_blame` is idempotent, `clear_blame` is idempotent, and a cleared blame cannot be re-added.
+- Heat: gains, drain and floors are applied per `delta`. Threshold triggers fire once on the way up and re-arm 15 below. `raise_mob()` fires the mob triggers exactly once per visit.
+- A content test: every `add_blame` id has at least one reachable `clear_blame` path in the content (§6.19.7).
+- A content test: no required milestone's guaranteed path tests `heat()`, `infamy()` or `stigma()`.
 
 ---
 
@@ -641,15 +900,16 @@ Terrain: L = lowlands, V = valley, M = mountain. Edges are undirected.
 ### 8.1 Vertical slice (first deliverable, C7): Act I scene 1, *The Drowned Rat*
 
 **Contents:**
-- Main menu → new game (name, attribute points) → `zone.drowned_rat`.
-- The courier's death beat and dialogue with innkeeper Bertha and the dying courier (his last word: "Ostrel"). Search the body for `item.dravin_letter` and `clue.courier_foam` (Investigate 4, or Bertha tells you).
-- Thugs arrive (a trigger: reading the letter or touching the front door). Three `enemy.choir_thug`. Branches:
-  - **Fight** in the tavern (a combat tutorial: light/heavy, block/parry, dodge, kick). Bertha helps by throwing a bottle once.
-  - **Talk** (Intimidate 6 makes one thug flee; Bribe 30 makes one thug walk) to shrink the fight.
-  - **Flee** through the cellar hatch to `zone.cintra_mudflats`: deep mud (−40% speed, root pockets you mash out of), the tide rising behind each checkpoint, a crossbowman and two thugs pursuing, then the docks.
-- Reach `zone.cintra_docks`: Kosk's sergeant meets the player ("The Marshal wants a word"). Slice end card.
+- Main menu → new game (name, face preset, attribute points) → `zone.drowned_rat`, the witcher in the corner snug with his hood up.
+- **Bertha's slate** (`dlg.bertha_tab`): she makes him lower his hood, sees his eyes, and charges double for three ales in the chipped "witcher's cup". The drinkers move away (heat 25). This is the stigma tutorial: Persuade is hard, Intimidate is easy, and paying without a fight is the decent thing.
+- The courier's death: the room recoils from a frothing man, and only the witcher kneels. The courier dies **in his arms** ("Ostrel"). The room decides the witcher did it (`blame.courier_murder`, heat 50). Answer the room through `dlg.rat_accused`: the boots (Investigate 4), naming grey lily (`[Witcher]`, which helps the clue and hurts the room), Persuade or Intimidate the crowd, or ask Bertha to speak for him. Search the dispatch case for `item.dravin_letter`. The medallion trembles at the rune-wax seal.
+- Thugs arrive (a trigger: reading the letter or touching the front door). Three `enemy.choir_thug`. Cobb turns the room ("The witcher's done our cousin!"). Branches:
+  - **Fight** in the tavern (a combat tutorial: light/heavy, block/parry, dodge, kick, and the Knock sign). Bertha helps by throwing a bottle once. If heat is ≥ 75 and nobody calmed the room, two regulars (`enemy.townsfolk`) join the thugs.
+  - **Talk** to shrink the fight: Intimidate 6 (stigma makes it easier), `[Hood]`, `[Hush]`, the poison clue to the room, or Bribe 30.
+  - **Flee** through the cellar hatch to `zone.cintra_mudflats`: deep mud (−40% speed, root pockets you mash out of), the tide rising behind each checkpoint, a crossbowman and two thugs pursuing, past the stake where Eel Row drowned the last witcher, then the docks.
+- Reach `zone.cintra_docks`: Kosk's sergeant, a Marnadal veteran who remembers him, meets the player. She turns away the Chancellery watch if a regular fetched it ("The Marshal wants a word." "And put your hood up. You'll start a riot."). Slice end card.
 
-**Systems in the slice** (each with production-quality code and tests): composition root and event bus, content loader and validation, actor stats, combat (player moveset, stamina, poise, damage, attack tokens, thug AI, crossbowman AI, yield), dialogue (line/choice/check/effect, bribe and intimidate), inventory (key item, consumables, quick slots), quests and journal (`quest.main_a1` stage 1, the clue board with one clue), progression (XP grant and the level-up toast; the skill tree screen can be a stub), escalation (stage 0, read-only), save/load (autosave on zone entry, quick save), settings (rebinding, subtitles, difficulty), death and reload.
+**Systems in the slice** (each with production-quality code and tests): composition root and event bus, content loader and validation, actor stats, combat (player moveset, stamina, poise, damage, attack tokens, the steel and silver swap and tag rule, the Knock sign, thug AI, crossbowman AI, townsfolk AI, yield), **stigma** (infamy and tier, `stigma_mod`, regard, `seen_eyes`, hood, zone heat with floors, thresholds and the mob trigger, one blame and the Accusations tab), the medallion trigger, one elixir in a quick slot, dialogue (line/choice/check/effect, bribe and intimidate, `vs`, `[Hush]`), inventory (key item, consumables, quick slots), quests and journal (`quest.main_a1` stage 1, the clue board with one clue), progression (XP grant and the level-up toast; the skill tree screen can be a stub), escalation (stage 0, read-only), save/load (autosave on zone entry, quick save), settings (rebinding, subtitles, difficulty), death and reload.
 
 **Not in the slice:** the travel map (stub button), factions UI (data only), companions, rumors, stealth, finale, endings.
 

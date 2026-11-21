@@ -767,3 +767,129 @@ escalation_pool:                        # (req) at least 3
 `kind` is `combat | event_card | discovery | hazard`. `ref` is the encounter or event card that runs (`null` for a quiet discovery). `alt` is how a table changes with the escalation stage (for example the stage 2 "drowner ×2 weight" rule: a second slot rolls the drowner ambush). An entry whose `requires` is false is rerolled (`gdd.md` §6.3).
 
 Converter output (§H): `map_node` → `map/nodes/<suffix>.json`, `map_edge` → `map/edges/<suffix>.json`, `encounter_table` → `encounter_tables/<terrain>.json`, `epilogue` → `epilogues/<suffix>.json`. Required fields are the ones marked (req) above.
+
+---
+
+## K. Addendum 2 (A13, 2026-11-21): the witcher and his stigma
+
+Addendum 2 adds what the witcher protagonist and the stigma system need (`gdd.md` §5, §6.19). Read it together with §C–§F and §J. The same rule holds: anything not listed in §C–§F, §J or here is invalid. The rules behind each call and op are in `gdd.md` §6.19; this section gives only their grammar.
+
+### K.1 Condition calls
+
+| Call | True when / returns |
+|---|---|
+| `infamy()` | int 10–100: what the realm's common folk believe about the witcher (`gdd.md` §6.19.2) |
+| `stigma()` | The infamy tier, an ordered enum: `tolerated < shunned < loathed < hunted`. Compare it the way you compare `rep_tier`: `"stigma() >= loathed"` |
+| `heat()` | int 0–100: the crowd meter of the current zone (§6.19.6). Always 0 in a zone whose `crowd` is null |
+| `hooded()` | The witcher's hood is up |
+| `seen_eyes(npc.x)` | That NPC has seen his eyes: he spoke to them with the hood down, or an effect ran `show_eyes` |
+| `blamed(blame.x)` | The accusation is active: added and not yet cleared |
+| `cleared(blame.x)` | The accusation has been cleared |
+| `regard(npc.x)` | That NPC's regard for witchers, an ordered enum: `bigot < wary < pragmatic < kindred` |
+| `sword_drawn(steel\|silver)` | That sword is in his hand |
+| `elixir_active()` | At least one elixir's tell is showing (black veins and eyes) |
+
+Examples:
+
+```
+"stigma() >= loathed and not hooded()"
+"heat() >= 75 and not flag(flag.rat_crowd_calmed)"
+"blamed(blame.courier_murder) and regard(npc.kosk) >= pragmatic"
+```
+
+### K.2 Effect ops
+
+| Effect | Arguments | Notes |
+|---|---|---|
+| `add_infamy(N)` | int (may be negative) | Clamped to 10–100. Use it for a deed. An accusation uses `add_blame` instead |
+| `add_heat(N)` / `set_heat(N)` | int | The current zone's crowd meter, clamped between the zone's floor and 100. A no-op in a zone with no `crowd` |
+| `add_blame(blame.x)` | blame id | Adds the accusation's `weight` to infamy and writes the accusation in the journal's Accusations tab. A no-op if it is already active or has been cleared |
+| `clear_blame(blame.x)` | blame id | Removes the weight plus 5 from infamy and marks the accusation cleared. A no-op unless it is active |
+| `show_eyes(npc.x)` | npc id | Records that the NPC has seen his eyes (`seen_eyes`). It does not change the hood |
+| `set_hood(up\|down)` | `up \| down` | A scripted hood change. Unlike the player's own toggle, it adds no heat; content adds heat itself |
+| `set_regard(npc.x, R)` | npc id, `bigot \| wary \| pragmatic \| kindred` | The NPC's regard changes for good: a person who turns |
+| `raise_mob()` | — | The current zone's heat jumps to 100 and its `"on": mob` triggers fire. The crowd counterpart of `raise_alarm()` |
+| `heal_over_time(N, S)` | HP per second, seconds | A heal that keeps ticking during combat (the Marrow elixir) |
+| `night_sight(S)` | seconds | Darkness stops hiding things from the player. Dark areas render lit for him, and hidden interactables glint as with `perk.keen_eye` |
+| `buff(stat, N, S)` | `armor \| poise \| stamina_regen_pct`, int, seconds | A timed bonus (the Stoneblood elixir) |
+
+### K.3 Triggers
+
+| `"on"` | `source` | Fires when |
+|---|---|---|
+| `heat` | `null` | The zone's heat rises through `threshold` (25, 50 or 75). Fires once per zone visit, and re-arms if heat falls 15 below the threshold |
+| `mob` | `null` | Heat reaches 100, or an effect runs `raise_mob()` |
+| `medallion` | an interactable or npc id that has `magic` | The player first comes within that source's `magic.range_m`, and the medallion trembles. Fires once per zone visit, or only once ever with `once: true` |
+
+### K.4 Zones
+
+```yaml zone
+crowd:                                  # null (the default) means no heat in this zone
+  heat_floor: 10                        # heat never drops below this, nor below the stigma tier's floor (gdd §6.19.6)
+  onlookers: [taproom, bar]             # areas where the generic crowd stands and watches
+  guards: null                          # npc id of the guard who hassles at the Watched threshold, or null
+  mob_encounter: null                   # the encounter the default mob rule starts, or null (the crowd flees instead)
+```
+
+Zone `variants` (§F.1, §J.5) may set `crowd`, so a quay that is empty at night and packed by day can differ.
+
+### K.5 NPCs
+
+| Field | Values | Meaning |
+|---|---|---|
+| `regard` | `bigot \| wary \| pragmatic \| kindred`. Default: the faction's default in `gdd.md` §6.19.3, else `wary` | How this person sees witchers. It sets the stigma modifier on checks against them and on their shop prices. It is separate from `disposition`, which is how they feel about this particular player |
+| `hushable` | bool, default `false` | A `[Hush]` sign option may target them. Use it for frightened, weak-willed or drunk people, never for a named lord, a Choir leader or a boss |
+| `magic` | `null` or `{range_m: N}` (default range 12) | The medallion senses them: ghosts, the Lady of the Reeds, someone carrying a rune-object |
+| `barks_by_stigma` | `{shunned: [], loathed: [], hunted: []}` | Extra barks used at or above that tier, in place of `barks` |
+
+### K.6 Interactables
+
+- `magic: {range_m: N}` (or `null`): the medallion senses the object. Use it for rune-iron, the Pact stones, a dead witcher's medallion and rune-wax.
+- `activate_by` (§J.3) gains the sign values `ember` and `knock`, and it may be a **list**: `activate_by: [interact, ember]` lets a beacon be lit by hand or by the Ember sign. A sign activation runs the interactable's `effects` the same way an interact does. In a crowd zone the sign also adds its heat (gdd §6.19.6).
+
+### K.7 Dialogue and event cards
+
+- **Option tags** gain `witcher` (a line only a witcher would know or say; usually a Lore check or no check), `sign` (a sign used in conversation) and `hood` (he lowers his hood on purpose).
+- **`vs`** (an option field) names who a check is made against: an npc id, or `crowd` for the zone's onlookers as one listener (regard `wary`, no faction). The default is the speaker of the last `line` before the choice. Both `rep_mod` (gdd §6.10) and `stigma_mod` (gdd §6.19.4) use it.
+- **`sign: hush`** (an option field) makes a Hush option. It has no check and always succeeds, like a Bribe. It is shown only if the `vs` NPC is `hushable`. In a crowd zone it adds 25 heat automatically. Anything else, such as infamy or flags, goes in its `effects`.
+- **Stigma on checks** is automatic. Persuade and Intimidate checks against an NPC or the crowd include `stigma_mod` (gdd §6.19.4). Investigate, Lore, attribute checks and Bribes never do. `skill(...)` in a condition does not include it, the same as `rep_mod`.
+
+### K.8 Shops
+
+```yaml npc
+shop:
+  stock: [{item: item.poultice, count: 5}]
+  price_mod: 1.0
+  stigma: {markup: true, refuse_at: loathed}   # markup: apply the stigma price factor (default true). refuse_at: shunned | loathed | hunted | never (default by regard, gdd §6.19.5)
+```
+
+### K.9 Items and enemies
+
+- `weapon.bonus_vs` keys may name any enemy tag, including the new tags `monster` and `civilian`. When several of the target's tags match, the highest bonus above 1.0 applies. If none is above 1.0, the lowest applies (gdd §6.4).
+- `equip_slot` (§F.5) gains `silver`: the witcher's second sword sheath (gdd §6.9). Only a weapon whose item is a silver sword goes there. The swap input switches `main_hand` and `silver`.
+- `consumable` gains `elixir: {tell_s: N}`. The item is a witcher's elixir (gdd §5.2): it counts toward the two-elixir limit and shows the tell for N seconds.
+- Enemy tags (gdd §6.7) gain `monster` (silver's target) and `civilian` (killing one is a civilian kill, gdd §6.19.8).
+
+### K.10 The `blame` block and the `blame` id kind
+
+A `blame` is an accusation the realm pins on the witcher (`gdd.md` §6.19.7). Declare each one once, in the section that first adds it.
+
+```yaml blame
+id: blame.courier_murder                 # (req)
+title: "The royal courier's death"       # (req) journal heading in the Accusations tab
+text: "Eel Row says the witcher at the Drowned Rat poisoned a royal courier with his own hands."   # (req)
+weight: 15                               # (req) infamy added by add_blame, and removed (plus 5) by clear_blame
+cleared_text: "The Marshal's proclamation names the poison and the men who paid for it."   # shown once cleared
+clear_hint: "Prove the courier was poisoned before he reached the Rat, to someone the city listens to."   # documentation
+```
+
+- `blame` is a new id kind (`blame.snake_case`). It must be added to `architecture.md` §8.2, to `IdRules.KINDS`, and to the layout (`blames/`).
+- The converter (§H) gains a row: `blame` → `game/content/blames/<suffix>.json`.
+
+### K.11 Checklist additions (§I)
+
+- [ ] Every `blame` id that is added or cleared is declared in a `blame` block. Every `add_blame` has a reachable `clear_blame` somewhere in the game (gdd §6.19.7 table), or the file's Open questions say why not.
+- [ ] Every `[Hush]` option targets a `hushable` NPC through `vs`.
+- [ ] Every zone that townsfolk walk through has a `crowd` block, or the file says why it has none.
+- [ ] Every `"on": medallion` trigger's source has `magic`.
+- [ ] A section that adds heat or infamy still keeps a check-free path to its required milestones. Heat never blocks a milestone; a mob only closes optional branches.
