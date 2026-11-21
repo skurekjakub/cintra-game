@@ -9,7 +9,8 @@
 ## `true`/`false` are a literal only when no operator follows; otherwise they are compare words
 ## (`finale_oath() == true`). The keywords and/or/not are recognised before the call rule, so
 ## `not(` and `and(` are never calls. Errors: condition_syntax, unknown_call, bad_arg_count,
-## bad_arg, bad_call_use and bad_compare; each detail names the offending text.
+## bad_arg, bad_call_use and bad_compare; each detail names the offending text. The type rules of a
+## compare (a call on one side, closed word sets, tiers) live in CompareChecker.
 class_name ConditionReader
 extends RefCounted
 
@@ -116,38 +117,13 @@ func _read_compare(left: ConditionValue, left_at: int) -> Result:
 	if second is Condition:
 		return _bad_use(right_at, "a boolean call cannot be compared")
 	var right: ConditionValue = second
-	var fit := _fit_types(left, left_at, right, right_at)
+	var fit := CompareChecker.fit(left, _tokens[left_at].text, right, _tokens[right_at].text)
 	if fit.is_err():
-		return fit
+		return _bad_compare(left_at, fit.detail)
 	var pair: Array[ConditionValue] = fit.value
 	if pair[0].value_type() == ConditionValue.VALUE_WORD and not _EQUALITY_OPS.has(op_name):
 		return _bad_compare(left_at, "words compare with == or != only")
 	return Result.ok(CompareCondition.new(pair[0], StringName(op_name), pair[1]))
-
-
-## ok([left, right]) with a bare word turned into a tier literal when the other side is a tier,
-## or err bad_compare when the two sides still differ in type.
-func _fit_types(left: ConditionValue, left_at: int, right: ConditionValue, right_at: int) -> Result:
-	var l := _bare_word_as_tier(left, left_at, right)
-	var r := _bare_word_as_tier(right, right_at, left)
-	if l.is_err() or r.is_err():
-		return l if l.is_err() else r
-	var left_fit: ConditionValue = l.value
-	var right_fit: ConditionValue = r.value
-	if left_fit.value_type() != right_fit.value_type():
-		return _bad_compare(left_at, "cannot compare %s with %s" % [left_fit.value_type(), right_fit.value_type()])
-	var pair: Array[ConditionValue] = [left_fit, right_fit]
-	return Result.ok(pair)
-
-
-func _bare_word_as_tier(value: ConditionValue, at: int, other: ConditionValue) -> Result:
-	var is_bare_word := value is LiteralValue and value.value_type() == ConditionValue.VALUE_WORD
-	if not is_bare_word or other.value_type() != ConditionValue.VALUE_TIER:
-		return Result.ok(value)
-	var word := StringName(_tokens[at].text)
-	if not RepTiers.is_tier(word):
-		return Result.err(&"bad_compare", "'%s' is not a reputation tier" % word)
-	return Result.ok(LiteralValue.new(word, ConditionValue.VALUE_TIER))
 
 
 ## One side of a comparison, or a boolean call used as a whole atom. ok(ConditionValue) for an

@@ -88,3 +88,23 @@ const FINALE_ANSELM: StringName = &"anselm"
 
 
 @abstract func queen_condition() -> int
+
+
+## True when the item sits in one of the player's equipment slots (content-format.md §J.1 `equipped`).
+@abstract func is_equipped(item_id: StringName) -> bool
+
+
+## True when the player is "permitted" in the current zone (gdd.md §6.5; content-format.md §J.1 `disguised`).
+@abstract func is_disguised() -> bool
+
+
+## True when the rumor was heard from that npc (content-format.md §J.1 `heard_from`).
+@abstract func heard_from(rumor_id: StringName, npc_id: StringName) -> bool
+
+
+## True when the travel-map node is unlocked.
+@abstract func map_unlocked(map_id: StringName) -> bool
+
+
+## True when the travel-map node has a map pin (`add_map_pin`).
+@abstract func map_pinned(map_id: StringName) -> bool

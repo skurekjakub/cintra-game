@@ -86,6 +86,27 @@ func test_fake_returns_configured_maps() -> void:
 	assert_eq(f.finale_value(FactProvider.FINALE_ANSELM), &"fled")
 
 
+func test_fake_j1_defaults_and_configured_values() -> void:
+	var f := FakeFactProvider.new()
+	assert_false(f.is_equipped(&"item.x"))
+	assert_false(f.is_disguised())
+	assert_false(f.heard_from(&"rumor.x", &"npc.x"))
+	assert_false(f.map_unlocked(&"map.x"))
+	assert_false(f.map_pinned(&"map.x"))
+	f.equipped_items[&"item.x"] = true
+	f.disguised_value = true
+	f.heard_sources[&"rumor.x"] = [&"npc.x"]
+	f.unlocked_maps[&"map.x"] = true
+	f.pinned_maps[&"map.y"] = true
+	assert_true(f.is_equipped(&"item.x"))
+	assert_true(f.is_disguised())
+	assert_true(f.heard_from(&"rumor.x", &"npc.x"))
+	assert_false(f.heard_from(&"rumor.x", &"npc.y"))
+	assert_true(f.map_unlocked(&"map.x"))
+	assert_false(f.map_pinned(&"map.x"))
+	assert_true(f.map_pinned(&"map.y"))
+
+
 func test_fake_returns_configured_scalars() -> void:
 	var f := FakeFactProvider.new()
 	f.act_value = 2

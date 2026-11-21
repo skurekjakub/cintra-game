@@ -12,6 +12,11 @@ var party: Dictionary[StringName, bool] = {}
 var perks: Dictionary[StringName, bool] = {}
 var visited_zones: Dictionary[StringName, bool] = {}
 var rumors: Dictionary[StringName, bool] = {}
+var equipped_items: Dictionary[StringName, bool] = {}
+var unlocked_maps: Dictionary[StringName, bool] = {}
+var pinned_maps: Dictionary[StringName, bool] = {}
+## rumor id -> the npc ids it was heard from.
+var heard_sources: Dictionary[StringName, Array] = {}
 
 var vars: Dictionary[StringName, int] = {}
 var items: Dictionary[StringName, int] = {}
@@ -29,6 +34,7 @@ var act_value: int = 1
 var crowns_value: int = 0
 var level_value: int = 1
 var queen_value: int = 0
+var disguised_value: bool = false
 
 
 func has_flag(id: StringName) -> bool:
@@ -117,6 +123,27 @@ func rumor_heard(rumor_id: StringName) -> bool:
 
 func queen_condition() -> int:
 	return queen_value
+
+
+func is_equipped(item_id: StringName) -> bool:
+	return equipped_items.get(item_id, false)
+
+
+func is_disguised() -> bool:
+	return disguised_value
+
+
+func heard_from(rumor_id: StringName, npc_id: StringName) -> bool:
+	var sources: Array = heard_sources.get(rumor_id, [])
+	return sources.has(npc_id)
+
+
+func map_unlocked(map_id: StringName) -> bool:
+	return unlocked_maps.get(map_id, false)
+
+
+func map_pinned(map_id: StringName) -> bool:
+	return pinned_maps.get(map_id, false)
 
 
 func _finale_default(key: StringName) -> StringName:

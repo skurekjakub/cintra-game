@@ -1,8 +1,10 @@
 ## ConditionCalls: the table of condition calls, their result type and their argument specs
-## (content-format.md §C "Boolean calls" and "Numeric or enum calls"; architecture.md §3.4).
+## (content-format.md §C "Boolean calls" and "Numeric or enum calls", §J.1; architecture.md §3.4).
 ## FactCalls evaluates the same names, so a call added here needs a branch there.
 ## Result types: &"bool", ConditionValue.VALUE_INT/VALUE_TIER/VALUE_WORD (&"int", &"tier", &"word").
-## A spec string is an ArgSpec; "" means the call takes no argument.
+## A spec string is one ArgSpec, or several joined with ";" (one per parameter, in order, e.g.
+## "id:rumor;id:npc"); "" means the call takes no argument.
+## _CLOSED_WORDS lists, for a WORD call, the only bare words it may be compared with ("a|b|c").
 class_name ConditionCalls
 extends RefCounted
 
@@ -22,6 +24,11 @@ const _BOOL_CALLS: Dictionary[StringName, String] = {
 	&"visited": "id:zone",
 	&"rumor_heard": "id:rumor",
 	&"finale_seized": "",
+	&"equipped": "id:item",
+	&"disguised": "",
+	&"heard_from": "id:rumor;id:npc",
+	&"map_unlocked": "id:map",
+	&"map_pinned": "id:map",
 }
 const _INT_CALLS: Dictionary[StringName, String] = {
 	&"var": "id:var",
@@ -42,6 +49,11 @@ const _WORD_CALLS: Dictionary[StringName, String] = {
 	&"finale_oath": "",
 	&"finale_anselm": "",
 }
+## The values of the FactProvider.FINALE_* doc comment. quest_stage is absent: stage ids are per quest.
+const _CLOSED_WORDS: Dictionary[StringName, String] = {
+	&"finale_oath": "true|reversed|none",
+	&"finale_anselm": "alive|dead|fled",
+}
 
 static var _returns: Dictionary[StringName, StringName] = {}
 static var _spec_texts: Dictionary[StringName, String] = {}
@@ -58,9 +70,19 @@ static func params(call_name: StringName) -> Array[ArgSpec]:
 	_ensure_built()
 	var specs: Array[ArgSpec] = []
 	var spec_text: String = _spec_texts.get(call_name, "")
-	if not spec_text.is_empty():
-		specs.append(ArgSpec.parse(spec_text))
+	for part: String in spec_text.split(";", false):
+		specs.append(ArgSpec.parse(part))
 	return specs
+
+
+## The only bare words a WORD call may be compared with, or empty when its words are open
+## (`quest_stage`) or `call_name` is not a WORD call.
+static func words(call_name: StringName) -> Array[StringName]:
+	var allowed: Array[StringName] = []
+	var text: String = _CLOSED_WORDS.get(call_name, "")
+	for part: String in text.split("|", false):
+		allowed.append(StringName(part))
+	return allowed
 
 
 static func _ensure_built() -> void:

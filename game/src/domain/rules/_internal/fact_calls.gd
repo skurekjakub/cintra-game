@@ -1,4 +1,4 @@
-## Maps the content-format.md §C call names onto FactProvider reads (architecture.md §3.4).
+## Maps the content-format.md §C and §J.1 call names onto FactProvider reads (architecture.md §3.4).
 ## `truth` serves the boolean calls and `value` the numeric/enum calls. The parser has already
 ## checked names and argument counts, so an unknown name here is a programmer error.
 ## `args` holds the bound call arguments: ids and words as StringName.
@@ -36,6 +36,22 @@ static func truth(call_name: StringName, args: Array, facts: FactProvider) -> bo
 			return facts.rumor_heard(_id(args))
 		&"finale_seized":
 			return facts.finale_value(FactProvider.FINALE_SEIZED) == &"true"
+	return _addendum_truth(call_name, args, facts)
+
+
+## The boolean calls of content-format.md §J.1.
+static func _addendum_truth(call_name: StringName, args: Array, facts: FactProvider) -> bool:
+	match call_name:
+		&"equipped":
+			return facts.is_equipped(_id(args))
+		&"disguised":
+			return facts.is_disguised()
+		&"heard_from":
+			return facts.heard_from(_id(args), _id_at(args, 1))
+		&"map_unlocked":
+			return facts.map_unlocked(_id(args))
+		&"map_pinned":
+			return facts.map_pinned(_id(args))
 	assert(false, "unknown boolean call: %s" % call_name)
 	return false
 
@@ -93,5 +109,9 @@ static func _count_ms(args: Array, facts: FactProvider) -> int:
 
 
 static func _id(args: Array) -> StringName:
-	var id: StringName = args[0]
+	return _id_at(args, 0)
+
+
+static func _id_at(args: Array, index: int) -> StringName:
+	var id: StringName = args[index]
 	return id
