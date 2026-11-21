@@ -81,5 +81,6 @@ presentation ──► application ──► domain
 
 - State, decisions and the agent table: `docs/orchestration/STATE.md`.
 - Briefs and reports: `docs/orchestration/agents/<id>/brief.md` and `report.md`.
-- **Subagents do not commit.** Agents share the working tree, so the orchestrator verifies each report and commits only that agent's paths.
+- **Commits:** on `main`, subagents do not commit (several agents share that tree); the orchestrator verifies each report and commits only that agent's paths. In an implementation worktree (`.worktrees/<plan>`, branch `feat/<plan>`), exactly one implementer runs at a time and commits its own task; the orchestrator pushes and merges.
+- Plan execution ledgers: `.superpowers/sdd/<plan>/progress.md` inside the worktree (git-ignored); milestones are mirrored in `docs/orchestration/STATE.md`.
 - Only touch the paths your brief owns. `docs/content/` and `docs/art-direction/` belong to their own agents.
