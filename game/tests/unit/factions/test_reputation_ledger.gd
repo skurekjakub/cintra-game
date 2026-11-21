@@ -1,5 +1,6 @@
 ## ReputationLedger and FactionDefinition: reputation range and tiers (gdd.md §6.12),
-## rep_mod by tier (gdd.md §6.10), events and snapshot (architecture.md §4.5, §9.3).
+## rep_mod by tier (gdd.md §6.10), events and snapshot (architecture.md §4.14, §9.3).
+## Restore validation: test_reputation_ledger_restore.gd.
 extends GutTest
 
 
@@ -136,7 +137,7 @@ func test_snapshot_survives_json_round_trip() -> void:
 	var l := _ledger()
 	l.add(&"faction.crown", 15)
 	var r := _ledger()
-	r.restore(JsonRoundTrip.of(l.to_snapshot()))
+	assert_true(r.restore(JsonRoundTrip.of(l.to_snapshot())).is_ok())
 	assert_eq(r.to_snapshot(), l.to_snapshot())
 	assert_eq(r.value(&"faction.crown"), 15)
 	assert_eq(r.value(&"faction.strept"), -10)
@@ -154,7 +155,7 @@ func test_restore_replaces_state_and_emits_nothing() -> void:
 	var r := _ledger()
 	r.add(&"faction.strept", 40)
 	r.drain_events()
-	r.restore(JsonRoundTrip.of(src.to_snapshot()))
+	assert_true(r.restore(JsonRoundTrip.of(src.to_snapshot())).is_ok())
 	assert_eq(r.value(&"faction.crown"), 30)
 	assert_eq(r.value(&"faction.strept"), -10)
 	assert_eq(r.drain_events().size(), 0)
@@ -166,20 +167,6 @@ func test_restore_does_not_touch_pending_events() -> void:
 	l.restore(JsonRoundTrip.of(_ledger().to_snapshot()))
 	assert_eq(l.drain_events().size(), 1)
 	assert_eq(l.value(&"faction.crown"), 0)
-
-
-func test_restore_keeps_start_for_a_faction_missing_from_the_snapshot() -> void:
-	var l := _ledger()
-	l.add(&"faction.strept", 30)
-	l.restore({"values": {"faction.crown": 7.0}})
-	assert_eq(l.value(&"faction.crown"), 7)
-	assert_eq(l.value(&"faction.strept"), -10)
-
-
-func test_restore_ignores_a_faction_the_ledger_does_not_define() -> void:
-	var l := _ledger()
-	l.restore({"values": {"faction.crown": 7.0, "faction.gone": 90.0}})
-	assert_eq(l.to_snapshot(), {"values": {"faction.crown": 7, "faction.strept": -10}})
 
 
 func test_queries_on_an_unknown_faction_are_lenient() -> void:

@@ -51,12 +51,31 @@ func to_snapshot() -> Dictionary:
 	return {"slots": stored}
 
 
-## Replaces every slot from a snapshot (also one that went through JSON). A short
-## list leaves the last slots empty and entries past SIZE are dropped; the ids are
-## not checked against the inventory, which may be restored later.
-func restore(data: Dictionary) -> void:
-	var stored: Array = data["slots"]
-	_slots.fill(&"")
-	for i: int in mini(stored.size(), SIZE):
-		var item_name: String = stored[i]
-		_slots[i] = StringName(item_name)
+## Replaces every slot from a snapshot (also one that went through JSON). All or
+## nothing: Err `save_invalid` when `slots` is missing or not a list of exactly
+## SIZE strings, an id is not a consumable in the catalog, or one id sits in two
+## slots; nothing changes then. `""` is an empty slot. Ownership is not checked:
+## the inventory may be restored later.
+func restore(data: Dictionary) -> Result:
+	var reader := SnapshotReader.new(data, "quick_slots")
+	var stored := reader.read_array("slots")
+	if not reader.failed() and stored.size() != SIZE:
+		reader.fail("slots", "expected %d entries, got %d" % [SIZE, stored.size()])
+	var slots: Array[StringName] = []
+	for i: int in stored.size():
+		var label := "slots[%d]" % i
+		var id := StringName(reader.string_value(stored[i], label))
+		if id != &"" and slots.has(id):
+			reader.fail(label, "%s is already in another slot" % id)
+		elif id != &"" and not _is_consumable(id):
+			reader.fail(label, "%s is not a known consumable" % id)
+		slots.append(id)
+	if reader.failed():
+		return reader.result()
+	_slots = slots
+	return Result.ok()
+
+
+func _is_consumable(id: StringName) -> bool:
+	var def := _inventory.definition(id)
+	return def != null and def.category == &"consumable"

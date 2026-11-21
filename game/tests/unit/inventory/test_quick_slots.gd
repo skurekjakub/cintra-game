@@ -1,6 +1,7 @@
 ## QuickSlots: the four quick item slots, assign rules and their error order, moving
 ## an id between slots, and the JSON-safe snapshot (gdd.md §6.4 quick items, §6.9
-## consumables; architecture.md §4.12, §9.3).
+## consumables; architecture.md §4.12, §9.3). Restore validation:
+## test_quick_slots_restore.gd.
 extends GutTest
 
 
@@ -107,7 +108,7 @@ func test_snapshot_survives_json_round_trip() -> void:
 	var q := QuickSlots.new(inv)
 	q.assign(1, &"item.poultice")
 	var r := QuickSlots.new(inv)
-	r.restore(JsonRoundTrip.of(q.to_snapshot()))
+	assert_true(r.restore(JsonRoundTrip.of(q.to_snapshot())).is_ok())
 	assert_eq(r.to_snapshot(), q.to_snapshot())
 	assert_eq(r.item_at(1), &"item.poultice")
 
@@ -118,13 +119,6 @@ func test_restore_replaces_all_state() -> void:
 	saved.assign(3, &"item.poultice")
 	var r := QuickSlots.new(inv)
 	r.assign(0, &"item.poultice")
-	r.restore(JsonRoundTrip.of(saved.to_snapshot()))
+	assert_true(r.restore(JsonRoundTrip.of(saved.to_snapshot())).is_ok())
 	assert_eq([r.item_at(0), r.item_at(3)], [&"", &"item.poultice"])
 
-
-func test_restore_tolerates_a_short_or_long_slot_list() -> void:
-	var r := QuickSlots.new(ItemDefBuilder.gear_inventory())
-	r.restore({"slots": ["item.poultice"]})
-	assert_eq(r.to_snapshot(), {"slots": ["item.poultice", "", "", ""]})
-	r.restore({"slots": ["", "", "", "", "item.poultice"]})
-	assert_eq(r.to_snapshot(), {"slots": ["", "", "", ""]})

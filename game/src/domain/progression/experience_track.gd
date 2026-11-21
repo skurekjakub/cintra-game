@@ -61,10 +61,16 @@ func to_snapshot() -> Dictionary:
 
 
 ## Replaces all state from a snapshot (also one that went through JSON, where
-## ints come back as floats), clamping XP to 0..max and the spent points to the
-## points earned. Emits no events and leaves pending ones alone.
-func restore(data: Dictionary) -> void:
-	var stored_xp: float = data["xp"]
-	var stored_spent: float = data["skill_points_spent"]
-	_xp = clampi(int(stored_xp), 0, LevelTable.max_xp())
-	_skill_points_spent = clampi(int(stored_spent), 0, LevelTable.skill_points_at(level()))
+## ints come back as floats). All or nothing: Err `save_invalid` on a missing key,
+## a wrong type, XP outside 0..max or more skill points spent than that XP's
+## level earned, and nothing changes. Emits no events and leaves pending ones alone.
+func restore(data: Dictionary) -> Result:
+	var reader := SnapshotReader.new(data, "experience_track")
+	var stored_xp := reader.read_int("xp", 0, LevelTable.max_xp())
+	var earned := LevelTable.skill_points_at(LevelTable.level_for(stored_xp))
+	var spent := reader.read_int("skill_points_spent", 0, earned)
+	if reader.failed():
+		return reader.result()
+	_xp = stored_xp
+	_skill_points_spent = spent
+	return Result.ok()

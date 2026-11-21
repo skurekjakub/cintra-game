@@ -101,17 +101,23 @@ func to_snapshot() -> Dictionary:
 
 
 ## Replaces all stacks from a snapshot (also one that went through JSON, where
-## ints come back as floats). An id the catalog does not know and a count below 1
-## are dropped; a count above the stack limit is cut to it. Emits no events and
-## leaves pending ones alone.
-func restore(data: Dictionary) -> void:
-	_counts.clear()
-	var stored: Dictionary = data["counts"]
-	for item_name: String in stored:
+## ints come back as floats). All or nothing: Err `save_invalid` when `counts` is
+## missing, an id is not in the catalog, or a count is not an int in
+## 1..stack_max; nothing changes then. Emits no events and leaves pending ones alone.
+func restore(data: Dictionary) -> Result:
+	var reader := SnapshotReader.new(data, "inventory")
+	var stored := reader.read_dict("counts")
+	var counts: Dictionary[StringName, int] = {}
+	for item_name: String in stored.keys():
 		var id := StringName(item_name)
-		var amount: float = stored[item_name]
-		if _catalog.has(id) and int(amount) >= 1:
-			_counts[id] = mini(int(amount), _catalog[id].stack_max)
+		if not _catalog.has(id):
+			stored.fail(item_name, "unknown item")
+			continue
+		counts[id] = stored.read_int(item_name, 1, _catalog[id].stack_max)
+	if reader.failed():
+		return reader.result()
+	_counts = counts
+	return Result.ok()
 
 
 # Sorted by text: Array[StringName].sort() orders by interned pointer instead.

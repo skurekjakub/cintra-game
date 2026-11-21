@@ -62,12 +62,18 @@ func to_snapshot() -> Dictionary:
 
 
 ## Replaces all state from a snapshot (also one that went through JSON, where
-## ints come back as floats). Emits no events and leaves pending ones alone.
-func restore(data: Dictionary) -> void:
-	var stored: float = data["condition"]
-	var administered: bool = data["administered"]
-	_condition = clampi(int(stored), 0, MAX_CONDITION)
+## ints come back as floats). All or nothing: Err `save_invalid` on a missing key,
+## a wrong type or a condition outside 0..3, and nothing changes. Emits no events
+## and leaves pending ones alone.
+func restore(data: Dictionary) -> Result:
+	var reader := SnapshotReader.new(data, "queen_condition")
+	var stored_condition := reader.read_int("condition", 0, MAX_CONDITION)
+	var administered := reader.read_bool("administered")
+	if reader.failed():
+		return reader.result()
+	_condition = stored_condition
 	_administered = administered
+	return Result.ok()
 
 
 func _set_condition(value: int) -> void:

@@ -67,14 +67,20 @@ func to_snapshot() -> Dictionary:
 
 
 ## Replaces all state from a snapshot (also one that went through JSON, where
-## ints come back as floats). A faction missing from the snapshot goes back to
-## its start; an id this ledger does not define is ignored. Emits no events.
-func restore(data: Dictionary) -> void:
+## ints come back as floats). All or nothing: Err `save_invalid` when `values` is
+## missing, a defined faction is missing, an id is not a faction this ledger
+## defines, or a score is not an int in -100..100; nothing changes then. Emits no
+## events and leaves pending ones alone.
+func restore(data: Dictionary) -> Result:
+	var reader := SnapshotReader.new(data, "reputation_ledger")
+	var stored := reader.read_dict("values")
+	for faction_name: String in stored.keys():
+		if not _defs.has(StringName(faction_name)):
+			stored.fail(faction_name, "unknown faction")
+	var values: Dictionary[StringName, int] = {}
 	for id: StringName in _defs:
-		_values[id] = _defs[id].start
-	var stored: Dictionary = data["values"]
-	for faction_name: String in stored:
-		var id := StringName(faction_name)
-		if _defs.has(id):
-			var amount: float = stored[faction_name]
-			_values[id] = clampi(int(amount), MIN_REP, MAX_REP)
+		values[id] = stored.read_int(String(id), MIN_REP, MAX_REP)
+	if reader.failed():
+		return reader.result()
+	_values = values
+	return Result.ok()

@@ -133,21 +133,35 @@ func to_snapshot() -> Dictionary:
 
 
 ## Replaces all state from a snapshot (also one that went through JSON, where
-## ints come back as floats). Emits no events.
-func restore(data: Dictionary) -> void:
-	var stored_attrs: Dictionary = data["attributes"]
-	var values: Dictionary[StringName, int] = {}
-	for attr_name: String in stored_attrs:
-		var stored: float = stored_attrs[attr_name]
-		values[StringName(attr_name)] = int(stored)
+## ints come back as floats). All or nothing: Err `save_invalid` on a missing key,
+## a wrong type, a missing or unknown attribute, an attribute outside 0..10, a
+## negative HP or spent points outside 0..5, and nothing changes. HP above the
+## max is accepted (the max depends on the level, restored elsewhere) and reads
+## capped. Emits no events and leaves pending ones alone.
+func restore(data: Dictionary) -> Result:
+	var reader := SnapshotReader.new(data, "actor_sheet")
+	var values := _read_attributes(reader.read_dict("attributes"))
+	var stored_hp := reader.read_int("hp", 0, SnapshotReader.INT_MAX)
+	var spent := reader.read_int("points_spent", 0, ATTRIBUTE_POINT_LEVELS.size())
+	if reader.failed():
+		return reader.result()
 	_attrs = Attributes.new(values)
-	var stored_hp: float = data["hp"]
-	_hp = int(stored_hp)
-	var stored_spent: float = data["points_spent"]
-	_points_spent = int(stored_spent)
+	_hp = stored_hp
+	_points_spent = spent
+	return Result.ok()
 
 
 func _level() -> int:
 	var level: int = _level_provider.call()
 	assert(level >= 1, "level starts at 1")
 	return level
+
+
+static func _read_attributes(reader: SnapshotReader) -> Dictionary[StringName, int]:
+	for attr_name: String in reader.keys():
+		if not CheckSkills.is_attribute(StringName(attr_name)):
+			reader.fail(attr_name, "unknown attribute")
+	var values: Dictionary[StringName, int] = {}
+	for attr: StringName in CheckSkills.ATTRIBUTES:
+		values[attr] = reader.read_int(String(attr), 0, Attributes.MAX)
+	return values

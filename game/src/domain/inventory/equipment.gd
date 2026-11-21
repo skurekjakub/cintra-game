@@ -87,21 +87,41 @@ func to_snapshot() -> Dictionary:
 	return {"slots": stored}
 
 
-## Replaces every slot from a snapshot (also one that went through JSON). A slot
-## name that is not a slot and an empty id are dropped; the ids are not checked
-## against the inventory, which may be restored later. Emits no events and leaves
-## pending ones alone.
-func restore(data: Dictionary) -> void:
-	_worn.clear()
-	var stored: Dictionary = data["slots"]
-	for slot_name: String in stored:
-		var slot := StringName(slot_name)
-		var item_name: String = stored[slot_name]
-		if SLOTS.has(slot) and item_name != "":
-			_worn[slot] = StringName(item_name)
+## Replaces every slot from a snapshot (also one that went through JSON). All or
+## nothing: Err `save_invalid` when `slots` is missing, a key is not a slot, an id
+## is empty or not in the catalog, an item does not fit its slot, or one id sits
+## in two slots; nothing changes then. Ownership is not checked: the inventory may
+## be restored later. Emits no events and leaves pending ones alone.
+func restore(data: Dictionary) -> Result:
+	var reader := SnapshotReader.new(data, "equipment")
+	var stored := reader.read_dict("slots")
+	var worn: Dictionary[StringName, StringName] = {}
+	for slot_name: String in stored.keys():
+		var id := _read_slot(stored, slot_name)
+		if worn.values().has(id):
+			stored.fail(slot_name, "%s is already in another slot" % id)
+		worn[StringName(slot_name)] = id
+	if reader.failed():
+		return reader.result()
+	_worn = worn
+	return Result.ok()
 
 
 func _fits(slot: StringName, def: ItemDefinition) -> bool:
 	if def.equip_slot == &"trinket":
 		return TRINKET_SLOTS.has(slot)
 	return def.equip_slot == slot
+
+
+# The item id saved for one slot, checked against the slots and the catalog.
+func _read_slot(stored: SnapshotReader, slot_name: String) -> StringName:
+	if not SLOTS.has(StringName(slot_name)):
+		stored.fail(slot_name, "unknown slot")
+		return &""
+	var id := StringName(stored.read_string(slot_name))
+	var def := _inventory.definition(id)
+	if def == null:
+		stored.fail(slot_name, "unknown item '%s'" % id)
+	elif not _fits(StringName(slot_name), def):
+		stored.fail(slot_name, "%s does not fit this slot" % id)
+	return id

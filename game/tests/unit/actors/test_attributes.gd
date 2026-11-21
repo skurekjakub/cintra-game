@@ -1,5 +1,5 @@
 ## Attributes: the five-attribute value and its creation rules
-## (gdd.md §6.6; architecture.md §4.4).
+## (gdd.md §6.6; architecture.md §4.11).
 extends GutTest
 
 

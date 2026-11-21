@@ -1,6 +1,7 @@
 ## ExperienceTrack: XP, level-ups, the cap, skill and attribute points earned
 ## (gdd.md §6.8; architecture.md §4.13, §9.3). Spending attribute points belongs
-## to ActorSheet, so the track only reports how many were earned.
+## to ActorSheet, so the track only reports how many were earned. Restore
+## validation: test_experience_track_restore.gd.
 extends GutTest
 
 
@@ -153,7 +154,7 @@ func test_snapshot_survives_json_round_trip() -> void:
 	t.grant(800, &"q")
 	t.spend_skill_point()
 	var r := ExperienceTrack.new()
-	r.restore(JsonRoundTrip.of(t.to_snapshot()))
+	assert_true(r.restore(JsonRoundTrip.of(t.to_snapshot())).is_ok())
 	assert_eq(r.to_snapshot(), t.to_snapshot())
 	assert_eq([r.xp(), r.level(), r.unspent_skill_points()], [800, 3, 1])
 
@@ -170,7 +171,7 @@ func test_restore_accepts_a_snapshot_that_never_went_through_json() -> void:
 	t.grant(800, &"q")
 	t.spend_skill_point()
 	var r := ExperienceTrack.new()
-	r.restore(t.to_snapshot())
+	assert_true(r.restore(t.to_snapshot()).is_ok())
 	assert_eq(r.to_snapshot(), t.to_snapshot())
 
 
@@ -181,7 +182,7 @@ func test_restore_replaces_state_and_emits_nothing() -> void:
 	r.grant(5000, &"q")
 	r.spend_skill_point()
 	r.drain_events()
-	r.restore(JsonRoundTrip.of(src.to_snapshot()))
+	assert_true(r.restore(JsonRoundTrip.of(src.to_snapshot())).is_ok())
 	assert_eq([r.xp(), r.level(), r.unspent_skill_points()], [300, 2, 1])
 	assert_eq(r.drain_events().size(), 0)
 
@@ -193,11 +194,3 @@ func test_restore_does_not_touch_pending_events() -> void:
 	assert_eq(t.drain_events().size(), 1)
 	assert_eq(t.xp(), 0)
 
-
-func test_restore_clamps_out_of_range_values() -> void:
-	var t := ExperienceTrack.new()
-	t.restore({"xp": 99999.0, "skill_points_spent": 50.0})
-	assert_eq(t.xp(), 11550)
-	assert_eq(t.unspent_skill_points(), 0)
-	t.restore({"xp": -5.0, "skill_points_spent": -2.0})
-	assert_eq([t.xp(), t.unspent_skill_points()], [0, 0])

@@ -1,5 +1,6 @@
 ## ActorSheet: derived stats, hit points and attribute points
-## (gdd.md §6.6 derived stats, §6.8 attribute points; architecture.md §4.4).
+## (gdd.md §6.6 derived stats, §6.8 attribute points; architecture.md §4.11).
+## Restore validation: test_actor_sheet_restore.gd.
 extends GutTest
 
 # GUT reuses one instance of this script for every test, and a lambda copies
@@ -113,7 +114,7 @@ func test_a_higher_level_raises_max_hp_but_not_current_hp() -> void:
 func test_current_hp_reads_clamped_to_max() -> void:
 	var snap := {"attributes": {"might": 3, "agility": 3, "grit": 3, "wits": 3, "presence": 3}, "hp": 999, "points_spent": 0}
 	var s := ActorSheet.new(Attributes.new(), _level_of)   # max 125
-	s.restore(JsonRoundTrip.of(snap))
+	assert_true(s.restore(JsonRoundTrip.of(snap)).is_ok(), "hp above max is valid; max depends on the level")
 	assert_eq(s.current_hp(), 125)
 
 
@@ -185,7 +186,7 @@ func test_snapshot_survives_json_round_trip() -> void:
 	s.spend_attribute_point(&"wits")
 	s.damage(10)
 	var r := ActorSheet.new(Attributes.new(), _level_of)
-	r.restore(JsonRoundTrip.of(s.to_snapshot()))
+	assert_true(r.restore(JsonRoundTrip.of(s.to_snapshot())).is_ok())
 	assert_eq(r.to_snapshot(), s.to_snapshot())
 	assert_eq(r.attribute(&"wits"), 7)
 	assert_eq(r.current_hp(), s.current_hp())
@@ -211,7 +212,7 @@ func test_restore_replaces_state_and_emits_nothing() -> void:
 	r.spend_attribute_point(&"presence")
 	r.damage(5)
 	r.drain_events()
-	r.restore(JsonRoundTrip.of(src.to_snapshot()))
+	assert_true(r.restore(JsonRoundTrip.of(src.to_snapshot())).is_ok())
 	assert_eq([r.attribute(&"might"), r.attribute(&"wits"), r.attribute(&"presence")], [6, 3, 3])
 	assert_eq(r.unspent_attribute_points(), 1)
 	assert_eq(r.current_hp(), src.current_hp())

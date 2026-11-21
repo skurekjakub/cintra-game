@@ -18,6 +18,15 @@ func test_snapshotable_subclass_round_trips() -> void:
 	var a := FakeCounter.new()
 	a.count = 5
 	var b := FakeCounter.new()
-	b.restore(a.to_snapshot())
+	var r: Result = b.restore(JsonRoundTrip.of(a.to_snapshot()))
+	assert_true(r.is_ok())
 	assert_is(b, Snapshotable)
+	assert_eq(b.count, 5)
+
+
+func test_snapshotable_restore_rejects_a_bad_snapshot_unchanged() -> void:
+	var b := FakeCounter.new()
+	b.count = 5
+	var r: Result = b.restore({"count": 2.5})
+	assert_eq(r.error_code, &"save_invalid")
 	assert_eq(b.count, 5)

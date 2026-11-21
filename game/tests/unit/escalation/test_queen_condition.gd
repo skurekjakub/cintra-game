@@ -1,6 +1,6 @@
 ## QueenCondition: the Queen's derived condition (gdd.md §6.2; architecture.md
-## §4.9, §9.3): formula, antidote freeze, improvement on milestones, events and
-## the JSON-safe snapshot.
+## §4.4, §9.3): formula, antidote freeze, improvement on milestones, events and
+## the JSON-safe snapshot. Restore validation: test_queen_condition_restore.gd.
 extends GutTest
 
 
@@ -108,7 +108,7 @@ func test_snapshot_survives_json_round_trip() -> void:
 	q.recompute(3, 1)
 	q.administer_antidote()
 	var r := QueenCondition.new()
-	r.restore(JsonRoundTrip.of(q.to_snapshot()))
+	assert_true(r.restore(JsonRoundTrip.of(q.to_snapshot())).is_ok())
 	assert_eq(r.to_snapshot(), q.to_snapshot())
 	assert_eq(r.condition(), 2)
 	assert_true(r.antidote_administered())
@@ -127,7 +127,7 @@ func test_restore_replaces_state_and_records_no_events() -> void:
 	q.recompute(3, 0)
 	q.administer_antidote()
 	q.drain_events()
-	q.restore(JsonRoundTrip.of(source.to_snapshot()))
+	assert_true(q.restore(JsonRoundTrip.of(source.to_snapshot())).is_ok())
 	assert_eq(q.condition(), 1)
 	assert_false(q.antidote_administered())
 	assert_eq(q.drain_events().size(), 0)

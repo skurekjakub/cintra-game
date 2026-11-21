@@ -1,6 +1,6 @@
 ## ItemDefinition, its payloads and Inventory: stacks, key items and documents,
 ## room_for, ItemAdded/ItemRemoved events and the JSON-safe snapshot (gdd.md §6.9;
-## architecture.md §4.12, §9.3).
+## architecture.md §4.12, §9.3). Restore: test_inventory_restore.gd.
 extends GutTest
 
 
@@ -261,39 +261,3 @@ func test_snapshot_shape() -> void:
 	i.add(&"item.dravin_letter")
 	assert_eq(i.to_snapshot(), {"counts": {"item.poultice": 3, "item.dravin_letter": 1}})
 
-
-func test_snapshot_survives_json_round_trip() -> void:
-	var i := _inv()
-	i.add(&"item.poultice", 3)
-	i.add(&"item.choir_list")
-	var r := _inv()
-	r.restore(JsonRoundTrip.of(i.to_snapshot()))
-	assert_eq(r.to_snapshot(), i.to_snapshot())
-	assert_eq(r.count(&"item.poultice"), 3)
-	var counts: Dictionary = r.to_snapshot()["counts"]
-	assert_eq(typeof(counts["item.poultice"]), TYPE_INT, "restored counts are ints, not the floats JSON gives")
-
-
-func test_restore_replaces_state_and_emits_nothing() -> void:
-	var r := _inv()
-	r.add(&"item.arming_sword")
-	r.restore({"counts": {"item.poultice": 4.0}})
-	assert_false(r.has(&"item.arming_sword"))
-	assert_eq(r.count(&"item.poultice"), 4)
-	assert_eq(r.drain_events().size(), 1, "restore leaves the pending add event and records none")
-
-
-func test_restore_skips_unknown_ids_and_non_positive_counts() -> void:
-	var r := _inv()
-	r.restore({"counts": {"item.gone_from_catalog": 3.0, "item.poultice": 0.0, "item.choir_list": -2.0,
-		"item.dravin_letter": 1.0}})
-	assert_eq(r.all_ids(), [&"item.dravin_letter"] as Array[StringName])
-	assert_eq(r.to_snapshot(), {"counts": {"item.dravin_letter": 1}})
-
-
-func test_restore_keeps_counts_within_the_stack_limit() -> void:
-	var r := _inv()
-	r.restore({"counts": {"item.poultice": 25.0, "item.arming_sword": 2.0}})
-	assert_eq(r.count(&"item.poultice"), 10)
-	assert_eq(r.count(&"item.arming_sword"), 1)
-	assert_eq(r.room_for(&"item.poultice"), 0)

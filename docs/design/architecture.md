@@ -88,13 +88,15 @@ Content uses one condition language and one effect list everywhere (dialogue, qu
 Conventions for every domain:
 - The public classes sit at the domain root. Helpers sit in `_internal/` and may only be referenced inside the same domain.
 - Definitions (`*Definition`) are immutable parsed content types owned by the domain. Infrastructure builds them, and the domain uses them.
-- Aggregates that hold saved state implement `Snapshotable` (`to_snapshot() -> Dictionary`, `restore(data: Dictionary) -> void`).
+- Aggregates that hold saved state implement `Snapshotable` (`to_snapshot() -> Dictionary`, `restore(data: Dictionary) -> Result`).
+- `restore()` is all or nothing: it validates every key, JSON type, range and id first and mutates only after. On any problem it returns `Result.err(&"save_invalid", "<section>.<key>: <reason>")` and the aggregate is exactly unchanged; on success it returns `Result.ok()`. Problems are a missing key, a wrong type (JSON numbers arrive as floats, so an integral float is accepted for an int and `2.5` is not), an out-of-range value, and an unknown id where the aggregate holds definitions (an item, a faction, an equipment slot). The policy is **reject**: never clamp, repair or drop. `restore()` emits no events and never touches the outbox (the load use case discards pending events). `SnapshotReader` (`shared`) does the typed reads and keeps the first problem with its path.
+- Queries are lenient, commands assert: a query on an unknown id returns a neutral value (`0`, `&""`, `false`, the tier of 0), while a command given an unknown id or a bad argument fails an `assert()` (or returns its documented `Result.err`).
 - "Consumes" lists what the application reacts to on the domain's behalf. Domains never subscribe to anything themselves.
 
 ### 4.1 `shared` (shared kernel)
 
 - **Responsibility:** primitives used by all domains.
-- **API:** `DomainEvent` (abstract), `Result` (`ok(value)`, `err(code: StringName, detail := "")`, `is_ok()`, `value`, `error_code`), `RandomSource` (abstract: `randi_range(a, b) -> int`, `randf() -> float`, `get_state() -> Dictionary`, `set_state(d)`), `SeededRandom extends RandomSource` (wraps `RandomNumberGenerator`), `IdRules` (`static func kind_of(id: StringName) -> StringName`, `static func is_valid(id, kind) -> bool`), `Snapshotable` (abstract).
+- **API:** `DomainEvent` (abstract), `Result` (`ok(value)`, `err(code: StringName, detail := "")`, `is_ok()`, `value`, `error_code`), `RandomSource` (abstract: `randi_range(a, b) -> int`, `randf() -> float`, `get_state() -> Dictionary`, `set_state(d)`), `SeededRandom extends RandomSource` (wraps `RandomNumberGenerator`), `IdRules` (`static func kind_of(id: StringName) -> StringName`, `static func is_valid(id, kind) -> bool`), `Snapshotable` (abstract), `SnapshotReader` (typed, range-checked reads of a saved section for `restore()`; `read_int/read_bool/read_string/read_dict/read_array/read_ids`, `fail(key, reason)`, `failed()`, `result()`).
 - **Emits / consumes:** none.
 - **Must not know:** any specific game concept.
 

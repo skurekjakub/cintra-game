@@ -118,20 +118,29 @@ func to_snapshot() -> Dictionary:
 
 
 ## Replaces all state from a snapshot (also one that went through JSON, where
-## ints come back as floats). Emits no events.
-func restore(data: Dictionary) -> void:
+## ints come back as floats). All or nothing: Err `save_invalid` on a missing key,
+## a wrong type, an empty or repeated flag or milestone id, a non-integer var or
+## an act outside 1..3; nothing changes then. Var bounds are not checked (set_var
+## ignores them too). Emits no events.
+func restore(data: Dictionary) -> Result:
+	var reader := SnapshotReader.new(data, "world_state")
+	var flag_ids := reader.read_ids("flags")
+	var var_values := _read_vars(reader.read_dict("vars"))
+	var reached := reader.read_ids("milestones")
+	var stored_act := reader.read_int("act", FIRST_ACT, LAST_ACT)
+	if reader.failed():
+		return reader.result()
 	_flags.clear()
-	_vars.clear()
-	_reached.clear()
-	var flag_names: Array = data["flags"]
-	for flag_name: String in flag_names:
-		_flags[StringName(flag_name)] = true
-	var var_values: Dictionary = data["vars"]
-	for var_name: String in var_values:
-		var stored: float = var_values[var_name]
-		_vars[StringName(var_name)] = int(stored)
-	var milestone_names: Array = data["milestones"]
-	for milestone_name: String in milestone_names:
-		_reached.append(StringName(milestone_name))
-	var stored_act: float = data["act"]
-	_act = int(stored_act)
+	for id: StringName in flag_ids:
+		_flags[id] = true
+	_vars = var_values
+	_reached = reached
+	_act = stored_act
+	return Result.ok()
+
+
+static func _read_vars(stored: SnapshotReader) -> Dictionary[StringName, int]:
+	var values: Dictionary[StringName, int] = {}
+	for var_name: String in stored.keys():
+		values[StringName(var_name)] = stored.read_int(var_name, SnapshotReader.INT_MIN, SnapshotReader.INT_MAX)
+	return values

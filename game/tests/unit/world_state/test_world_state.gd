@@ -1,5 +1,6 @@
 ## WorldState: flags, bounded vars, write-once milestones and the act counter
 ## (architecture.md §4.3; content-format.md §E add_var clamps; gdd.md §6.1 write-once milestones).
+## Restore validation: test_world_state_restore.gd.
 extends GutTest
 
 
@@ -117,7 +118,7 @@ func test_snapshot_survives_json_round_trip() -> void:
 	w.reach_milestone(&"ms.c")
 	w.set_act(2)
 	var r := WorldState.new()
-	r.restore(JsonRoundTrip.of(w.to_snapshot()))
+	assert_true(r.restore(JsonRoundTrip.of(w.to_snapshot())).is_ok())
 	assert_eq(r.to_snapshot(), w.to_snapshot())
 	assert_true(r.has_flag(&"flag.a"))
 	assert_eq(r.get_var(&"var.b"), 3)
@@ -146,7 +147,7 @@ func test_restore_keeps_vars_as_ints_after_json() -> void:
 	var w := WorldState.new()
 	w.set_var(&"var.b", 3)
 	var r := WorldState.new()
-	r.restore(JsonRoundTrip.of(w.to_snapshot()))
+	assert_true(r.restore(JsonRoundTrip.of(w.to_snapshot())).is_ok())
 	var stored: Variant = (r.to_snapshot()["vars"] as Dictionary)["var.b"]
 	assert_typeof(stored, TYPE_INT)
 	assert_typeof(r.to_snapshot()["act"], TYPE_INT)
@@ -161,7 +162,7 @@ func test_restore_replaces_all_state_and_emits_nothing() -> void:
 	r.reach_milestone(&"ms.stale")
 	r.set_act(3)
 	r.drain_events()
-	r.restore(JsonRoundTrip.of(src.to_snapshot()))
+	assert_true(r.restore(JsonRoundTrip.of(src.to_snapshot())).is_ok())
 	assert_false(r.has_flag(&"flag.stale"))
 	assert_true(r.has_flag(&"flag.keep"))
 	assert_eq(r.get_var(&"var.stale"), 0)

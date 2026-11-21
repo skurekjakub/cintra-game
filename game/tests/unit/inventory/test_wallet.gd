@@ -1,6 +1,6 @@
 ## Wallet: the crowns balance, add/spend, CrownsChanged events and the JSON-safe
 ## snapshot (gdd.md §6.9 crowns; content-format.md §E add_crowns; architecture.md
-## §4.7, §9.3).
+## §4.12, §9.3). Restore validation: test_wallet_restore.gd.
 extends GutTest
 
 
@@ -73,7 +73,7 @@ func test_snapshot_shape() -> void:
 func test_snapshot_survives_json_round_trip() -> void:
 	var w := Wallet.new(42)
 	var r := Wallet.new()
-	r.restore(JsonRoundTrip.of(w.to_snapshot()))
+	assert_true(r.restore(JsonRoundTrip.of(w.to_snapshot())).is_ok())
 	assert_eq(r.to_snapshot(), w.to_snapshot())
 	assert_eq(r.balance(), 42)
 
@@ -81,14 +81,9 @@ func test_snapshot_survives_json_round_trip() -> void:
 func test_restore_replaces_state_and_emits_nothing() -> void:
 	var r := Wallet.new(5)
 	r.add(1)
-	r.restore({"crowns": 42.0})
+	assert_true(r.restore({"crowns": 42.0}).is_ok())
 	assert_eq(r.balance(), 42)
 	assert_eq(typeof(r.to_snapshot()["crowns"]), TYPE_INT)
 	var events := r.drain_events()
 	assert_eq(events.size(), 1, "restore leaves the pending add event and records none")
 
-
-func test_restore_clamps_a_negative_balance_to_zero() -> void:
-	var r := Wallet.new(5)
-	r.restore({"crowns": -10.0})
-	assert_eq(r.balance(), 0)

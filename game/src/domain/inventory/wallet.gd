@@ -43,11 +43,16 @@ func to_snapshot() -> Dictionary:
 
 
 ## Replaces the balance from a snapshot (also one that went through JSON, where
-## ints come back as floats), clamping a negative value to 0. Emits no events
-## and leaves pending ones alone.
-func restore(data: Dictionary) -> void:
-	var stored: float = data["crowns"]
-	_crowns = maxi(int(stored), 0)
+## ints come back as floats). All or nothing: Err `save_invalid` on a missing,
+## non-integer or negative balance, and nothing changes. Emits no events and
+## leaves pending ones alone.
+func restore(data: Dictionary) -> Result:
+	var reader := SnapshotReader.new(data, "wallet")
+	var crowns := reader.read_int("crowns", 0, SnapshotReader.INT_MAX)
+	if reader.failed():
+		return reader.result()
+	_crowns = crowns
+	return Result.ok()
 
 
 func _change_by(delta: int) -> void:

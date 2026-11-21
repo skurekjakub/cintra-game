@@ -1,6 +1,7 @@
 ## Equipment: the five slots, equip and unequip rules and their error order,
 ## ItemEquipped/ItemUnequipped events, the armor sum and the JSON-safe snapshot
 ## (gdd.md §6.9 equipment slots, §6.6 armor; architecture.md §4.12, §9.3).
+## Restore validation: test_equipment_restore.gd.
 extends GutTest
 
 
@@ -223,7 +224,7 @@ func test_snapshot_survives_json_round_trip() -> void:
 	e.equip(&"armor", &"item.gambeson")
 	e.equip(&"main_hand", &"item.arming_sword")
 	var r := Equipment.new(inv)
-	r.restore(JsonRoundTrip.of(e.to_snapshot()))
+	assert_true(r.restore(JsonRoundTrip.of(e.to_snapshot())).is_ok())
 	assert_eq(r.to_snapshot(), e.to_snapshot())
 	assert_eq(r.equipped(&"armor"), &"item.gambeson")
 	assert_eq(r.armor_total(), 10)
@@ -235,13 +236,8 @@ func test_restore_replaces_all_state_and_emits_nothing() -> void:
 	saved.equip(&"armor", &"item.gambeson")
 	var r := Equipment.new(inv)
 	r.equip(&"main_hand", &"item.arming_sword")
-	r.restore(JsonRoundTrip.of(saved.to_snapshot()))
+	assert_true(r.restore(JsonRoundTrip.of(saved.to_snapshot())).is_ok())
 	assert_eq(r.equipped(&"main_hand"), &"", "the old slot is cleared")
 	assert_eq(r.equipped(&"armor"), &"item.gambeson")
 	assert_eq(r.drain_events().size(), 1, "restore leaves the pending equip event and records none")
 
-
-func test_restore_skips_unknown_slots_and_empty_ids() -> void:
-	var r := Equipment.new(ItemDefBuilder.gear_inventory())
-	r.restore({"slots": {"belt": "item.gambeson", "armor": "", "main_hand": "item.arming_sword"}})
-	assert_eq(r.to_snapshot(), {"slots": {"main_hand": "item.arming_sword"}})
