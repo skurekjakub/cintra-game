@@ -1,15 +1,17 @@
 extends Node3D
-## HD-2D spike shot 1 (round 2+): the Drowned Rat taproom at night, mid-fight (Act I, scene 1).
-## Full 3D room (KayKit CC0 props with Poly Haven grain, baked carved flagstones, Poly Haven PBR
-## walls), rolling-cylinder world bend, volumetric fog with window shafts, hand-authored pixel
-## sprites lit by the room's lights. Camera looks south: the front door is at the top.
+## HD-2D spike shot 1: the Drowned Rat taproom at night, mid-fight (Act I, scene 1).
+## Environment (A10): bespoke Blender set (art-src/env/build_taproom.py: timber framing with
+## plaster infill, windows with mullions and wavy glass, stone hearth, bar, stairs, trapdoor,
+## clutter, the rain-wet quay outside) + Poly Haven CC0 props, a unique baked plank floor
+## (art-src/env/bake_taproom_floor.py), moonlight shafts, lantern and hearth pools.
+## Rolling-cylinder world bend, hand-authored pixel sprites lit by the room's lights.
+## Camera looks south: the front door is at the top.
 
 const Kit := preload("res://spikes/hd2d/lib/kit.gd")
-const Props := preload("res://spikes/hd2d/lib/props.gd")
-const KK := preload("res://spikes/hd2d/lib/kaykit.gd")
 const Card := preload("res://spikes/hd2d/lib/pixel_card.gd")
 const Vfx := preload("res://spikes/hd2d/lib/vfx.gd")
 const Hud := preload("res://spikes/hd2d/hud/hud.gd")
+const Set := preload("res://spikes/hd2d/lib/taproom.gd")
 
 const PLAYER := Vector3(0.5, 0, -0.3)
 const THUG_A := Vector3(-0.9, 0, 0.2)
@@ -23,138 +25,198 @@ const D := 5.5
 
 var cam: Camera3D
 var lights: Array[Light3D] = []
+var anchors: Dictionary = {}
+const MOON := Color(0.5, 0.68, 1.0)
+const FIRE := Color(1.0, 0.6, 0.3)
+const CANDLE := Color(1.0, 0.72, 0.44)
+const MOON_DIR := Vector3(0.18, -0.62, 0.76)
 
 
 func _ready() -> void:
 	Kit.env_materials.clear()
 	cam = Kit.camera(self, Vector3(0.0, 0.0, -0.6), 52.0, 0.0, 21.0, 27.0)
 	var we := Kit.environment(self, cam, {
-		"ambient": Color(0.46, 0.4, 0.68), "ambient_energy": 1.1, "exposure": 1.05,
-		"glow": 0.4, "contrast": 1.1, "saturation": 1.15,
-		"fog": true, "fog_density": 0.028, "fog_albedo": Color(0.75, 0.7, 0.85),
+		"ambient": Color(0.36, 0.44, 0.62), "ambient_energy": 1.15, "exposure": 1.18,
+		"glow": 0.4, "contrast": 1.08, "saturation": 0.92,
+		"fog": true, "fog_density": 0.012, "fog_albedo": Color(0.82, 0.84, 0.9),
 	}, 21.0)
-	we.environment.ssr_enabled = true
-	we.environment.ssr_max_steps = 48
-	we.environment.glow_hdr_threshold = 1.0
-	_room()
-	_furniture()
-	_lights()
+	var env := we.environment
+	env.ssr_enabled = true
+	env.ssr_max_steps = 48
+	env.ssr_fade_in = 0.1
+	env.ssr_depth_tolerance = 0.3
+	env.glow_hdr_threshold = 1.0
+	env.volumetric_fog_anisotropy = 0.1
+	env.volumetric_fog_gi_inject = 0.0
+	env.volumetric_fog_ambient_inject = 0.05
+	# SSIL cost ~4 ms on the Adreno X2 for an almost invisible gain here: bounce is faked with fill lights
+	env.ssil_enabled = false
+	RenderingServer.environment_set_volumetric_fog_volume_size(96, 64)
+	# stronger near blur so the hanging net / herbs / lantern in front of the lens read as foreground
+	var attrs := we.camera_attributes as CameraAttributesPractical
+	attrs.dof_blur_amount = 0.06
+	attrs.dof_blur_near_transition = 2.0
+	anchors = Set.anchors()
+	Set.instance(self, "taproom_arch.glb")
+	if ResourceLoader.exists("res://spikes/hd2d/models/env/taproom_props.glb"):
+		Set.instance(self, "taproom_props.glb")
+	_fire()
+	_lamps()
+	_outside()
 	Kit.apply_bend(self, PLAYER, cam, 13.0)
+	_moonlight()
+	_fog_energies()
 	_characters()
 	_vfx()
-	Kit.post_layer(self, {"focus_center": 0.52, "focus_half": 0.15, "blur_px": 11.0, "vignette": 0.42,
-		"shadow_tint": Color(0.82, 0.74, 1.0), "high_tint": Color(1.06, 0.98, 0.88), "grain": 0.02})
+	Kit.post_layer(self, {"focus_center": 0.52, "focus_half": 0.15, "blur_px": 11.0, "vignette": 0.32,
+		"shadow_tint": Color(0.82, 0.9, 1.06), "high_tint": Color(1.03, 1.0, 0.93), "grain": 0.02, "lift": 2.0})
 	_hud()
+	var dbg := OS.get_environment("A10_DEBUG")
+	if dbg.contains("noglass"):
+		for n: Node in find_children("glass*", "MeshInstance3D", true, false):
+			(n as MeshInstance3D).visible = false
+	if dbg.contains("nossr"):
+		env.ssr_enabled = false
+	if dbg.contains("nossil"):
+		env.ssil_enabled = false
+	if dbg.contains("noprops"):
+		for n: Node in get_children():
+			if n.name.begins_with("taproom_props"):
+				(n as Node3D).visible = false
+	if dbg.contains("nofog"):
+		env.volumetric_fog_enabled = false
+	if dbg.contains("moononly"):
+		for n: Node in find_children("*", "OmniLight3D", true, false):
+			(n as OmniLight3D).visible = false
+		env.ambient_light_energy = 0.1
+	if dbg.contains("nospot"):
+		for n: Node in find_children("*", "SpotLight3D", true, false):
+			(n as SpotLight3D).visible = false
 
 
-func _room() -> void:
-	var pm := PlaneMesh.new()
-	pm.size = Vector2(W * 2.0, D * 2.0)
-	pm.subdivide_width = 48
-	pm.subdivide_depth = 32
-	Kit.mesh_node(self, pm, Vector3.ZERO, Kit.floor_material("tavern_floor", Color(0.8, 0.78, 0.84), 2.0))
-	var outside := PlaneMesh.new()
-	outside.size = Vector2(30, 8)
-	outside.subdivide_width = 30
-	outside.subdivide_depth = 8
-	var quay := Kit.floor_material("karak_floor", Color(0.35, 0.4, 0.55), 3.0)
-	Kit.mesh_node(self, outside, Vector3(0, -0.12, -D - 4.2), quay)
-	var stone := Kit.pbr("rough_block_wall", Color(0.85, 0.8, 0.86), 2.0)
-	var timber := Kit.pbr("old_planks_02", Color(0.95, 0.74, 0.58), 2.2)
-	var wood := Kit.pbr("dark_wooden_planks", Color(0.55, 0.4, 0.32), 1.8)
-	var h := 3.2
-	Props.timber_wall(self, Vector3(-W, 0, -D), Vector3(DOOR.x, 0, -D), h, 1.0, stone, timber, wood)
-	Props.timber_wall(self, Vector3(DOOR.y, 0, -D), Vector3(W, 0, -D), h, 1.0, stone, timber, wood)
-	Kit.box(self, Vector3(DOOR.y - DOOR.x + 0.5, 0.6, 0.5), Vector3((DOOR.x + DOOR.y) * 0.5, 2.6, -D), wood)
-	Props.timber_wall(self, Vector3(-W, 0, -D), Vector3(-W, 0, D), h, 1.0, stone, timber, wood)
-	Props.timber_wall(self, Vector3(W, 0, -D), Vector3(W, 0, D), h, 1.0, stone, timber, wood)
-	var door := Kit.box(self, Vector3(1.4, 2.2, 0.12), Vector3(DOOR.x - 0.2, 1.1, -D + 0.75), wood, Vector3(0, -62, 0))
-	door.position.x += 0.0
-	_hearth(stone, wood)
-	for x: float in [-4.6, 4.6]:
-		Kit.box(self, Vector3(1.3, 1.1, 0.1), Vector3(x, 1.8, -D + 0.24), Kit.pbr("old_planks_02", Color(0.3, 0.24, 0.2), 1.0))
-		for k: int in range(4):
-			Kit.box(self, Vector3(0.03, 1.0, 0.03), Vector3(x - 0.45 + k * 0.3, 1.8, -D + 0.3), Kit.emissive(Color(0.45, 0.6, 1.0), 4.0))
+## Hearth fire, candles (clustered into a few lights), embers.
+func _fire() -> void:
+	for h: Dictionary in anchors["hearth"]:
+		var p := Set.v3(h["pos"])
+		for i: int in range(6):
+			Kit.flame(self, p + Vector3(0.05 * (i % 2), -0.12, -0.62 + i * 0.25), Vector2(0.42, 0.72 + 0.22 * (i % 3)), cam, float(i) * 3.1, 5.0)
+		Kit.glow(self, p + Vector3(0.35, 0.25, 0), 1.7, Color(1.0, 0.45, 0.15), 0.7, cam)
+		lights.append(Kit.omni(self, p + Vector3(0.45, 0.5, 0.0), FIRE, 3.4, 8.5, true))
+		# fake bounce off the hearthstones and the chimney breast
+		Kit.omni(self, p + Vector3(1.6, 1.6, 0.0), FIRE, 0.6, 4.5)
+	for e: Dictionary in anchors["embers"]:
+		Vfx.embers(self, Set.v3(e["pos"]), Set.v3(e["ext"]) * Vector3(1.0, 0.6, 0.8), Color(1.0, 0.5, 0.2), 16, 0.5)
+	var groups: Array = []
+	for c: Dictionary in anchors["candles"]:
+		var p := Set.v3(c["pos"])
+		Kit.flame(self, p, Vector2(0.07, 0.15), cam, p.x * 7.0 + p.z, 5.0)
+		Kit.glow(self, p + Vector3(0, 0.07, 0), 0.38, Color(1.0, 0.62, 0.28), 1.1, cam)
+		var placed := false
+		for g: Array in groups:
+			if (g[0] as Vector3).distance_to(p) < 1.4:
+				g[1] = int(g[1]) + 1
+				placed = true
+				break
+		if not placed:
+			groups.append([p, 1])
+	for g: Array in groups:
+		var n := int(g[1])
+		var gp := g[0] as Vector3
+		var far := 0.55 if gp.z < -2.0 else 1.0
+		Kit.omni(self, gp + Vector3(0, 0.25, 0), CANDLE, (0.45 + 0.1 * float(n)) * far, 2.4 + 0.2 * float(n))
 
 
-func _hearth(stone: Material, wood: Material) -> void:
-	var hx := -W + 0.55
-	Kit.box(self, Vector3(1.1, 3.2, 0.7), Vector3(hx, 1.6, -1.3), stone)
-	Kit.box(self, Vector3(1.1, 3.2, 0.7), Vector3(hx, 1.6, 1.3), stone)
-	Kit.box(self, Vector3(1.3, 0.35, 3.4), Vector3(hx, 1.45, 0), wood)
-	Kit.box(self, Vector3(1.1, 1.6, 1.9), Vector3(hx, 2.4, 0), stone)
-	Kit.box(self, Vector3(0.3, 1.3, 1.9), Vector3(hx - 0.35, 0.65, 0), Kit.flat(Color(0.04, 0.02, 0.02)))
-	Kit.box(self, Vector3(2.0, 0.07, 3.6), Vector3(hx + 1.2, 0.035, 0), Kit.floor_material("karak_floor", Color(0.62, 0.55, 0.55), 1.5))
-	var logm := Kit.pbr("dark_wooden_planks", Color(0.3, 0.18, 0.12), 0.8)
-	for i: int in range(3):
-		var lg := Kit.cyl(self, 0.08, 0.08, 1.2, Vector3(hx + 0.05, 0.12 + i * 0.05, -0.2 + i * 0.2), logm, 8)
-		lg.rotation_degrees = Vector3(90, 0, 12 * i)
-	for i: int in range(5):
-		Kit.flame(self, Vector3(hx + 0.12, 0.1, -0.6 + i * 0.3), Vector2(0.5, 0.85 + 0.2 * (i % 2)), cam, float(i) * 3.1, 5.0)
-	Kit.glow(self, Vector3(hx + 0.3, 0.5, 0), 1.6, Color(1.0, 0.45, 0.15), 0.8, cam)
-	Vfx.embers(self, Vector3(hx + 0.3, 0.9, 0), Vector3(0.3, 0.3, 0.8), Color(1.0, 0.5, 0.2), 50)
+## Lanterns (hanging, wall, the foreground one) and the cellar glow under the trapdoor.
+func _lamps() -> void:
+	var shadowed := 0
+	for l: Dictionary in anchors["lanterns"]:
+		var p := Set.v3(l["pos"])
+		var fg: bool = l.get("fg", false)
+		Kit.flame(self, p - Vector3(0, 0.07, 0), Vector2(0.08, 0.16), cam, p.x * 3.0, 5.0)
+		Kit.glow(self, p, 1.0 if fg else 0.7, Color(1.0, 0.6, 0.28), 1.0, cam)
+		var sh := (not fg) and shadowed < 1 and p.z > 0.0
+		if sh:
+			shadowed += 1
+		var rng := 3.0 if fg else (3.4 if p.z < -2.0 else 4.5)
+		lights.append(Kit.omni(self, p, CANDLE, 0.8 if fg else 1.3, rng, sh))
+	for l: Dictionary in anchors["wall_lamps"]:
+		var p := Set.v3(l["pos"])
+		Kit.flame(self, p - Vector3(0, 0.07, 0), Vector2(0.08, 0.16), cam, p.x * 5.0, 5.0)
+		Kit.glow(self, p, 0.8, Color(1.0, 0.6, 0.28), 1.0, cam)
+		Kit.omni(self, p + Vector3(0, 0.1, 0.35), CANDLE, 0.75, 3.2)
+	for t: Dictionary in anchors["trapdoor"]:
+		var p := Set.v3(t["pos"])
+		Kit.omni(self, p, Color(1.0, 0.6, 0.3), 7.0, 3.6)
+		Kit.omni(self, p + Vector3(0, 1.5, 0), Color(1.0, 0.62, 0.32), 1.2, 2.2)
+		Kit.glow(self, p + Vector3(0, 1.25, 0), 1.3, Color(1.0, 0.55, 0.22), 0.6, cam)
+	# soft play-area fill + far-wall wash so the walls read in mid-tones
+	# cool moon-bounce fill over the play area: the room's base light is cold, fire pools are local
+	Kit.omni(self, Vector3(0.5, 6.5, -0.5), Color(0.62, 0.7, 1.0), 0.7, 14.0)
+	Kit.omni(self, Vector3(0.0, 2.6, -4.4), Color(0.52, 0.62, 1.0), 1.0, 6.5)
+	Vfx.embers(self, Vector3(0, 1.4, -1.0), Vector3(6.0, 1.2, 4.0), Color(0.42, 0.46, 0.55), 40, 0.12)
 
 
-func _furniture() -> void:
-	var grain := "wood_table_worn"
-	KK.prop(self, "table_long", Vector3(-4.3, 0, -2.9), 90.0, 1.0, grain, 0.5)
-	KK.prop(self, "table_long_decorated_A", Vector3(4.6, 0, -0.8), 0.0, 1.0, grain, 0.5)
-	KK.prop(self, "table_medium_decorated_A", Vector3(-4.0, 0, 2.0), 15.0, 1.0, grain, 0.5)
-	KK.prop(self, "table_medium", Vector3(3.8, 0, 2.4), -10.0, 1.0, grain, 0.5)
-	for p: Vector3 in [Vector3(-5.3, 0, -3.6), Vector3(-3.3, 0, -3.6), Vector3(-5.2, 0, -2.2), Vector3(-4.9, 0, 2.9),
-			Vector3(-3.1, 0, 1.3), Vector3(3.0, 0, 3.0), Vector3(4.7, 0, 1.6), Vector3(5.5, 0, -1.4), Vector3(3.7, 0, -0.2)]:
-		KK.prop(self, "stool", p, p.x * 37.0, 1.0, grain, 0.4)
-	var chair := KK.prop(self, "chair", Vector3(-0.2, 0.18, -1.9), 40.0, 1.0, grain, 0.4)
-	chair.rotation_degrees = Vector3(0, 40, 85)
-	KK.prop(self, "table_long_broken", Vector3(0.9, 0, -3.0), 70.0, 1.0, grain, 0.5)
-	for p: Vector3 in [Vector3(-7.1, 0, -4.6), Vector3(-6.2, 0, -4.9), Vector3(6.9, 0, 3.6), Vector3(-7.2, 0, 3.2)]:
-		KK.prop(self, "barrel_large", p, p.z * 40.0, 1.0, "dark_wooden_planks", 0.35)
-	KK.prop(self, "barrel_small_stack", Vector3(6.8, 0, -4.6), 20.0, 1.0, "dark_wooden_planks", 0.35)
-	KK.prop(self, "keg_decorated", Vector3(-7.0, 0, 4.4), 90.0, 1.0, "dark_wooden_planks", 0.35)
-	KK.prop(self, "crates_stacked", Vector3(7.0, 0, 1.2), -15.0, 1.0, "dark_wooden_planks", 0.3)
-	KK.prop(self, "box_large", Vector3(6.6, 0, 0.0), 30.0, 1.0, "dark_wooden_planks", 0.3)
-	KK.prop(self, "shelves", Vector3(5.6, 0, -D + 0.4), 0.0, 1.0, grain, 0.4)
-	for p: Vector3 in [Vector3(-4.3, 0.61, -3.2), Vector3(4.6, 0.61, -0.4), Vector3(3.8, 0.61, 2.4), Vector3(-4.0, 0.61, 2.0)]:
-		KK.prop(self, "candle_triple", p, p.x * 20.0)
-	for p: Vector3 in [Vector3(-4.6, 0.61, -2.6), Vector3(4.4, 0.61, -1.3), Vector3(-3.7, 0.61, 1.8)]:
-		KK.prop(self, "plate_food_A", p, p.z * 50.0)
-	for p: Vector3 in [Vector3(4.9, 0.61, -1.0), Vector3(-4.1, 0.61, -2.4), Vector3(3.6, 0.61, 2.1)]:
-		KK.prop(self, "bottle_A_green", p, 0.0)
-	# The bar along the bottom of the frame.
-	var bar_wood := Kit.pbr("dark_wooden_planks", Color(0.6, 0.44, 0.34), 1.5)
-	Kit.box(self, Vector3(8.0, 0.95, 0.7), Vector3(-0.8, 0.475, 4.3), bar_wood)
-	Kit.box(self, Vector3(8.3, 0.1, 0.95), Vector3(-0.8, 1.0, 4.3), Kit.pbr("wood_table_worn", Color(0.8, 0.62, 0.5), 1.4, 0.6))
-	for i: int in range(8):
-		KK.prop(self, ["bottle_A_brown", "bottle_A_green", "bottle_B_green"][i % 3], Vector3(-4.3 + i * 0.95, 1.05, 4.15 + (i % 2) * 0.2), i * 30.0)
-	var blood := Kit.flat(Color(0.25, 0.01, 0.03), 0.08)
-	Kit.cyl(self, 0.38, 0.38, 0.01, COURIER + Vector3(0.35, 0.075, 0.15), blood, 20)
+## The quay outside: rain, the dock lantern, cold night fill, distant harbour lights.
+func _outside() -> void:
+	Vfx.rain(self, Vector3(0, 3.2, -7.2), Vector3(9.0, 0.6, 1.5), Color(0.55, 0.65, 1.0, 0.35), 1200)
+	for d: Dictionary in anchors["dock"]:
+		var p := Set.v3(d["pos"])
+		Kit.flame(self, p - Vector3(0, 0.08, 0), Vector2(0.1, 0.2), cam, 4.2, 5.0)
+		Kit.glow(self, p, 1.0, Color(1.0, 0.6, 0.28), 1.2, cam)
+		Kit.omni(self, p, CANDLE, 2.2, 6.0)
+	Kit.omni(self, Vector3(1.2, 3.0, -7.4), Color(0.42, 0.52, 1.0), 2.4, 8.0)
+	Kit.omni(self, Vector3(-5.0, 3.0, -7.4), Color(0.42, 0.52, 1.0), 1.6, 7.0)
+	Kit.omni(self, Vector3(5.5, 3.0, -7.4), Color(0.42, 0.52, 1.0), 1.6, 7.0)
+	for f: Dictionary in anchors["far_lights"]:
+		Kit.glow(self, Set.v3(f["pos"]), 0.9 if f.has("boat") else 1.4, Color(1.0, 0.62, 0.3), 2.2, cam)
 
 
-func _lights() -> void:
-	var hx := -W + 0.9
-	lights.append(Kit.omni(self, Vector3(hx, 0.9, 0.0), Color(1.0, 0.5, 0.2), 4.0, 9.0, true))
-	Kit.omni(self, Vector3(0.0, 7.0, 0.0), Color(0.62, 0.56, 0.9), 1.2, 16.0)
-	# Wash on the far wall so the bent background reads.
-	Kit.omni(self, Vector3(-3.0, 2.6, -D + 1.6), Color(1.0, 0.7, 0.5), 1.4, 6.0)
-	Kit.omni(self, Vector3(4.0, 2.6, -D + 1.6), Color(1.0, 0.7, 0.5), 1.4, 6.0)
-	for p: Vector3 in [Vector3(-4.3, 1.05, -3.2), Vector3(4.6, 1.05, -0.4), Vector3(3.8, 1.05, 2.4), Vector3(-4.0, 1.05, 2.0)]:
-		lights.append(Kit.omni(self, p, Color(1.0, 0.62, 0.32), 0.9, 3.5))
-		Kit.glow(self, p - Vector3(0, 0.15, 0), 0.35, Color(1.0, 0.65, 0.3), 1.0, cam)
-	for p: Vector3 in [Vector3(-2.2, 2.0, -D + 0.3), Vector3(3.4, 2.0, -D + 0.3), Vector3(W - 0.3, 2.0, -2.6), Vector3(-W + 0.3, 2.0, 3.2)]:
-		KK.prop(self, "torch_mounted", p + Vector3(0, -0.6, 0), 0.0 if p.z < -4.0 else (90.0 if p.x < 0.0 else -90.0))
-		Kit.flame(self, p + Vector3(0, -0.02, 0.0), Vector2(0.2, 0.35), cam, p.x, 5.0)
-		lights.append(Kit.omni(self, p + Vector3(0, 0.1, 0), Color(1.0, 0.6, 0.3), 1.6, 5.0))
-	# Moonlight shafts through the shuttered windows and the open door.
-	for x: float in [-4.6, 4.6]:
-		var s := Kit.spot(self, Vector3(x, 2.4, -D + 0.45), Vector3(x + 0.8, 0.0, -D + 3.6), Color(0.5, 0.62, 1.0), 5.0, 8.0, 18.0)
-		s.light_volumetric_fog_energy = 5.0
-	var dc := Vector3((DOOR.x + DOOR.y) * 0.5, 0, -D)
-	var ds := Kit.spot(self, dc + Vector3(0.0, 3.4, -2.4), dc + Vector3(0.3, 0, 3.0), Color(0.45, 0.58, 1.0), 6.0, 11.0, 24.0)
-	ds.light_volumetric_fog_energy = 4.0
-	lights.append(ds)
-	Kit.omni(self, dc + Vector3(0, 2.0, -2.2), Color(0.4, 0.5, 1.0), 2.5, 5.0)
-	Vfx.rain(self, dc + Vector3(0, 3.0, -2.6), Vector3(5.0, 0.5, 1.8), Color(0.55, 0.65, 1.0, 0.35), 700)
-	Vfx.embers(self, Vector3(0, 1.4, -1.0), Vector3(6.0, 1.2, 4.0), Color(0.5, 0.45, 0.35), 40, 0.12)
+## Moonlight through every window and the door: a shadowed spot (volumetric) + a shaft mesh.
+## Built after the bend so the spots can be aimed at their bent windows.
+func _moonlight() -> void:
+	var i := 0
+	for w: Dictionary in anchors["windows"]:
+		var corners: Array = []
+		var dir := MOON_DIR
+		if String(w.get("axis", "z")) == "x":
+			var x := float(w["x"])
+			dir = Vector3(-0.78, -0.6, 0.18)
+			corners = [Vector3(x, float(w["y0"]), float(w["x0"])), Vector3(x, float(w["y0"]), float(w["x1"])),
+				Vector3(x, float(w["y1"]), float(w["x1"])), Vector3(x, float(w["y1"]), float(w["x0"]))]
+		else:
+			var z := float(w["z"]) - 0.12
+			corners = [Vector3(float(w["x0"]), float(w["y0"]), z), Vector3(float(w["x1"]), float(w["y0"]), z),
+				Vector3(float(w["x1"]), float(w["y1"]), z), Vector3(float(w["x0"]), float(w["y1"]), z)]
+		_moon_opening(corners, dir.normalized(), 0.5 if bool(w.get("barred", false)) else 1.0, float(i))
+		i += 1
+	for d: Dictionary in anchors["door"]:
+		var z := float(d["z"]) - 0.1
+		var corners: Array = [Vector3(float(d["x0"]), 0.0, z), Vector3(float(d["x1"]), 0.0, z),
+			Vector3(float(d["x1"]), float(d["y1"]), z), Vector3(float(d["x0"]), float(d["y1"]), z)]
+		_moon_opening(corners, MOON_DIR.normalized(), 1.3, 9.0)
+
+
+## Only the fire and the moon may light the fog; small lights stay out of it (no orange haze).
+func _fog_energies() -> void:
+	for n: Node in find_children("*", "OmniLight3D", true, false):
+		var l := n as OmniLight3D
+		l.light_volumetric_fog_energy = 0.45 if l.shadow_enabled and l.light_energy > 4.0 else 0.04
+
+
+func _moon_opening(corners: Array, dir: Vector3, strength: float, seed: float) -> void:
+	var c := Vector3.ZERO
+	for p: Vector3 in corners:
+		c += p
+	c /= 4.0
+	var bs := Kit.bend_point(c - dir * 1.6)
+	var bt := Kit.bend_point(c + dir * 3.0)
+	var s := Kit.spot(self, bs, bt, MOON, 14.0 * strength, 7.5, 26.0)
+	s.light_volumetric_fog_energy = 0.6
+	s.shadow_bias = 0.04
+	lights.append(s)
+	var reach := c.y / maxf(-dir.y, 0.1)
+	if not OS.get_environment("A10_DEBUG").contains("noshaft"):
+		Set.shaft(self, corners, dir, reach * 1.25, MOON, 0.22 * strength, seed)
 
 
 func _card(sprite: String, pos: Vector3, flip: bool = false, flat: bool = false) -> Node3D:

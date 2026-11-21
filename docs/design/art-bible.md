@@ -1,6 +1,6 @@
 # Art Bible: The Lion's Shadow (HD-2D)
 
-Status: v1.1 (A09, 2026-11-21). **Work in progress: the spike does not yet meet the bar (see section 11).** Source of truth for every visual asset. The reference implementation is the throwaway spike in `game/spikes/hd2d/` (screenshots in `docs/art-direction/spike/`). When this file and the spike disagree, this file wins and the spike is wrong.
+Status: v1.2 (A09 + A10 environment pass, 2026-11-21). **Work in progress: the environment now holds up as an HD-2D set; characters, animation and frame time do not yet meet the bar (see section 11).** Source of truth for every visual asset. The reference implementation is the throwaway spike in `game/spikes/hd2d/` (screenshots in `docs/art-direction/spike/`). When this file and the spike disagree, this file wins and the spike is wrong.
 
 **The look in one line:** a dark, full-3D diorama of crisp, worn stone and timber, seen from high above through a narrow lens, lit by warm fire pools against a cool violet night, with small crisp pixel-art people standing in it and loud additive VFX on top.
 
@@ -38,14 +38,14 @@ Rooms should be built so the play area fills the middle 60% of the frame and the
 | Element | Tavern / city interior (warm) | Dungeon / Karak Ostrel (cold) |
 |---|---|---|
 | Background | `#030104` | `#030104` |
-| Ambient colour × energy | `(0.50, 0.36, 0.66)` × 1.4 | `(0.36, 0.40, 0.68)` × 1.4 |
-| Key fire light | `(1.0, 0.52, 0.25)` | rune blue `(0.35, 0.75, 1.0)` |
-| Play-area wash (overhead omni) | `(1.0, 0.78, 0.8)` energy 3, range 12 | `(0.75, 0.8, 1.0)` energy 2, range 13 |
-| Accent | cold door light `(0.45, 0.58, 1.0)` | one warm brazier `(1.0, 0.55, 0.25)` near the player |
-| Post shadow tint | `(0.75, 0.62, 1.0)` violet | `(0.62, 0.68, 1.0)` blue |
-| Post highlight tint | `(1.08, 0.98, 0.86)` amber | `(1.02, 1.0, 0.95)` |
+| Ambient colour × energy | `(0.36, 0.44, 0.62)` × 1.15 (cool moon bounce) | `(0.36, 0.40, 0.68)` × 1.4 |
+| Key fire light | hearth `(1.0, 0.6, 0.3)`, candles/lanterns amber `(1.0, 0.72, 0.44)` | rune blue `(0.35, 0.75, 1.0)` |
+| Play-area wash (overhead omni) | cool `(0.62, 0.7, 1.0)` energy 0.7, range 14: the base light is cold, fire pools are local | `(0.75, 0.8, 1.0)` energy 2, range 13 |
+| Accent | moonlight `(0.5, 0.68, 1.0)` through every window and the door (spot + shaft mesh, §4) | one warm brazier `(1.0, 0.55, 0.25)` near the player |
+| Post shadow tint | `(0.82, 0.9, 1.06)` cool blue (lift 2.0) | `(0.62, 0.68, 1.0)` blue |
+| Post highlight tint | `(1.03, 1.0, 0.93)` natural amber | `(1.02, 1.0, 0.95)` |
 
-Rule: **shadows are violet, light is warm**. Every zone keeps at least one warm source and one cold source so the split-tone reads.
+Rule: **shadows are cool, light is warm**. Every zone keeps at least one warm source and one cold source so the split-tone reads. Tavern (A10): exposure 1.18, contrast 1.08, saturation 0.92, vignette 0.32, SSIL off (≈4 ms on the Adreno for no visible gain; bounce is faked with fill omnis). Check the grade numerically against ref-02 (480×270 luminance): target mean ≈ 0.27, ≤ 10% of pixels below 0.06, green channel close to red (no magenta cast). The r6 frame measures mean 0.26 with 16% near black.
 
 Tonemap ACES, exposure 1.15, white 6. Adjustments: contrast 1.12–1.15, saturation 1.08–1.12. Glow: levels 2–5 weighted (0.6, 1, 1, 0.8, 0.5, 0.3), intensity 0.5, strength 1.1, HDR threshold 1.2, blend Screen. SSAO radius 1.2, intensity 2.5, power 1.6. SSIL radius 4, intensity 0.8. Volumetric fog density 0.003–0.006 (just enough to catch light). Vignette 0.62 (oval). Film grain 0.025.
 
@@ -63,9 +63,9 @@ Tonemap ACES, exposure 1.15, white 6. Adjustments: contrast 1.12–1.15, saturat
 1. **Ambient** (colour source, values above) keeps unlit stone readable as violet-grey, never black, inside the play area.
 2. **Play-area wash**: one overhead `OmniLight3D` (6.5 m up, range 12–13 m, shadows on) creates the lit "stage" that falls off to darkness at the room edges.
 3. **Fire pools**: hearth, braziers, candles, lanterns as `OmniLight3D`, attenuation 1.3. Hearth energy 2.6 range 9 with shadows; braziers 2.5–3.5 range 7–8 with shadows; candles 0.7 range 3.2 without shadows; lanterns 1.2 range 4.5.
-4. **Cold accent**: a `SpotLight3D` through a door or window (energy 5, range 10, 28°, shadows), or rune strips (emissive + small omni).
+4. **Cold accent / moon shafts** (A10 recipe, `shots/drowned_rat.gd` `_moon_opening`): for each real wall opening, a shadowed `SpotLight3D` 1.6 m outside the opening along the light direction `(0.18, -0.62, 0.76)`, energy 14 (7 for barred windows), range 7.5, angle 26°, volumetric fog energy 0.6, placed with `Kit.bend_point` on both ends **after** `apply_bend` (a spot 4 m out gets swung to floor level by the bend and floods the fog in front of the lens). Plus a hand-made shaft mesh (`taproom.gd` `shaft()`: 8 crossed additive sheets swept from the opening, `vfx_shaft.gdshader`, intensity 0.22) because the 96×64 froxel fog alone gives only faint shafts. Clamp every `pow()` in additive shaders: one NaN smeared white/black blobs over a third of the frame through bloom + DOF. Volumetric fog density 0.012, anisotropy 0.1; only the fire and the moon inject into the fog (`_fog_energies`: every other omni 0.04).
 5. **Every visible flame** = flame billboard + additive glow disc + omni light. A light with no visible source is allowed only for the play-area wash.
-6. Max **8 shadowed lights** visible per room. Shadow atlas 4096.
+6. Max **8 shadowed lights** visible per room (the tavern uses 7: hearth, one hanging lantern, 5 moon spots). Shadow atlas 4096. Candle clusters within 1.4 m share one omni.
 7. Volumetric fog energy per light: omni 0.25, spot 0.6.
 
 ## 5. Character pipeline
@@ -83,31 +83,43 @@ Tonemap ACES, exposure 1.15, white 6. Adjustments: contrast 1.12–1.15, saturat
 
 ## 6. Environment kit
 
-All geometry is full-resolution 3D with PBR materials. Chunky beats thin: at 75 px/m anything under 4 cm wide disappears.
+All geometry is full-resolution 3D with PBR materials. Chunky beats thin: at 100 px/m anything under 4 cm wide disappears. **Bevel every edge, nothing perfectly straight, nothing clean.**
 
-**Floors** are baked carved-stone panels (`art-src/bake_floors.py`: height field with 1 m tiles, worn bevels, chips, Voronoi cracks, chiselled ornament grooves → albedo, OpenGL normal, roughness, AO, height PNGs at 1024 px per panel; photo grain from Poly Haven `quarry_wall`). `floor_baked.gdshader` world-maps them with offset-mapped relief. Panels: `karak_floor` (3 m: octagon frames, interlace lattice, rosette, corner quarter-rounds) and `tavern_floor` (2 m: diamond tile, rosette tile, two plain tiles with an inset line). Real-time Voronoi in a floor shader crashed the Adreno driver (Vulkan device loss): always bake.
+### 6.1 Bespoke Blender sets (A10, the reference implementation)
 
-**Props**: KayKit Dungeon Remastered (CC0) at 0.45 × 1.35 scale with `env_uv.gdshader` (palette atlas × triplanar Poly Haven grain).
+Pipeline: `art-src/env/build_taproom.py` (+ `envlib.py`) runs in Blender 5.3 CLI and writes `game/spikes/hd2d/models/env/taproom_arch.glb` (bespoke geometry), `taproom_props.glb` (Poly Haven props) and `taproom_anchors.json` (every flame, lantern, window, door, trapdoor and far light in Godot coordinates). Godot loads both with `lib/taproom.gd`, which swaps every material for a bend-aware one and builds the lights from the anchors, so the set and its lights never drift apart. Author in **Godot coordinates** (`envlib.g2b` converts on output); lay out with `art-src/env/proj.py` (screen projection of world points) (the bend + 52° camera means the far wall shows only 0–2.6 m, windows must sit between 0.95 and 1.95 m to clear the HUD, the bottom 15% of the frame is the near-blur band).
 
-**Materials** (CC0 Poly Haven 1k sets, `env_triplanar.gdshader`, see `game/assets/LICENSES.md`):
-- Floors: `stone_floor.gdshader` = photo albedo/normal/roughness/AO + procedural height field (large tiles with worn bevels, carved ornament panels, Voronoi cracks, damp stains that darken albedo and drop roughness to 0.18 so they catch the lights), normal from finite differences.
-  - Tavern flagstones: `monastery_stone_floor`, tex scale 5 m, tint `(0.82, 0.74, 0.8)`, cracks 0.7, damp 0.7.
-  - Hearthstones: `monastery_stone_floor`, scale 3.
-  - Dwarven halls: `granite_tile` as micro detail, `use_grid` with 1.0 m tiles, ornament panels every 3×3 tiles (double octagon frame, diagonal interlace lattice, central rosette, corner quarter-rounds), groove dirt `(0.18, 0.2, 0.3)`.
-- Walls: `rough_block_wall` footings (1.1 m), `old_planks_02` timber upper, `dark_wooden_planks` posts and beams (Drowned Rat); `large_sandstone_blocks` tinted `(0.42, 0.45, 0.55)` for dwarven stone; `rusty_metal_02` darkened for iron.
-- Furniture tops: `wood_table_worn`.
+Pieces (`envlib.py`):
+- `rbox`: rounded box from a non-uniform cube grid projected onto the rounded surface (real 15° arc bevels; small radii fall back to one chamfer).
+- `timber(p0, p1, w, h)`: rbox + sag, twist, wobble, section swell, adze undulation, 1.6 random edge chips per metre per edge, rough ends. Grid 0.09 m across, 0.2 m along (enough for the world bend).
+- `stone`, `board`, `panel` (plaster infill recessed 5 cm behind the timbers, bulging, closed back so it casts shadows), `tube`, `lathe`, `quad_poly`.
+- Every vertex carries a colour: **R cavity** (chips, undersides), **G edge wear**, **B grime/soot** (a world pass adds floor-line dirt, hearth soot, ceiling smoke, corner dirt), **A wet** (door threshold, quay).
+- `Batch` merges pieces into one object per group (26 objects, 650k triangles for the whole taproom).
 
-**Modules** (`game/spikes/hd2d/lib/props.gd` holds the reference builders):
-- Timber wall run (footing, upper, sill beam, top beam, posts every 3 m), 3.1 m tall.
-- Hearth (two cheeks, mantel beam, chimney breast, firebox, 3–5 flame cards, logs, ember particles).
-- Round table with 4 stools, trestle table with 2 benches, bar counter 1.05 m with bottle row, barrels (standing, lying), crates.
-- Support post with plinth, wall lantern (emissive box + omni), shuttered window with emissive cold slits.
-- Chunky iron railing: top rail 0.12 × 0.22 m, dense diagonal balusters every 0.18 m, posts every 2 m with brass ball and spike finials, brass kerb.
-- Dwarven pillar: plinth, two bands, capital; rune strip (emissive) on the inner face.
-- Rune bulkhead door with emissive glyph bars, steps.
-- Rubble chunks, fallen armour plates, blood pools (flat, roughness 0.15).
+Materials (`lib/taproom.gd`): `TRI_*` → `env_set.gdshader` (world triplanar Poly Haven photo set, desaturated then tinted, ×0.55–1.55 macro variation from the same photo at 9× scale, vertex wear/grime/wet); `COL_*`/`EMIT_*` → `env_set_uv.gdshader` flat PBR; textured Poly Haven props keep their albedo/normal/ORM with a roughness floor of 0.5 (no glitter). **Meshes without a colour attribute read COLOR = (1,1,1,1) in Godot**: zero the vertex-colour terms for them or they render wet and black. Sets in use: timber `rough_wood` (tint 0.86/0.6/0.4, desat 0.75, 1.5 m), lime-wash plaster `rough_plaster_03` (tint 1.75/1.6/1.32, desat 0.9), stone `quarry_wall`, iron `rusty_metal_02`, table tops `wood_table_worn`, wet quay `rough_wood` × rough 0.45.
 
-Deep shadow outside the play area is mandatory: drop-offs, unlit back rooms or an abyss floor 9 m below lit at 10%.
+Recipes that worked in the taproom:
+- **Timber-frame walls**: stone plinth (two courses of individual stones) → sole plate → posts 0.27 m every 1.2–2.2 m → mid rail at 1.95–2.15 m that doubles as window head → top plate; diagonal braces in plain bays; plaster panels recessed. Lime-wash plaster against dark timber is what survives the far blur.
+- **Windows**: real openings, sill rail, two mullions + transom, wavy glass (`glass_wavy.gdshader`, never casts shadows), one casement leaf swung open into the room, iron bars + a half-closed shutter for the snug.
+- **Hearth**: chimney breast 1.35 m deep (so the fire clears the HUD slot column), coursed stones, protruding arch stones, sooty firebox, fire dogs, logs, embers, pot crane + kettle, poker, sagging charred mantel beam with a shelf of candles, bottles and a jug, stacked firewood, a raised 3D flagstone apron.
+- **Bar**: three heavy top boards, panelled front, open under-counter shelves facing the camera (stock reads from the player's side), brass foot rail, kegs on a cradle. **Trapdoor**: hole in the floor mesh, stone shaft, ladder, lid hinged on the far side leaning away (a lid on the camera side hides the hole), a lit cellar floor + lantern below so the flee route reads as a warm rectangle.
+- **Stairs** rising away from the camera (risers face the lens). **Snug**: high-backed settles in the corner.
+- **No ceiling members over the play area**: N–S summer beams became huge blurred bars. Posts end in a bolster; candle wheels and lanterns hang on long chains that leave the frame.
+- **Foreground layer**: things hung 5–7 m up near the camera (a dark net at frame right, a herb-and-onion rope top-left, two lanterns for bokeh) with near DOF amount 0.06, transition 2 m. FG materials must be dark (`COL_rope_fg`): moonlit FG reads as a bright grid.
+- **Outside**: wet deck planks with gaps, joists, kerb, bollards, piles, a dock lamp, rain, dark water, Poly Haven ships and bespoke warehouse/mast silhouettes with lit windows on a sky card — keep everything beyond the wall within ~3 m or vertical (the bend turns far floors back-facing beyond z ≈ −9).
+- **Floor** (`art-src/env/bake_taproom_floor.py`, numpy): one unique 2332×1627 set (144 px/m) for the whole room, nothing tiles: 390 boards of random width (0.17–0.31 m) and length with staggered end joints, per-board grain offset (Poly Haven `rough_wood`), tint, cupping and tilt; dirt-filled gaps; nail rows every 0.6 m; knots; patches; traffic wear (lighter, polished) along door→bar/hearth paths; wall and table dirt; hearth soot; stains and wet ale spills; clustered straw; rain puddles and streaks at the door (roughness 0.03, flattened normal, SSR); wet boot prints from the door to the hearth; a blood trail. `floor_room.gdshader` maps world XZ to the room rect with offset-mapped relief. Do not stamp holes (a broken board read as a black rectangle).
+- **Rug** (`bake_rug.py`): woven texture (borders, lozenges, weave, fading 38% toward dusty grey) on a wrinkled UV mesh with fringes: the colour break the plank field needs.
+- **Litter in the play space**: low and sparse 3D straw tufts, coins, cards, splinters, a cosh, a cap; keep 0.45 m clear around every combatant.
+
+### 6.2 Older kit (A09)
+
+**Floors** baked carved-stone panels (`art-src/bake_floors.py`) with `floor_baked.gdshader`: `karak_floor` (3 m) and `tavern_floor` (2 m, superseded by the unique plank floor). Real-time Voronoi in a floor shader crashed the Adreno driver (Vulkan device loss): always bake.
+
+**Props**: KayKit Dungeon Remastered (CC0) with `env_uv.gdshader` — read as toys; use Poly Haven models (decimated in Blender, 512 px maps) or bespoke Blender props instead.
+
+**Modules** in `lib/props.gd` (box-based timber wall, hearth, tables, railing, dwarven pillar, bulkhead door) remain for Karak Ostrel until it gets the §6.1 treatment.
+
+Deep shadow outside the play area is mandatory, but it must hold colour (post lift, cool ambient), never pure black.
 
 ## 7. VFX recipes
 
@@ -143,14 +155,14 @@ The HUD draws on a canvas layer above the post pass so it is never blurred or gr
 
 | Item | Budget |
 |---|---|
-| Frame | 16.6 ms at 1080p with MSAA 2×. **MSAA 4× at 1080p crashed the Adreno driver (Vulkan submit failure) in the spike; ship 2× or FXAA.** |
+| Frame | 16.6 ms at 1080p with MSAA 2×. **MSAA 4× at 1080p crashed the Adreno driver (Vulkan submit failure) in the spike; ship 2× or FXAA.** Measured (A10): the full taproom runs at 35 fps (≈28 ms) on the Snapdragon X2 Adreno; omni lights cost ≈5 fps, volumetric fog ≈2, SSR ≈1, SSIL ≈4 (now off). |
 | Draw calls | ≤ 1500 per frame (merge static props into MultiMesh or combined meshes per room in production; the spike uses one node per box). |
 | Shadowed lights | ≤ 8 visible, atlas 4096. Candles never cast shadows. |
 | Unshadowed omni lights | ≤ 32 visible. |
 | Character viewports | ≤ 12 active, each ≤ 112×112, no AA, own world. Off-screen characters pause their viewport (`UPDATE_DISABLED`). |
 | Floor shader | One finite-difference height field (3 evaluations, 2 Voronoi passes each). Bake the height to a normal map per tile set if the GPU cost exceeds 2 ms. |
 | Particles | ≤ 2000 live. |
-| Textures | 1k PBR sets for walls and props, 2k only for floors that fill the screen. Mipmaps on, anisotropic. |
+| Textures | 1k PBR sets for walls, 512 px for props (they are 20–80 px tall), one unique floor set per room at ~144 px/m. Mipmaps on, anisotropic. Resize Poly Haven sources with PIL before the Blender import (`fetch_polyhaven.py`); Blender `Image.scale()` + glTF export writes corrupt JPEGs. |
 
 ## 10. Asset licensing rules
 
@@ -163,9 +175,9 @@ The HUD draws on a canvas layer above the post pass so it is never blurred or gr
 
 ## 11. Status of the spike (read before building on it)
 
-The spike proves the pipeline pieces (bend, baked carved floors, lit pixel cards with real shadows, HUD, post stack, KayKit props) but **does not yet hold up next to the Elliot and Aldermere references**. Known gaps, in priority order:
-1. Environment density: the room reads as a clean tiled box with toy props. It needs bespoke Blender-modelled hero pieces (bevelled beams, hearth, bar, rope, railings), Poly Haven models (barrels, crates, bottles, chairs), clutter and decals, and layered depth (foreground occluders, back rooms).
-2. The tavern floor ornament is too regular and the grout too dark; vary tiles, add rugs, straw and spill decals, and reduce the grid read.
-3. Walls and the bent background are too dark; light them and add detail (shelves, banners, windows with real openings so the volumetric shafts show).
-4. Hale has no attack pose; animations are not authored; the warden and Maelis still use the 3D-render fallback.
-5. Volumetric light shafts are not visible yet; SDFGI/LightmapGI not tried (the Adreno X2 GPU is fragile: MSAA 4× at 1080p and heavy per-pixel noise both caused device loss).
+The environment pass (A10, `docs/art-direction/spike/env-r6.png`, log in `env-log.md`) closed the A09 environment gaps: bespoke Blender architecture and dressing, Poly Haven props instead of KayKit, a unique worn plank floor with rugs, litter, puddles and prints, lit far walls with real window openings, moon shafts, a foreground layer, and a natural amber vs blue grade. Remaining gaps, in priority order:
+1. Hale has no attack pose; animations are not authored; the warden and Maelis still use the 3D-render fallback.
+2. Frame time: 35 fps on the Adreno X2 at 1080p (budget 60). Merge candle/lantern lights, restrict SSR to the wet zone, MultiMesh the repeated props, reconsider shadowed spots per opening.
+3. The far wall is only a soft timber-frame impression under the far DOF + tilt-shift; the bar band at the bottom is a dark blur with bokeh rather than a designed foreground. Decide with the lighting/post TD whether the far blur should ease off in interiors.
+4. Micro-density inside the play space is still well below Elliot (sparse litter only); the snug and the stairs are under the HUD.
+5. Karak Ostrel still uses the A09 box kit and should be rebuilt with §6.1. SDFGI/LightmapGI not tried (fill lights fake the bounce).

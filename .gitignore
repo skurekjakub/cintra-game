@@ -39,3 +39,6 @@ Thumbs.db
 .claude/settings.local.json
 .mcp.json
 /docs/art-direction/spike/char-player-test*.png
+
+# Raw Poly Haven downloads (re-fetch with art-src/env/fetch_polyhaven.py)
+/game/spikes/hd2d/models/ph_src/
