@@ -1,5 +1,7 @@
-# Godot 4
+# Godot 4 (game/.godot/ holds the import cache and the global class cache)
 .godot/
+# Godot AI plugin self-update downloads and backups
+game/addons/.godot_ai_update/
 .import/
 export.cfg
 export_presets.cfg
@@ -23,5 +25,7 @@ Thumbs.db
 *.blend1
 *.blend2
 
-# Local Claude Code settings (project .mcp.json IS committed)
+# Local Claude Code settings. godot-ai is registered at local scope; its launch
+# command contains machine paths, so never commit a .mcp.json.
 .claude/settings.local.json
+.mcp.json

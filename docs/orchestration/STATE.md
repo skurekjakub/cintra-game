@@ -40,19 +40,35 @@ Update after every decision, dispatch, and report.
 ## Agents
 | id | task | status | brief | report |
 |---|---|---|---|---|
-| A01-art-options | Build 5 art-direction mockup artifact | dispatched | agents/A01-art-options/brief.md | agents/A01-art-options/report.md |
-| A02-design-architecture | GDD + architecture + content template | dispatched | agents/A02-design-architecture/brief.md | agents/A02-design-architecture/report.md |
+| A01-art-options | Build 5 art-direction mockup artifact | DONE, committed 8812c02. Awaiting user pick | agents/A01-art-options/brief.md | agents/A01-art-options/report.md |
+| A02-design-architecture | GDD + architecture + content template | DONE (report saved by orchestrator; agent's write was blocked) | agents/A02-design-architecture/brief.md | agents/A02-design-architecture/report.md |
+| A03-project-setup | Godot project in game/, GUT, tools/test.ps1, shared kernel + event bus (TDD), architecture test, Godot AI plugin, CLAUDE.md, README | dispatched | agents/A03-project-setup/brief.md | agents/A03-project-setup/report.md |
+| A04-content-act1 | Act I sections (01-drowned-rat = vertical slice) | dispatched | agents/A04-content-act1/brief.md | agents/A04-content-act1/report.md |
+| A05-content-act2 | Act II sandbox sections + twist | dispatched | agents/A05-content-act2/brief.md | agents/A05-content-act2/report.md |
+| A06-content-act3 | Act III + finale + endings | dispatched | agents/A06-content-act3/brief.md | agents/A06-content-act3/report.md |
+| A07-content-side | 12 side quests, travel events, rumors | dispatched | agents/A07-content-side/brief.md | agents/A07-content-side/report.md |
+
+Common content-writer brief: agents/_content-writer-common.md. Writers log new cross-slice ids in docs/content/<slice>/_ids.md → needs a reconciliation agent after all four finish.
+
+## Key design facts (from A02; details in docs/design/)
+- Godot project lives in `game/`. Content = JSON (converted from docs/content markdown via a converter spec'd in content-format.md §H; converter has NO owner yet).
+- Test: GUT 9.7.1; `tools/test.ps1` (A03). Always use 4.7.2 exe via $env:GODOT; PATH `godot` may be 4.7.0.
+- Escalation stage 0–4, milestone-driven. Act II gate = antidote line resolved + proof + true verse.
+- Only autoload: `Services`. Composition root injects everything else. Architecture test enforces layers + 300-line cap.
 
 ## Artifacts
-- (none yet)
+- Art options: https://claude.ai/artifact/NAEiH8W5Fuz9ihX3chUVze (src docs/art-direction/art-options.html). 1 Lantern Diorama (iso low-poly), 2 Woodcut Chronicle (engraving shader), 3 Lo-Fi Dread (late-90s 3D), 4 Grim Naturalism (scans), 5 Illuminated Manuscript (2D).
+
+## Harness note
+Subagents cannot write report .md files (harness block). They return the report in their final message and the orchestrator saves it to agents/<id>/report.md.
 
 ## Commits
 - c5eaf01 story outline + orchestration state (pushed)
+- 5ea1127 GDD, architecture, content format (pushed)
 
 ## Next steps
 1. A01 returns → show the user the art artifact (only question allowed). Commit docs/art-direction.
-2. A02 returns → review, commit docs/design. Then wave 2 in parallel:
-   - A03 project setup: Godot project, test framework + headless runner script, Godot AI plugin, folder skeleton, `.mcp.json`, CLAUDE.md for the repo.
-   - A04–A07 content writers: act1, act2, act3, side quests (per content-format.md). Also the 90-day calendar/escalation and travel/rumor tables.
-3. After A03: writing-plans → implementation plan per domain (docs/plans/), then subagent-driven TDD by domain, starting with the vertical slice.
+2. Wave 2 running (A03–A07). As each returns: verify, commit its paths only, push, and update this table.
+3. After A04–A07: A08 id reconciliation + content review; A09 markdown→JSON converter (TDD) + content validation tests.
+4. After A03: writing-plans → implementation plan per domain (docs/plans/), then subagent-driven TDD by domain, starting with the vertical slice (01-drowned-rat).
 4. After the art pick: art bible + asset pipeline agent (Blender MCP), presentation layer.
