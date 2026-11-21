@@ -1,0 +1,22 @@
+# Side slice: index
+
+Side quests, travel events and rumors (A07). Files in rough play order: by the earliest point each becomes available. Side quests set no milestones; they pay off through flags and items that Act II and Act III content reads.
+
+| # | File | Section | Available (act / stage) | Location | Summary | Payoff |
+|---|---|---|---|---|---|---|
+| 01 | `01-drowned-rat-debt.md` | `side.bertha_debt` | Act I–II, stage 0–3 | `zone.drowned_rat` (Cintra) | Clear Bertha's debt to Jory's collector by coin, talk, steel, or proof that the collector skims Jory | Safehouse (`flag.bertha_safehouse`): free rest, rumor credibility, masquerade invitation, gossip |
+| 02 | `02-abbey-ledgers.md` | `side.abbey_ledgers` | Act I–II (closes at the twist), stage 0–3 | `zone.abbey_scriptorium` (St. Corwen) | Night stealth in the locked scriptorium to smuggle out Maelis's forbidden ledgers | `item.choir_list` → `flag.choir_list_exposed`; Maelis joins |
+| 03 | `03-barrows-old-kings.md` | `side.barrows` | Act I–II, stage 0–3 | `map.barrows` | Take Corvan's blade back from grave-robbers, then face his shade: parley or duel | `item.mane_cleaver` (×2 vs constructs) |
+| 04 | `04-brzezina-woods.md` | `side.brzezina` | Act II, stage 1–3 | `map.brzezina_woods` | Expose a border baron selling a northern flank to Sodden's spymaster | `flag.brzezina_plot_exposed`; rival Ivena Drozd (`flag.drozd_rival`) |
+| 05 | `05-isle-of-skerra.md` | `side.skerra` | Act II, stage 1–3 | `map.isle_skerra` | A fisherman stole a seal-wife's pelt and the sea shut the cove | `flag.skerra_cutter`: sea routes, bypass of Attre's stage 3 fortification |
+| 06 | `06-wreck-morrow-gull.md` | `side.morrow_gull` | Act II, stage 1–3 | `map.morrow_gull` | Dive a sunken cog past a sea serpent for a dispatch tube | `item.taster_dispatch` → `flag.food_taster_exposed` |
+| 07 | `07-rozrog-forest.md` | `side.rozrog` | Act II, stage 1–3 | `map.rozrog_forest` | Charcoal burners cut sacred oaks for Choir silver; a woodwose kills them | `ally.forest_guide` (peace) or a woodwose kill |
+| 08 | `08-wenna-hair.md` | `side.wenna_hair` | Act II after meeting Wenna, stage 1–3 | `zone.witchs_mere` | Bring Wenna a lock of the Queen's hair; she reads how far the poison has gone | Exact Queen condition and rider risk (`flag.queen_reading_known`); +15 Wenna |
+| 09 | `09-marnadal-watch.md` | `side.marnadal_watch` | Act II–III, stage 1–4 | `map.marnadal_watch` | A lone squire, deserters, and a cold beacon | `flag.watch_signal_lit` → Kosk's cavalry in the finale |
+| 10 | `10-grey-ferry.md` | `side.grey_ferry` | Act II–III, stage 1–4 | `map.grey_ferry` | Pay a dead soldier what he is owed for one true answer | `ded.marnadal_truth` → Kosk's apology without a check |
+| 11 | `11-ravensford-ruins.md` | `side.ravensford` | Act II–III, stage 1–4 | `map.ravensford` | Free a drowned boy's spirit from a drowner nest | `clue.choir_secret_pass` (skip the Stairs sharpshooters) |
+| 12 | `12-silver-mine.md` | `side.silver_mine` | Act II–III, stage 1–4 | `map.silver_mine` | Iron knocking under a Strept silver mine | `flag.lower_breach_open` (alt. Karak Ostrel entry), +10 Strept |
+| 13 | `13-travel-events.md` | `side.travel_events` | All, by card | Travel map | 21 terrain-table cards (slot 8 draws the pool), a rival variant, 9 escalation-pool cards, 2 forced hazards, 6 arenas | Hooks for 09, 04, 07; verse clues; small loot |
+| 14 | `14-rumors.md` | `side.rumors` | All, by rumor | Taverns | The 10 story rumors plus 10 side-quest rumors | Map pins and hooks for every side quest |
+
+Ids: see `_ids.md`.
