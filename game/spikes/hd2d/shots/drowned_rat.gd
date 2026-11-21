@@ -12,13 +12,20 @@ const Card := preload("res://spikes/hd2d/lib/pixel_card.gd")
 const Vfx := preload("res://spikes/hd2d/lib/vfx.gd")
 const Hud := preload("res://spikes/hd2d/hud/hud.gd")
 const Set := preload("res://spikes/hd2d/lib/taproom.gd")
+const Stage := preload("res://spikes/hd2d/lib/stage_walk.gd")
 
 const PLAYER := Vector3(0.5, 0, -0.3)
 const THUG_A := Vector3(-0.9, 0, 0.2)
 const THUG_B := Vector3(1.9, 0, -1.7)
 const THUG_C := Vector3(1.2, 0, -4.3)
 const COURIER := Vector3(-6.0, 0, 0.4)
-const BERTHA := Vector3(-1.8, 0, 4.9)
+## Bertha (A12, animated): she idles under the bar-end lantern, where the player meets her.
+## "--bertha=walk" stages the review walk instead: 3 s idle in the east window's moonlight, then
+## straight toward the camera down the aisle east of the trestle, out of the moon into a warm pool.
+const BERTHA := Vector3(4.3, 0, 0.9)
+## per-light ceiling on her card: the moon spot (energy 14) otherwise burns her white in the shaft
+const BERTHA_LIGHT_CAP := 2.0
+const BERTHA_WALK: Array[Vector3] = [Vector3(6.5, 0, -2.0), Vector3(6.2, 0, 1.2)]
 const DOOR := Vector2(0.4, 2.0)
 const W := 8.0
 const D := 5.5
@@ -26,6 +33,8 @@ const D := 5.5
 var cam: Camera3D
 var lights: Array[Light3D] = []
 var anchors: Dictionary = {}
+## seconds before Bertha's timeline starts (shot_runner sets it to its warm-up when recording)
+var lead_in: float = 0.0
 const MOON := Color(0.5, 0.68, 1.0)
 const FIRE := Color(1.0, 0.6, 0.3)
 const CANDLE := Color(1.0, 0.72, 0.44)
@@ -234,8 +243,39 @@ func _characters() -> void:
 	_card("thug_s", THUG_B, true)
 	_card("thug_s", THUG_C)
 	_card("courier_lying", COURIER)
-	_card("bertha_s", BERTHA)
+	_bertha()
 	Kit.omni(self, PLAYER + Vector3(0.3, 1.2, 0.6), Color(1.0, 0.72, 0.45), 1.0, 3.5)
+
+
+func _bertha() -> void:
+	var c: Node3D = Card.new()
+	c.set(&"hframes", 8)
+	add_child(c)
+	c.global_position = Kit.bend_point(BERTHA)
+	c.call(&"setup", cam, "bertha_idle", 33)
+	c.add_to_group(&"record_track")
+	(c.get(&"material") as ShaderMaterial).set_shader_parameter(&"light_cap", BERTHA_LIGHT_CAP)
+	var meta: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://spikes/hd2d/sprites/bertha_anim.json"))
+	var path: Array[Vector3] = [BERTHA]
+	if OS.get_cmdline_user_args().has("--bertha=walk"):
+		path = BERTHA_WALK
+	var probe := OS.get_environment("A12_PROBE")
+	if probe != "":
+		path = []
+		for p: String in probe.split(";"):
+			var xz := p.split_floats(",")
+			path.append(Vector3(xz[0], 0, xz[1]))
+		for i: int in range(1, path.size()):
+			var extra: Node3D = Card.new()
+			extra.set(&"hframes", 8)
+			add_child(extra)
+			extra.global_position = Kit.bend_point(path[i])
+			extra.call(&"setup", cam, "bertha_idle", 33)
+		path = [path[0]]
+	var st: Node = Stage.new()
+	st.set(&"lead_in", lead_in)
+	add_child(st)
+	st.call(&"setup", c, meta, path)
 
 
 func _vfx() -> void:
@@ -251,8 +291,8 @@ func _vfx() -> void:
 
 func _hud() -> void:
 	var at := AtlasTexture.new()
-	at.atlas = load("res://spikes/hd2d/sprites/bertha_s.png")
-	at.region = Rect2(5, 0, 24, 24)
+	at.atlas = load("res://spikes/hd2d/sprites/bertha_idle.png")
+	at.region = Rect2(5, 2, 24, 24)
 	var layer := CanvasLayer.new()
 	layer.layer = 2
 	add_child(layer)

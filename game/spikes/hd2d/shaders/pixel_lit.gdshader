@@ -17,6 +17,12 @@ uniform float rim_strength = 1.6;
 uniform float hit_flash = 0.0;
 uniform bool flip = false;
 uniform bool upright = true;
+// animation strip (A12): the texture holds `hframes` frames side by side; `anim_frame` picks one
+uniform int hframes = 1;
+uniform int anim_frame = 0;
+// A12: per-light ceiling (hue kept) so a sprite walking through a moon shaft is not burnt white;
+// the default leaves every other card exactly as before
+uniform float light_cap = 1000.0;
 
 void vertex() {
 	if (!upright) {
@@ -36,12 +42,13 @@ void vertex() {
 }
 
 void fragment() {
-	vec4 c = texture(tex, UV);
+	vec2 uv = vec2((clamp(UV.x, 0.0, 0.9999) + float(anim_frame)) / float(hframes), UV.y);
+	vec4 c = texture(tex, uv);
 	ALPHA = c.a;
 	ALPHA_SCISSOR_THRESHOLD = 0.5;
 	vec3 base = mix(c.rgb, vec3(1.0), hit_flash);
 	ALBEDO = base;
-	vec3 n = texture(nrm, UV).rgb;
+	vec3 n = texture(nrm, uv).rgb;
 	if (flip) {
 		n.x = 1.0 - n.x;
 	}
@@ -55,6 +62,7 @@ void light() {
 	float ndl = dot(NORMAL, LIGHT);
 	float band = smoothstep(-0.05, 0.05, ndl) * 0.55 + smoothstep(0.45, 0.55, ndl) * 0.45;
 	vec3 l = LIGHT_COLOR * ATTENUATION;
+	l *= min(1.0, light_cap / max(max(l.r, max(l.g, l.b)), 1e-4));
 	DIFFUSE_LIGHT += l * band;
 	// Rim: light coming from behind the figure catches the edges the normal map turns sideways.
 	float behind = clamp(dot(LIGHT, -VIEW), 0.0, 1.0);
