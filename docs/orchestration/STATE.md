@@ -15,7 +15,10 @@ The orchestrator works from the main checkout `C:/Users/skure/repositories/cintr
   - The critic round is the main lever.
 
 **In flight:**
-- A second critic round on the P6 Bertha, to see how far the loop pushes. Then relay it to the artist (agent a7adcc363d1709d35, via SendMessage) for revision 2, and show the user the result.
+- **A12, sprite animator** (opus, agent ace272b03a114be06, brief `docs/orchestration/agents/A12-sprite-animator/brief.md`): Bertha rev2 gets an idle cycle and a front walk cycle, with normal maps, placed in the Drowned Rat. Lit close-up clips are the main deliverable, plus a scene clip.
+  - The user said: "critic 2 is going decently, but i would need to see it in the actual scene lit up and animated" and "animated sprite primarily".
+  - When it reports: look at the clips, run an independent critic on the animation, then show the user.
+  - A11 (lighting/post) waits until A12 is done, because both touch `game/spikes/hd2d`.
 
 **Next (in order):**
 1. **Art queue:**
