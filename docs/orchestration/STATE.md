@@ -1,5 +1,22 @@
 # Orchestration State — The Lion's Shadow (cintra-game)
 
+## >>> RESUME HERE AFTER COMPACTION (snapshot 2026-11-21, late) <<<
+The orchestrator's cwd is the worktree `.worktrees/core-state` (branch feat/core-state). Main-checkout git uses `git -C C:\Users\skure\repositories\cintra-game`.
+
+**In flight (background agents; ids are for SendMessage only, never show them to the user):**
+1. **P1 implementation** (sequential, D5): Task 17 is DONE (commit 8ecfb0f, 343 tests). Its REVIEW is running (agent a094699dec90e4de8). Next: record it in the ledger → push → Task 18 (Equipment/QuickSlots, rulings F11 + G-rules) → then the orchestrator-inserted task "J1-conditions" (see ledger ruling) → then the P1 final whole-branch review (opus) → merge feat/core-state to main. Tasks 16, 19, 20, 21 are DEFERRED (D6).
+   - Ledger: `.worktrees/core-state/.superpowers/sdd/2026-11-21-core-state-domains/progress.md` (rulings, minors, carry-forwards).
+   - Common dispatch rules: `.../dispatch-common.md` (G1–G8); reviewer rules: `.../review-common.md`.
+   - Scripts: `/c/Users/skure/.claude/plugins/cache/claude-plugins-official/superpowers/7.0.0/skills/subagent-driven-development/scripts/{task-brief,review-package}`.
+2. **A10 environment artist** (opus, agent ad34e71a6c9280b11): rebuilding the Drowned Rat set to shipped-HD-2D quality. When it reports: look at the env-rN.png yourself against the Elliot refs and gate it (D-quality gate). Next in the art queue: A11 lighting/post TD → A12 sprite animator. Apply the new skill (item 3) to their briefs.
+3. **Skill `crafting-game-assets`** (user request: "write it up into a skill in this repo and test it on subagents, method by method"). Follows superpowers:writing-skills (RED first). Plan: `docs/skill-tests/crafting-game-assets/TEST-PLAN.md`.
+   - Methods M1–M7; cumulative ablation P0..P5 (pixel Bertha) + D0/D1 (Blender barrel); outputs in the scratchpad `skilltest/<arm>/`.
+   - Running now: **P0 baseline** (agent a34ea39564d5eadb9) and **D0 baseline** (agent af3b8cea147a342b5).
+   - Next: read the baselines' behaviour and images → write the skill at `.claude/skills/crafting-game-assets/SKILL.md` (one section per method so arms can get subsets) → run P1..P5 and D1 ONE AT A TIME → blind judge subagent → `RESULTS.md` → refactor the skill → commit.
+   - Research sources: Codixel (github.com/mankidev/codixel), Sprite Fusion blog, Anthropic frontend-aesthetics cookbook, Blender MCP guides, SpriteCook plugin.
+
+**User constraints recap:** no questions except art; orchestrator only; sequential implementation; stop at the vertical slice (D6) for visual refinement; triple-A visual bar (orchestrator gates every render); commit per chunk and push; Elliot = target look (fully 3D world + pixel sprites), Aldermere = proof code-made sprites can be great.
+
 Single source of truth for progress. The orchestrator re-reads this file after any context compaction.
 Update after every decision, dispatch, and report.
 
@@ -49,7 +66,7 @@ Update after every decision, dispatch, and report.
 | A03-project-setup | Godot project in game/, GUT, tools/test.ps1, shared kernel + event bus (TDD), architecture test, Godot AI plugin, CLAUDE.md, README | DONE 8f426ef (53 tests green, re-verified). godot-ai moved to LOCAL scope by orch (no .mcp.json in public repo) | agents/A03-project-setup/brief.md | agents/A03-project-setup/report.md |
 | A04-content-act1 | Act I sections (01-drowned-rat = vertical slice) | DONE 708d63f (issues list in report → A08) | agents/A04-content-act1/brief.md | agents/A04-content-act1/report.md |
 | A05-content-act2 | Act II sandbox sections + twist | DONE 23af503 (issues in report → A08) |
-| A08-content-reconcile | Cross-slice id reconciliation, apply orchestrator rulings, content-format §J addendum, _registry.md, balance note | dispatched | agents/A08-content-reconcile/brief.md | (final msg → save) | agents/A05-content-act2/brief.md | agents/A05-content-act2/report.md |
+| A08-content-reconcile | Cross-slice id reconciliation, apply orchestrator rulings, content-format §J addendum, _registry.md, balance note | DONE f84f301 (0 errors/40 files; world/ map + tables; XP is ~3.5× over budget → rebalance after the slice) | agents/A08-content-reconcile/brief.md | (final msg → save) | agents/A05-content-act2/brief.md | agents/A05-content-act2/report.md |
 | A06-content-act3 | Act III + finale + endings | DONE 82ef406 (issues + reconciliation list in report → A08) | agents/A06-content-act3/brief.md | agents/A06-content-act3/report.md |
 | A07-content-side | 12 side quests, travel events, rumors | DONE f246017 (format issues listed in report → A08) | agents/A07-content-side/brief.md | agents/A07-content-side/report.md |
 
@@ -58,7 +75,9 @@ Update after every decision, dispatch, and report.
 | P3-plan-app-infra | Plan: save, application layer, infra, composer/Services/Main.tscn, md→JSON converter, content validation tests | DONE 27620bf (58 tasks, 15 waves; W1–3 independent of P1/P2) | agents/P3-plan-app-infra/brief.md | agents/P3-plan-app-infra/report.md |
 
 Common planner brief: agents/_planner-common.md. Plans → docs/superpowers/plans/2026-11-21-*.md. Execution: subagent-driven-development, ONE task at a time (D5): implementer → reviewer → orchestrator commits → next task.
-| A09-art-spike | HD-2D Godot render spike (Drowned Rat + Karak Ostrel shots, 3+ iterations) + art-bible.md | running; the user saw r1 and was unhappy → detailed critique sent (too dark, tiny unreadable chars → CC0 KayKit/Quaternius rigs at 96–128 px, invisible floor ornament, camera too far, blown bloom, blob props, crude portrait). Quality over speed; compare-*.png side by side (gitignored). 2nd ref (forest combat) saved at docs/art-direction/reference/ref-02-forest-combat.png (gitignored; image.png was overwritten, so ref-01 survives only in A09's notes). USER CORRECTION: the world is FULLY 3D rendered (smooth, detailed materials); ONLY characters are pixel sprites (my "pixel textures on the world" read was wrong and was retracted). Also: strong tilt-shift DOF, volumetric fog and particles. A09 may download web HD-2D refs into reference/ for local study | agents/A09-art-spike/brief.md | (final msg → save) |
+| A10-env-artist | Rebuild the Drowned Rat environment to shipped-HD-2D quality (Blender bespoke architecture, plank floor, Poly Haven props, dressing, depth layers, shafts, grade), ≥6 rounds with env-log.md critiques | dispatched (opus) | agents/A10-env-artist/brief.md | (final msg → save) |
+| — | Art specialist queue after A10: A11 lighting/post TD → A12 sprite animator (Hale attack/walk, warden, Maelis, thugs) | queued | | |
+| A09-art-spike | HD-2D Godot render spike — DONE 4ef40da (handoff; below the bar: toy props, tiled-box floor, dark walls, no shafts, no animations). Earlier status:  (Drowned Rat + Karak Ostrel shots, 3+ iterations) + art-bible.md | running; the user saw r1 and was unhappy → detailed critique sent (too dark, tiny unreadable chars → CC0 KayKit/Quaternius rigs at 96–128 px, invisible floor ornament, camera too far, blown bloom, blob props, crude portrait). Quality over speed; compare-*.png side by side (gitignored). 2nd ref (forest combat) saved at docs/art-direction/reference/ref-02-forest-combat.png (gitignored; image.png was overwritten, so ref-01 survives only in A09's notes). USER CORRECTION: the world is FULLY 3D rendered (smooth, detailed materials); ONLY characters are pixel sprites (my "pixel textures on the world" read was wrong and was retracted). Also: strong tilt-shift DOF, volumetric fog and particles. A09 may download web HD-2D refs into reference/ for local study | agents/A09-art-spike/brief.md | (final msg → save) |
 
 ## Visual quality gate (user, 2026-11-21): "I refuse to accept any other prototype than something that looks just as production triple-A quality"
 - The orchestrator reviews every render against the Elliot and Aldermere refs before the user sees anything. Anything below a shipped-HD-2D level is rejected and sent back with a written critique. No "work in progress" shows to the user.
