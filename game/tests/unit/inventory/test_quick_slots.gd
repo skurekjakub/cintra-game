@@ -45,6 +45,39 @@ func test_only_a_consumable_can_be_assigned() -> void:
 	assert_eq(q.item_at(0), &"")
 
 
+func _quick_slot_inventory() -> Inventory:
+	var salve := ItemDefBuilder.consumable(&"item.salve")
+	var key_vial := ItemDefBuilder.consumable(&"item.key_vial", false)
+	var odd_armor := ItemDefBuilder.item(&"item.odd_armor", &"armor")
+	odd_armor.consumable = ItemDefBuilder.consumable(&"item.unused", false).consumable
+	var inv := Inventory.new(ItemDefBuilder.catalog([salve, key_vial, odd_armor] as Array[ItemDefinition]))
+	for id: StringName in [&"item.salve", &"item.key_vial", &"item.odd_armor"]:
+		inv.add(id)
+	return inv
+
+
+func test_a_consumable_with_quick_slot_false_is_not_quick_slottable() -> void:
+	var q := QuickSlots.new(_quick_slot_inventory())
+	assert_eq(q.assign(0, &"item.key_vial").error_code, &"not_quick_slottable")
+	assert_eq(q.item_at(0), &"")
+	assert_true(q.assign(0, &"item.salve").is_ok(), "the default is true")
+	assert_eq(q.item_at(0), &"item.salve")
+
+
+func test_not_quick_slottable_is_checked_after_not_consumable() -> void:
+	var q := QuickSlots.new(_quick_slot_inventory())
+	assert_eq(q.assign(0, &"item.odd_armor").error_code, &"not_consumable", "category before the flag")
+	assert_eq(q.assign(9, &"item.key_vial").error_code, &"bad_index", "index before the flag")
+
+
+func test_a_refused_assign_leaves_an_earlier_slot_alone() -> void:
+	var q := QuickSlots.new(_quick_slot_inventory())
+	q.assign(1, &"item.salve")
+	var before := q.to_snapshot()
+	q.assign(1, &"item.key_vial")
+	assert_eq(q.to_snapshot(), before)
+
+
 func test_a_failed_assign_changes_nothing() -> void:
 	var q := QuickSlots.new(ItemDefBuilder.gear_inventory())
 	q.assign(1, &"item.poultice")

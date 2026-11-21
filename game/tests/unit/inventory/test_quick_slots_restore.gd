@@ -48,6 +48,16 @@ func test_an_item_that_is_not_a_consumable_is_rejected() -> void:
 	assert_string_contains(_rejects(["item.arming_sword", "", "", ""]), "quick_slots.slots[0]")
 
 
+func test_a_consumable_with_quick_slot_false_is_rejected_like_assign() -> void:
+	var key_vial := ItemDefBuilder.consumable(&"item.key_vial", false)
+	var inv := Inventory.new(ItemDefBuilder.catalog([key_vial] as Array[ItemDefinition]))
+	var q := QuickSlots.new(inv)
+	var res := q.restore({"slots": ["", "item.key_vial", "", ""]})
+	assert_eq(res.error_code, &"save_invalid")
+	assert_string_contains(res.detail, "quick_slots.slots[1]")
+	assert_eq(q.to_snapshot(), {"slots": ["", "", "", ""]})
+
+
 func test_one_item_in_two_slots_is_rejected() -> void:
 	assert_string_contains(_rejects(["item.poultice", "", "", "item.poultice"]), "quick_slots.slots[3]")
 
@@ -57,3 +67,12 @@ func test_a_rejected_restore_changes_nothing() -> void:
 	var before := q.to_snapshot()
 	assert_true(q.restore({"slots": ["item.poultice", "", ""]}).is_err())
 	assert_eq(q.to_snapshot(), before)
+
+
+func test_a_failure_on_a_later_entry_after_a_valid_one_changes_nothing() -> void:
+	var q := _populated()
+	var before := q.to_snapshot()
+	var res := q.restore({"slots": ["item.poultice", "", "", "item.gone"]})
+	assert_eq(res.error_code, &"save_invalid")
+	assert_string_contains(res.detail, "quick_slots.slots[3]")
+	assert_eq(q.to_snapshot(), before, "the valid first entry was not applied")

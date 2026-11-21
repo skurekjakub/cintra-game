@@ -9,6 +9,35 @@ static func item(id: StringName, category: StringName, stack_max: int = 1, price
 	return ItemDefinition.new(id, category, stack_max, price)
 
 
+## An ItemModifier (content-format.md §J.6); asserts that the arguments are valid.
+static func mod(mod_name: StringName, amount: int, faction: StringName = &"") -> ItemModifier:
+	var r := ItemModifier.create(mod_name, amount, faction)
+	assert(r.is_ok(), "bad test modifier")
+	var made: ItemModifier = r.value
+	return made
+
+
+## Sets `mods` on `def` (a trinket or armor definition) and returns `def`.
+static func with_mods(def: ItemDefinition, mods: Array[ItemModifier]) -> ItemDefinition:
+	def.mods = mods
+	return def
+
+
+## A trinket (price 15) that fits trinket_1 and trinket_2 and carries `mods`.
+static func trinket(id: StringName, mods: Array[ItemModifier]) -> ItemDefinition:
+	var def := item(id, &"trinket", 1, 15)
+	def.equip_slot = &"trinket"
+	return with_mods(def, mods)
+
+
+## A consumable (stack 10, price 8) whose payload says whether it fits a quick slot.
+static func consumable(id: StringName, quick_slot: bool = true) -> ItemDefinition:
+	var def := item(id, &"consumable", 10, 8)
+	def.consumable = ItemConsumablePayload.new()
+	def.consumable.quick_slot = quick_slot
+	return def
+
+
 static func catalog(defs: Array[ItemDefinition]) -> Dictionary[StringName, ItemDefinition]:
 	var by_id: Dictionary[StringName, ItemDefinition] = {}
 	for def: ItemDefinition in defs:

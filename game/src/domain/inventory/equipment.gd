@@ -1,7 +1,8 @@
 ## What the player wears and wields: one item id per equipment slot, checked
 ## against what the inventory owns and what each item fits (gdd.md §6.9 equipment
-## slots, §6.6 armor sum; architecture.md §4.12). Equipping does not take the item
-## out of the inventory. A failed equip changes nothing and records nothing.
+## slots, §6.6 armor sum; content-format.md §J.6 item mods; architecture.md §4.12).
+## Equipping does not take the item out of the inventory. A failed equip changes
+## nothing and records nothing.
 ## Whoever removes the last copy of an equipped item (selling, take_item) must
 ## unequip it first.
 ## To move an item between slots (e.g. `trinket_1` → `trinket_2`), the use case unequips it first.
@@ -66,14 +67,29 @@ func is_equipped(id: StringName) -> bool:
 	return _worn.values().has(id)
 
 
-## The sum of `armor.armor` over every equipped item that has an armor payload.
+## The sum of `armor.armor` over every equipped item that has an armor payload,
+## plus every `armor` mod without a `vs_faction` on an equipped item (§J.6).
 func armor_total() -> int:
 	var total := 0
 	for id: StringName in _worn.values():
 		var def := _inventory.definition(id)
 		if def != null and def.armor != null:
 			total += def.armor.armor
+	for m: ItemModifier in equipped_mods():
+		if m.mod == &"armor" and m.vs_faction == &"":
+			total += m.value
 	return total
+
+
+## The mods of every equipped item (content-format.md §J.6), in SLOTS order and,
+## within an item, in its `mods` order. Callers filter by `mod` and `vs_faction`.
+func equipped_mods() -> Array[ItemModifier]:
+	var mods: Array[ItemModifier] = []
+	for slot: StringName in SLOTS:
+		var def := _inventory.definition(equipped(slot))
+		if def != null:
+			mods.append_array(def.mods)
+	return mods
 
 
 func drain_events() -> Array[DomainEvent]:

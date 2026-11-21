@@ -1,8 +1,8 @@
-## One kind of item: category, stack limit, price, optional equip slot and weapon,
-## armor or consumable payload (gdd.md §6.9 inventory and items; content-format.md
-## items; architecture.md §4.12). Immutable by convention: the required fields go
-## through `_init`; the optional ones are assigned only by parsers and tests, right
-## after construction.
+## One kind of item: category, stack limit, price, optional equip slot, weapon,
+## armor or consumable payload and §J.6 modifiers (gdd.md §6.9 inventory and items;
+## content-format.md items, §J.6; architecture.md §4.12). Immutable by convention:
+## the required fields go through `_init`; the optional ones are assigned only by
+## parsers and tests, right after construction.
 class_name ItemDefinition
 extends RefCounted
 
@@ -25,6 +25,9 @@ var tags: Array[StringName] = []
 var weapon: ItemWeaponPayload = null
 var armor: ItemArmorPayload = null
 var consumable: ItemConsumablePayload = null
+## The §J.6 modifiers of a trinket or armor, flat (the `trinket:` / `armor:` split in
+## content only matters to the parser). Empty for an item with no mechanical effect.
+var mods: Array[ItemModifier] = []
 ## The full text of a document.
 var readable_text: String = ""
 
