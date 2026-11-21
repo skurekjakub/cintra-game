@@ -46,7 +46,8 @@ Update after every decision, dispatch, and report.
 | A02-design-architecture | GDD + architecture + content template | DONE (report saved by orchestrator; agent's write was blocked) | agents/A02-design-architecture/brief.md | agents/A02-design-architecture/report.md |
 | A03-project-setup | Godot project in game/, GUT, tools/test.ps1, shared kernel + event bus (TDD), architecture test, Godot AI plugin, CLAUDE.md, README | DONE 8f426ef (53 tests green, re-verified). godot-ai moved to LOCAL scope by orch (no .mcp.json in public repo) | agents/A03-project-setup/brief.md | agents/A03-project-setup/report.md |
 | A04-content-act1 | Act I sections (01-drowned-rat = vertical slice) | DONE 708d63f (issues list in report → A08) | agents/A04-content-act1/brief.md | agents/A04-content-act1/report.md |
-| A05-content-act2 | Act II sandbox sections + twist | dispatched | agents/A05-content-act2/brief.md | agents/A05-content-act2/report.md |
+| A05-content-act2 | Act II sandbox sections + twist | DONE 23af503 (issues in report → A08) |
+| A08-content-reconcile | Cross-slice id reconciliation, apply orchestrator rulings, content-format §J addendum, _registry.md, balance note | dispatched | agents/A08-content-reconcile/brief.md | (final msg → save) | agents/A05-content-act2/brief.md | agents/A05-content-act2/report.md |
 | A06-content-act3 | Act III + finale + endings | DONE 82ef406 (issues + reconciliation list in report → A08) | agents/A06-content-act3/brief.md | agents/A06-content-act3/report.md |
 | A07-content-side | 12 side quests, travel events, rumors | DONE f246017 (format issues listed in report → A08) | agents/A07-content-side/brief.md | agents/A07-content-side/report.md |
 
