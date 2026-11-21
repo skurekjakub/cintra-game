@@ -1,19 +1,28 @@
 # Orchestration State — The Lion's Shadow (cintra-game)
 
-## >>> RESUME HERE AFTER COMPACTION (snapshot 2026-11-21, late) <<<
-The orchestrator's cwd is the worktree `.worktrees/core-state` (branch feat/core-state). Main-checkout git uses `git -C C:\Users\skure\repositories\cintra-game`.
+## >>> RESUME HERE AFTER COMPACTION (snapshot 2026-11-21, night) <<<
+The orchestrator works from the main checkout `C:/Users/skure/repositories/cintra-game` (branch main). The core-state worktree is merged, so remove it once nothing needs its ledger.
 
-**In flight (background agents; ids are for SendMessage only, never show them to the user):**
-1. **P1 implementation** (sequential, D5): Task 17 is DONE (commit 8ecfb0f, 343 tests). Its REVIEW is running (agent a094699dec90e4de8). Next: record it in the ledger → push → Task 18 (Equipment/QuickSlots, rulings F11 + G-rules) → then the orchestrator-inserted task "J1-conditions" (see ledger ruling) → then the P1 final whole-branch review (opus) → merge feat/core-state to main. Tasks 16, 19, 20, 21 are DEFERRED (D6).
-   - Ledger: `.worktrees/core-state/.superpowers/sdd/2026-11-21-core-state-domains/progress.md` (rulings, minors, carry-forwards).
-   - Common dispatch rules: `.../dispatch-common.md` (G1–G8); reviewer rules: `.../review-common.md`.
-   - Scripts: `/c/Users/skure/.claude/plugins/cache/claude-plugins-official/superpowers/7.0.0/skills/subagent-driven-development/scripts/{task-brief,review-package}`.
-2. **A10 environment artist** (opus, agent ad34e71a6c9280b11): rebuilding the Drowned Rat set to shipped-HD-2D quality. When it reports: look at the env-rN.png yourself against the Elliot refs and gate it (D-quality gate). Next in the art queue: A11 lighting/post TD → A12 sprite animator. Apply the new skill (item 3) to their briefs.
-3. **Skill `crafting-game-assets`** (user request: "write it up into a skill in this repo and test it on subagents, method by method"). Follows superpowers:writing-skills (RED first). Plan: `docs/skill-tests/crafting-game-assets/TEST-PLAN.md`.
-   - Methods M1–M7; cumulative ablation P0..P5 (pixel Bertha) + D0/D1 (Blender barrel); outputs in the scratchpad `skilltest/<arm>/`.
-   - Running now: **P0 baseline** (agent a34ea39564d5eadb9) and **D0 baseline** (agent af3b8cea147a342b5).
-   - Next: read the baselines' behaviour and images → write the skill at `.claude/skills/crafting-game-assets/SKILL.md` (one section per method so arms can get subsets) → run P1..P5 and D1 ONE AT A TIME → blind judge subagent → `RESULTS.md` → refactor the skill → commit.
-   - Research sources: Codixel (github.com/mankidev/codixel), Sprite Fusion blog, Anthropic frontend-aesthetics cookbook, Blender MCP guides, SpriteCook plugin.
+**Done:**
+- **P1 core domain layer, MERGED to main** (b5d29c4, 512 tests, lint clean).
+  - Final review rulings FR-1..FR-8 are in the ledger `.worktrees/core-state/.superpowers/sdd/2026-11-21-core-state-domains/progress.md`.
+  - Extra tasks done: J1 (§J.1 conditions), R1 (`restore() -> Result`), J6 (§J.6 item mods).
+  - P2/P3 carry-forwards: the section "P1 final review" at the end of this file.
+- **A10 environment:** 6 rounds, env-r6.png, committed fa801e4. Not yet at Elliot level: sparse play area, blurry far wall and foreground, 35 fps against a 60 target.
+- **Skill `crafting-game-assets`:** TDD done over 2 rounds; see `docs/skill-tests/crafting-game-assets/RESULTS.md`.
+  - Round 1: the method-stacking skill FAILED (the baseline won, the full skill came last).
+  - Round 2: the rewritten skill (game-scale spec, `audit_sprite.py` gates, an INDEPENDENT critic run by the orchestrator) won 34 against 29/28/23.
+  - The critic round is the main lever.
+
+**In flight:**
+- A second critic round on the P6 Bertha, to see how far the loop pushes. Then relay it to the artist (agent a7adcc363d1709d35, via SendMessage) for revision 2, and show the user the result.
+
+**Next (in order):**
+1. **Art queue:**
+   - A11 lighting/post TD: 60 fps, fill the play area, design the far wall and foreground.
+   - A12 sprite animator: player, Bertha, enemies; idle/walk/attack sheets using the skill loop (artist → 2 independent-critic rounds → gates → blind check in the scene).
+2. **Vertical slice:** write P4, the Drowned Rat slice plan. It covers the P2/P3 subset the slice needs, combat, and the HD-2D presentation. Execute it sequentially, then STOP for the user's visual refinement (D6).
+3. **Later:** the deferred P1 tasks (16, 19, 20, 21), the full P2/P3 plans, and the XP rebalance.
 
 **User constraints recap:** no questions except art; orchestrator only; sequential implementation; stop at the vertical slice (D6) for visual refinement; triple-A visual bar (orchestrator gates every render); commit per chunk and push; Elliot = target look (fully 3D world + pixel sprites), Aldermere = proof code-made sprites can be great.
 
